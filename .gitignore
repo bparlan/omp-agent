@@ -25,3 +25,6 @@ npm-debug.log*
 # Build artifacts
 dist/
 build/
+sessions/
+logs/
+history.*
