@@ -1,0 +1,40 @@
+{
+  "@context": "https://schema.org",
+  "@type": "Article",
+  "@id": "https://YOURDOMAIN.com/blog/ARTICLE_SLUG/#article",
+  "headline": "ARTICLE_TITLE",
+  "description": "ARTICLE_DESCRIPTION",
+  "url": "https://YOURDOMAIN.com/blog/ARTICLE_SLUG",
+  "datePublished": "YYYY-MM-DD",
+  "dateModified": "YYYY-MM-DD",
+  "author": {
+    "@type": "Person",
+    "@id": "https://YOURDOMAIN.com/about/AUTHOR_SLUG/#person",
+    "name": "AUTHOR_NAME",
+    "url": "https://YOURDOMAIN.com/about/AUTHOR_SLUG",
+    "jobTitle": "AUTHOR_JOB_TITLE",
+    "description": "AUTHOR_BIO_SHORT",
+    "sameAs": [
+      "https://www.linkedin.com/in/AUTHOR_LINKEDIN",
+      "https://twitter.com/AUTHOR_TWITTER"
+    ],
+    "worksFor": {
+      "@type": "Organization",
+      "name": "YOUR_ORGANIZATION_NAME"
+    }
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "YOUR_ORGANIZATION_NAME",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://YOURDOMAIN.com/logo.png"
+    }
+  },
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://YOURDOMAIN.com/blog/ARTICLE_SLUG"
+  },
+  "isAccessibleForFree": true,
+  "inLanguage": "en-US"
+}
