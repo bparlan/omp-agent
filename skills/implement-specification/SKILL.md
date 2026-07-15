@@ -1,5 +1,6 @@
 ---
 name: implement-specification
+version: 1.0.0
 description: Implement an approved specification using project architecture, conventions, and verification plan. Orchestrates implementation workflow without redundant documentation generation.
 tools: read, write, bash, glob, lsp, edit, ask, todo, task
 user-invocable: true
@@ -89,7 +90,7 @@ Do not claim verification unless tests actually run and pass.
 
 ## Output
 
-Write the review to `M{X}S{Y}C.md` in the `milestones/M{X}/` directory using the template at `~/.omp/agent/templates/completion_template.md`.
+Write the completion report to `M{X}S{Y}C.md` in the `milestones/M{X}/` directory using the template at `~/.omp/agent/templates/completion_template.md`.
 
 ## Out of Scope
 

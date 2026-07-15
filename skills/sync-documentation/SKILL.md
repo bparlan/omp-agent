@@ -1,7 +1,8 @@
 ---
 name: sync-documentation
+version: 1.0.1
 description: Maintain long-lived project documentation by distilling completed engineering work into canonical project documents.
-tools: read, write, bash, glob, grep
+tools: read, write, edit, bash, glob, grep
 user-invocable: true
 ---
 
@@ -15,7 +16,7 @@ Only execute when explicitly requested by user. Not automatic.
 
 ## Your Process
 
-1. **Read completed artifacts** — Load milestone, specification, verification, review, investigation, and implementation files. Include Investigation Reports (`M{X}I{Z}.md`, `M{X}S{Y}I{Z}.md`).
+1. **Read completed artifacts** — Load Milestone `M{X}.md`, Specifications `M{X}S{Y}.md`, Verification `M{X}S{Y}V.md`, Review Report `M{X}S{Y}R.md`, Completion Report `M{X}S{Y}C.md`, Summary `M{X}S{Y}S.md`, Investigation Report `M{X}S{Y}I{Z}.md`, and implementation files.
 2. **Examine repository state** — Use `glob`/`grep` to find current documentation and understand structure.
 3. **Identify material changes** — Determine if any canonical documents need updates based on Change Detection criteria.
 4. **For each documentation file:**
@@ -25,7 +26,8 @@ Only execute when explicitly requested by user. Not automatic.
    - If no: leave unchanged
 5. **Preserve style** — Match existing writing conventions.
 6. **Avoid duplication** — Summarize, don't copy full spec/milestone content.
-7. **Write revision summary** — Use the summary template.
+7. **Propose Roadmap Updates** — Based on the completed artifacts, technical debt noted in the Review Report, or obvious logical next steps, propose 1-3 specific updates to `ROADMAP.md`. Ask the user for approval. If approved, use `edit` to add these to the `ROADMAP.md` future items list.
+8. **Write revision summary** — Use the summary template.
 
 ## Change Detection
 
@@ -54,10 +56,25 @@ Update documentation only when material changes occurred:
 
 ## For Each Document
 
+### MILESTONES.md
+- Update milestone status from active to archived/completed
+- Add links to archived milestone artifacts
+- Note milestone dependencies and relationships
+
+### AGENTS.md
+- Update build/test commands if changed
+- Add coding patterns or conventions discovered
+- Note preferred tool patterns for the codebase
+
+### DATA.md
+- Update data models if schema changed
+- Add configuration changes
+- Note data flow modifications
+
 ### ROADMAP.md
 - Add completed milestones as done items
-- Note any architectural shifts
 - Archive completed features
+- Add user-approved proposals for future work, technical debt resolution, or optimizations.
 
 ### SPEC.md
 - Update only for new/changed architecture
@@ -75,9 +92,10 @@ Update documentation only when material changes occurred:
 - Remove obsolete commands
 
 ### CHANGELOG.md
-- Add completed work entry
-- Note public API changes
-- Record breaking changes
+- Append completed milestone summaries
+- Note version bumps
+- Record public API changes
+- Document breaking changes
 
 ### README.md
 - Update usage if user behavior changed
@@ -95,7 +113,7 @@ Before writing:
 
 ## Output
 
-Produce minimal edits to affected documentation files and write `M{X}S{Y}Summary.md` using the template at `~/.omp/agent/templates/summary_template.md`.
+Produce minimal edits to affected documentation files and write `M{X}S{Y}S.md` using the template at `~/.omp/agent/templates/summary_template.md`.
 
 ## Template Mapping
 

@@ -1,9 +1,9 @@
-# Summary M{X}S{Y}Summary
+# Summary M{X}S{Y}S
 
 | Property      | Value           |
 | ------------- | --------------- |
 | Document Type | Summary         |
-| Identifier    | M{X}S{Y}Summary |
+| Identifier    | M{X}S{Y}S       |
 | Derived From  | M{X}S{Y}R       |
 
 ## Files Modified

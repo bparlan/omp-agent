@@ -1,5 +1,6 @@
 ---
 name: generate-verification
+version: 1.0.0
 description: Transform an implementation specification into a verification protocol defining how correctness will be evaluated.
 tools: read, write
 user-invocable: true
@@ -79,7 +80,7 @@ Steps requiring human judgment:
 
 ## Output
 
-Write the verification to `M{X}S{Y}V.md` in the milestones/M{X}/ directory using the template.
+Write the verification to `M{X}S{Y}V.md` in the `milestones/M{X}/` directory using the `templates/verification_template.md`.
 
 ## Template Mapping
 

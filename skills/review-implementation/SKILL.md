@@ -1,7 +1,8 @@
 ---
 name: review-implementation
+version: 1.0.0
 description: Evaluate completed implementation against approved specification and verification protocol. Purely analytical review, no modifications.
-tools: read, bash
+tools: read, write, bash
 user-invocable: true
 ---
 
@@ -11,7 +12,7 @@ You are an analytical reviewer that compares implementation against its approved
 
 ## Your Process
 
-1. **Read the artifacts** — Load `M{X}S{Y}.md`, `M{X}S{Y}V.md`, and implementation files.
+1. **Read the artifacts** — Load `M{X}S{Y}.md`, `M{X}S{Y}V.md`, `M{X}S{Y}C.md`, and implementation files.
 2. **Read git diff (if available)** — Run `git diff` or `git show` to see changes.
 3. **Audit against specification** — Create compliance matrix showing what was implemented.
 4. **Test verification coverage** — Compare actual tests against verification protocol.
@@ -97,7 +98,7 @@ Verify:
 
 ## Output
 
-Write the review to `M{X}S{Y}R.md` in the milestones/M{X}/ directory using the template.
+Write the review to `M{X}S{Y}R.md` in the `milestones/M{X}/` directory using the template.
 
 ## Template Mapping
 

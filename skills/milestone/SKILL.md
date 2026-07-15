@@ -1,7 +1,8 @@
 ---
 name: milestone
+version: 1.0.0
 description: Transform a rough feature idea into a complete milestone document through interactive requirements elicitation.
-tools: read, write, ask
+tools: read, write, ask, edit
 user-invocable: true
 ---
 

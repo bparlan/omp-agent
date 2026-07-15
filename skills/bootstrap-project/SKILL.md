@@ -1,5 +1,6 @@
 ---
 name: bootstrap-project
+version: 1.0.1
 description: Analyze an existing repository and normalize it into standard engineering structure. One-time setup for brownfield projects.
 tools: read, write, bash, glob, grep, lsp
 user-invocable: true
@@ -21,10 +22,11 @@ Typically executed once per repository or after major architectural changes.
 4. **Identify tests and CI/CD** — Find test patterns, configuration files, workflows.
 5. **Inventory existing documentation** — Read `README.md`, `docs/`, any project guides.
 6. **Consolidate and normalize** — Merge documentation into canonical layer, remove duplication.
-7. **Create missing documents in the `docs/` directory** — Generate `AGENTS.md`, `FRAMEWORK.md`, `SPEC.md`, `ROADMAP.md`, `PLAYBOOK.md`, `DATA.md`, `MILESTONES.md` as needed.
-8. **Create milestones directory structure** — Ensure `milestones/` and `milestones/archive/` directories exist.
-9. **Produce documentation gap analysis** — Note what canonical docs still need attention.
-10. **Recommend first milestone** — Suggest appropriate starting scope.
+7. **Create missing documents in the `docs/` directory** — Generate `CHANGELOG.md`, `FRAMEWORK.md`, `SPEC.md`, `ROADMAP.md`, `PLAYBOOK.md`, `DATA.md`, and `MILESTONES.md` as needed.
+8. **Create root-level entry point documents** — Generate `README.md` and `AGENTS.md` (repository overview, build commands, preferred tool patterns) as needed.
+9. **Create milestones directory structure** — Ensure `milestones/` and `milestones/archive/` directories exist.
+10. **Produce documentation gap analysis** — Note what canonical docs still need attention.
+11. **Recommend first milestone** — Suggest appropriate starting scope.
 
 ## Discovery Priority
 
@@ -53,10 +55,23 @@ Typically executed once per repository or after major architectural changes.
 
 ### AGENTS.md
 
-- Repository overview
+- Repository overview and entry point for agents
 - Build and test commands
 - Coding conventions if detectable
 - Preferred tool patterns
+
+### README.md
+
+- Project overview and purpose
+- Quick start guide
+- Build and run instructions
+- Link to canonical documentation layer
+
+### CHANGELOG.md (docs/)
+
+- Chronological record of changes
+- Milestone releases with links to archived artifacts
+- Version history and significant updates
 
 ### FRAMEWORK.md
 
@@ -105,8 +120,12 @@ Typically executed once per repository or after major architectural changes.
 ## Output Structure
 
 ```
+{repository}/
+├── README.md          # Created or updated with project overview and quick start
+├── AGENTS.md          # Created or updated (agent entry point)
+
 {repository}/docs/
-├── AGENTS.md          # Updated or created
+├── CHANGELOG.md       # Created (chronological record of changes)
 ├── FRAMEWORK.md       # Created if missing
 ├── SPEC.md            # Created or updated
 ├── ROADMAP.md         # Created or updated

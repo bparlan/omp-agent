@@ -1,9 +1,9 @@
-# Investigation M{X}[S{Y}]I{Z}
+# Investigation M{X}S{Y}I{Z}
 
 | Property      | Value                |
 | ------------- | -------------------- |
 | Document Type | Investigation Report |
-| Identifier    | M{X}[S{Y}]I{Z}      |
+| Identifier    | M{X}S{Y}I{Z}        |
 | Derived From  | Issue {Z}            |
 
 ---

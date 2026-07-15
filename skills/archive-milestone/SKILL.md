@@ -1,7 +1,8 @@
 ---
 name: archive-milestone
+version: 1.0.0
 description: Archive completed milestone artifacts while preserving complete engineering history.
-tools: bash, read, glob, write
+tools: bash, read, glob, write, edit, ast_grep
 user-invocable: true
 ---
 
@@ -23,7 +24,13 @@ Before archiving, verify:
 
 ## Your Process
 
-1. **Read milestone artifacts** — Find all files prefixed with the milestone ID in the `milestones/M{X}/` directory (includes `M{X}.md`, `M{X}S{Y}.md`, `M{X}S{Y}V.md`, `M{X}S{Y}R.md`, `M{X}S{Y}C.md`, `M{X}I{Z}.md`, and `M{X}S{Y}Summary.md`).
+1. Identify relevant artifacts using code-search:
+   a. Determine the milestone ID (e.g., M1 from context).
+   b. Use ast_grep (as code-search) to find artifacts:
+       i. Search for core milestone files prefixed with the milestone ID in milestones/ directory.
+       ii. Search for relevant skills by querying SKILL.md files for the milestone ID in their description or tools.
+       iii. Search for related documentation (.md files) by querying for the milestone ID.
+   c. Collect all identified artifact paths.
 2. **Verify prerequisites** — Check for review and documentation synchronization.
 3. **Determine archive location** — Target `milestones/archive/M{X}/`.
 4. **Create archive directory** — Make the directory preserving relationships.

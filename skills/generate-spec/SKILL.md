@@ -1,5 +1,6 @@
 ---
 name: generate-spec
+version: 1.0.1
 description: Transform an approved milestone document into a detailed implementation specification.
 tools: read, write, glob
 user-invocable: true
@@ -15,15 +16,15 @@ You are a specification writer that transforms milestone documents into detailed
 2. **Scan for existing specs** — Use `glob` to find all `M{X}S*.md` files in milestones/M{X}/.
 3. **Determine next sequence** — If `M{X}S1.md` exists, create `M{X}S2.md`; if `M{X}S2.md` exists, create `M{X}S3.md`, etc. Never overwrite existing specifications.
 4. **Extract the core objective** — The specification's Objective derives directly from the milestone's Goal.
-5. **Derive Functional Requirements** — From Scope items, define what the system must do.
-6. **Derive Non-Functional Requirements** — From Risks and implicit needs (performance, security, maintainability).
-7. **Identify Architecture Impact** — Map affected/new/removed modules and public interfaces.
-8. **Define Data Flow** — Describe how data moves through the system, if applicable.
-9. **Extract Constraints** — From Out of Scope and Risks, identify limiting factors.
-10. **Extract Assumptions** — From Risks and Notes, record foundational assumptions.
-11. **Define Acceptance Criteria** — From Success Criteria, create verifiable checklist.
-12. **Write the specification** — Use the template at `~/.omp/agent/templates/specification_template.md`.
-
+5. **Analyze Milestone Complexity** — Determine if the milestone should be broken into multiple, sequential specifications for stability (e.g., S1: Backend APIs, S2: Frontend UI, S3: Integration). If yes, explicitly outline this multi-spec plan in the Objective section.
+6. **Derive Functional Requirements** — From Scope items, define what the system must do.
+7. **Derive Non-Functional Requirements** — From Risks and implicit needs (performance, security, maintainability).
+8. **Identify Architecture Impact** — Map affected/new/removed modules and public interfaces.
+9. **Define Data Flow** — Describe how data moves through the system, if applicable.
+10. **Extract Constraints** — From Out of Scope and Risks, identify limiting factors.
+11. **Extract Assumptions** — From Risks and Notes, record foundational assumptions.
+12. **Define Acceptance Criteria** — From Success Criteria, create verifiable checklist.
+13. **Write the specification** — Use the template at `~/.omp/agent/templates/specification_template.md`. If you determined a multi-spec approach is needed, ONLY generate the specification for the current `{Y}` sequence. Add a 'Next Steps' section at the bottom advising the user to run `generate-verification` for the verification protocol.
 ## Requirement Derivation Rules
 
 ### Functional Requirements
@@ -31,6 +32,7 @@ For each Scope item:
 - Start with "The system shall..."
 - Be specific and testable
 - Cover inputs, processing, and outputs
+- Keep the scope strictly limited to the current chunk (e.g., if this is the Database spec, do not include UI requirements).
 
 ### Non-Functional Requirements
 Derive from:
@@ -75,4 +77,38 @@ Write the specification to `milestones/M{X}/M{X}S{Y}.md` using the template.
 | Success Criteria | Acceptance Criteria |
 | Out of Scope | Constraints (negative space) |
 | Risks + Notes | Assumptions, Non-Functional Requirements |
-| Scope + Risks | Architecture Impact |
+
+## Out of Scope
+Never:
+- Modify parent milestone documents (`M{X}.md`)
+- Maintain internal indexes in parent files
+## Edit Tool Usage
+
+### Single-line Replacements (Use `bash`)
+
+For simple one-line edits, `bash` with `sed` is simpler and less error-prone:
+
+```bash
+# Replace line 27 with new text
+sed -i.bak '27s/.*/NEW_TEXT/' /path/to/file
+
+# Example: Fix a single instruction line
+sed -i.bak '27s/.*/13. **Write the specification** — Use the template at `~\/.omp\/agent\/templates\/specification_template.md`. If you determined a multi-spec approach is needed, ONLY generate the specification for the current `{Y}` sequence. Add a '\''Next Steps'\'' section at the bottom advising the user to run `generate-verification` for the verification protocol./' /Users/bparlan/.omp/agent/skills/generate-spec/SKILL.md
+```
+
+### Multi-line Block Edits (Use `edit`)
+
+For structural changes with multiple lines, use the `edit` tool:
+
+**Steps**:
+1. Read the file with `read` to get `[PATH#HASH]`
+2. Use `SWAP N.=N:` to replace a single line
+3. Use `SWAP.BLK N:` to replace a complete block
+4. Always use `+` prefix for new lines
+
+**Example**:
+```
+[SKILL.md#ABC123]
+SWAP 27.=27:
++13. **Write the specification** — Use the template at `~/.omp/agent/templates/specification_template.md`. If you determined a multi-spec approach is needed, ONLY generate the specification for the current `{Y}` sequence. Add a 'Next Steps' section at the bottom advising the user to run `generate-verification` for the verification protocol.
+```
