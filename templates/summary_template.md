@@ -1,10 +1,11 @@
 # Summary M{X}S{Y}S
 
-| Property      | Value           |
-| ------------- | --------------- |
-| Document Type | Summary         |
-| Identifier    | M{X}S{Y}S       |
-| Derived From  | M{X}S{Y}R       |
+| Property         | Value     |
+| ---------------- | --------- |
+| Document Type    | Summary   |
+| Identifier       | M{X}S{Y}S |
+| Derived From     | M{X}S{Y}R |
+| template_version | 1.0.0     |
 
 ## Files Modified
 

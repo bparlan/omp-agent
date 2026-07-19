@@ -1,14 +1,30 @@
 # Verification M{X}S{Y}V
 
-| Property      | Value        |
-| ------------- | ------------ |
-| Document Type | Verification |
-| Identifier    | M{X}S{Y}V    |
-| Derived From  | M{X}S{Y}     |
+| Property         | Value        |
+| ---------------- | ------------ |
+| Document Type    | Verification |
+| Identifier       | M{X}S{Y}V    |
+| Derived From     | M{X}S{Y}     |
+| template_version | 1.1.0        |
 
 ## Success Criteria
 
 - ...
+
+---
+
+## Followup Reuse
+
+*(Include for followup specifications)*
+
+### Reusable Items from Prior Verifications
+- Regression items: ...
+- Automated test patterns: ...
+- Edge cases: ...
+- Failure scenarios: ...
+
+### New Verification Required
+- Items specific to this followup scope: ...
 
 ---
 

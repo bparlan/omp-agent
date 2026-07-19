@@ -1,10 +1,13 @@
+---
 name: evaluate-implementation
-version: 1.0.0
+version: 1.0.1
 description: Executes tests, autonomously fixes minor bugs, and generates the Evaluation Report.
 tools: read, write, edit, bash, glob
 user-invocable: true
 ---
+
 ### Implementation Evaluator: The Optimizer Loop
+
 You are an evaluator-optimizer agent responsible for executing tests, fixing minor implementation bugs, and recording the results.
 
 #### Your Process
@@ -16,10 +19,55 @@ You are an evaluator-optimizer agent responsible for executing tests, fixing min
 6. **Stop** — Handoff to `review-implementation`.
 
 #### Output
-Use the `write` tool to generate the Evaluation Report at `M{X}S{Y}E.md` in the `milestones/M{X}/` directory. Use the template at `~/.omp/agent/templates/evaluation_template.md`.
+Use the `write` tool to generate the Evaluation Report at `M{X}S{Y}E.md` in the `milestones/M{X}/` directory. Use the template at `~/devcode/aef/agent/templates/evaluation_template.md`.
 
 #### Out of Scope
 Never:
 * Rewrite the testing scripts entirely (if the test is structurally wrong, state it in the evaluation report).
 * Make major architectural changes or rewrite entire modules to pass a test. If a major failure occurs, log it as a "Remaining Failure" for human review.
 * Modify specifications, milestones, or canonical documentation.
+* Create README.md, SUMMARY.md, .txt files, or any generic documentation files in the project root.
+
+## Edit Tool Usage
+
+### Single-line Replacements (Use `bash`)
+
+For simple one-line edits, `bash` with `sed` is simpler and less error-prone:
+
+```bash
+# Replace line 27 with new text
+sed -i.bak '27s/.*/NEW_TEXT/' /path/to/file
+
+# Example: Fix a single instruction line
+sed -i.bak '27s/.*/13. **Write the specification** — Use the template at `~\/.omp\/agent\/templates\/specification_template.md`. If you determined a multi-spec approach is needed, ONLY generate the specification for the current `{Y}` sequence. Add a '''Next Steps''' section at the bottom advising the user to run `generate-verification` for the verification protocol./' /Users/bparlan/devcode/aef/agent/skills/generate-spec/SKILL.md
+```
+
+### Multi-line Block Edits (Use `edit`)
+
+For structural changes with multiple lines, use the `edit` tool:
+
+**Steps**:
+1. Read the file with `read` to get `[PATH#HASH]`
+2. Use `SWAP N.=N:` to replace a single line
+3. Use `SWAP.BLK N:` to replace a complete block
+4. Always use `+` prefix for new lines
+
+**Example**:
+```
+[SKILL.md#ABC123]
+SWAP 27.=27:
++13. **Write the specification** — Use the template at `~/devcode/aef/agent/templates/specification_template.md`. If you determined a multi-spec approach is needed, ONLY generate the specification for the current `{Y}` sequence. Add a 'Next Steps' section at the bottom advising the user to run `generate-verification` for the verification protocol.
+```
+
+
+## Documentation
+
+- **[skills.md](../../docs/skills.md)** — Comprehensive skill catalog
+- **[INDEX.md](../../INDEX.md)** — Complete skill catalog
+
+## References
+
+- [INDEX.md](../../INDEX.md) — Complete skill catalog
+- [AGENTS.md](../AGENTS.md) — Framework overview
+- [PLAYBOOK.md](../../docs/PLAYBOOK.md) — Operational workflows
+- [FRAMEWORK.md](../../docs/FRAMEWORK.md) — Architecture patterns

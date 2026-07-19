@@ -1,7 +1,7 @@
 ---
 name: generate-spec
-version: 1.0.1
-description: Transform an approved milestone document into a detailed implementation specification.
+version: 1.3.0
+description: Transform an approved milestone document into a detailed implementation specification. Supports followup specifications for existing milestones.
 tools: read, write, glob
 user-invocable: true
 ---
@@ -15,100 +15,27 @@ You are a specification writer that transforms milestone documents into detailed
 1. **Read the milestone** — Load `M{X}.md` from the milestones/M{X}/ directory.
 2. **Scan for existing specs** — Use `glob` to find all `M{X}S*.md` files in milestones/M{X}/.
 3. **Determine next sequence** — If `M{X}S1.md` exists, create `M{X}S2.md`; if `M{X}S2.md` exists, create `M{X}S3.md`, etc. Never overwrite existing specifications.
-4. **Extract the core objective** — The specification's Objective derives directly from the milestone's Goal.
-5. **Analyze Milestone Complexity** — Determine if the milestone should be broken into multiple, sequential specifications for stability (e.g., S1: Backend APIs, S2: Frontend UI, S3: Integration). If yes, explicitly outline this multi-spec plan in the Objective section.
-6. **Derive Functional Requirements** — From Scope items, define what the system must do.
-7. **Derive Non-Functional Requirements** — From Risks and implicit needs (performance, security, maintainability).
-8. **Identify Architecture Impact** — Map affected/new/removed modules and public interfaces.
-9. **Define Data Flow** — Describe how data moves through the system, if applicable.
-10. **Extract Constraints** — From Out of Scope and Risks, identify limiting factors.
-11. **Extract Assumptions** — From Risks and Notes, record foundational assumptions.
-12. **Define Acceptance Criteria** — From Success Criteria, create verifiable checklist.
-13. **Write the specification** — Use the template at `~/.omp/agent/templates/specification_template.md`. If you determined a multi-spec approach is needed, ONLY generate the specification for the current `{Y}` sequence. Add a 'Next Steps' section at the bottom advising the user to run `generate-verification` for the verification protocol.
-## Requirement Derivation Rules
+4. **Check for Followup Context** — If prior specifications exist, read the most recent one to understand the current implementation state and derive followup work appropriately.
+5. **Extract the core objective** — The specification's Objective derives directly from the milestone's Goal. For followups, clarify what additional work is being specified.
+6. **Analyze Milestone Complexity** — Determine if the milestone should be broken into multiple, sequential specifications for stability (e.g., S1: Backend APIs, S2: Frontend UI, S3: Integration). If yes, explicitly outline this multi-spec plan in the Objective section.
+7. **Derive Functional Requirements** — From Scope items, define what the system must do. For followups, focus on the incremental additions.
+8. **Derive Non-Functional Requirements** — From Risks and implicit needs (performance, security, maintainability).
+9. **Identify Architecture Impact** — Map affected/new/removed modules and public interfaces.
+10. **Define Data Flow** — Describe how data moves through the system, if applicable.
+11. **Extract Constraints** — From Out of Scope and Risks, identify limiting factors.
+12. **Extract Assumptions** — From Risks and Notes, record foundational assumptions.
+13. **Define Acceptance Criteria** — From Success Criteria, create verifiable checklist.
+14. **Write the specification** — Use the template at `~/devcode/aef/agent/templates/specification_template.md`. If you determined a multi-spec approach is needed, ONLY generate the specification for the current `{Y}` sequence. Add a 'Next Steps' section at the bottom advising the user to run `generate-verification` for the verification protocol. Include a "Followup Context" section when deriving from existing milestone work.
 
-### Functional Requirements
-For each Scope item:
-- Start with "The system shall..."
-- Be specific and testable
-- Cover inputs, processing, and outputs
-- Keep the scope strictly limited to the current chunk (e.g., if this is the Database spec, do not include UI requirements).
 
-### Non-Functional Requirements
-Derive from:
-- Explicit performance needs
-- Security considerations (from Risks)
-- Reliability requirements (from Dependencies)
-- Maintainability concerns (from Notes)
+## Documentation
 
-### Architecture Impact
-- **Affected modules**: Existing code that must change
-- **New modules**: Code that must be created
-- **Removed modules**: Code that will be deleted
-- **Public interfaces**: APIs/interfaces exposed to other modules
+- **[skills.md](../../docs/skills.md)** — Comprehensive skill catalog
+- **[INDEX.md](../../INDEX.md)** — Complete skill catalog
 
-### Data Flow
-Document if the feature involves:
-- Data transformation pipelines
-- State persistence
-- External system integration
-- Event processing
+## References
 
-### Constraints
-- Technology stack limits
-- Integration requirements
-- Out of scope restrictions that become negative space constraints
-
-### Assumptions
-- Technical assumptions about environment
-- Data assumptions about inputs
-- User behavior assumptions
-
-## Output
-
-Write the specification to `milestones/M{X}/M{X}S{Y}.md` using the template.
-
-## Template Mapping
-
-| Milestone Section | Specification Section |
-|-------------------|----------------------|
-| Goal | Objective (rephrase as summary) |
-| Scope | Functional Requirements |
-| Success Criteria | Acceptance Criteria |
-| Out of Scope | Constraints (negative space) |
-| Risks + Notes | Assumptions, Non-Functional Requirements |
-
-## Out of Scope
-Never:
-- Modify parent milestone documents (`M{X}.md`)
-- Maintain internal indexes in parent files
-## Edit Tool Usage
-
-### Single-line Replacements (Use `bash`)
-
-For simple one-line edits, `bash` with `sed` is simpler and less error-prone:
-
-```bash
-# Replace line 27 with new text
-sed -i.bak '27s/.*/NEW_TEXT/' /path/to/file
-
-# Example: Fix a single instruction line
-sed -i.bak '27s/.*/13. **Write the specification** — Use the template at `~\/.omp\/agent\/templates\/specification_template.md`. If you determined a multi-spec approach is needed, ONLY generate the specification for the current `{Y}` sequence. Add a '\''Next Steps'\'' section at the bottom advising the user to run `generate-verification` for the verification protocol./' /Users/bparlan/.omp/agent/skills/generate-spec/SKILL.md
-```
-
-### Multi-line Block Edits (Use `edit`)
-
-For structural changes with multiple lines, use the `edit` tool:
-
-**Steps**:
-1. Read the file with `read` to get `[PATH#HASH]`
-2. Use `SWAP N.=N:` to replace a single line
-3. Use `SWAP.BLK N:` to replace a complete block
-4. Always use `+` prefix for new lines
-
-**Example**:
-```
-[SKILL.md#ABC123]
-SWAP 27.=27:
-+13. **Write the specification** — Use the template at `~/.omp/agent/templates/specification_template.md`. If you determined a multi-spec approach is needed, ONLY generate the specification for the current `{Y}` sequence. Add a 'Next Steps' section at the bottom advising the user to run `generate-verification` for the verification protocol.
-```
+- [INDEX.md](../../INDEX.md) — Complete skill catalog
+- [AGENTS.md](../AGENTS.md) — Framework overview
+- [PLAYBOOK.md](../../docs/PLAYBOOK.md) — Operational workflows
+- [FRAMEWORK.md](../../docs/FRAMEWORK.md) — Architecture patterns

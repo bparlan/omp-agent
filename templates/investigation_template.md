@@ -1,10 +1,11 @@
 # Investigation M{X}S{Y}I{Z}
 
-| Property      | Value                |
-| ------------- | -------------------- |
-| Document Type | Investigation Report |
-| Identifier    | M{X}S{Y}I{Z}        |
-| Derived From  | Issue {Z}            |
+| Property         | Value                |
+| ---------------- | -------------------- |
+| Document Type    | Investigation Report |
+| Identifier       | M{X}S{Y}I{Z}         |
+| Derived From     | Issue {Z}            |
+| template_version | 1.0.0                |
 
 ---
 

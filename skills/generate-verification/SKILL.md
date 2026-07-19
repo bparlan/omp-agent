@@ -1,7 +1,7 @@
 ---
 name: generate-verification
-version: 1.0.0
-description: Transform an implementation specification into a verification protocol defining how correctness will be evaluated.
+version: 1.1.0
+description: Transform an implementation specification into a verification protocol defining how correctness will be evaluated. Supports followup specifications referencing multiple sources.
 tools: read, write
 user-invocable: true
 ---
@@ -13,15 +13,44 @@ You are a verification planner that transforms specifications into precise verif
 ## Your Process
 
 1. **Read the specification** — Load `M{X}S{Y}.md` from the current working directory.
-2. **Extract Success Criteria** — Copy from Acceptance Criteria, reframe as verification targets.
-3. **Derive Functional Validation** — For each Functional Requirement, define how to verify.
-4. **Identify Edge Cases** — From assumptions and implicit boundaries, find boundary conditions.
-5. **Identify Failure Scenarios** — From Risks and Non-Functional Requirements, define negative cases.
-6. **Define Regression Checklist** — Identify what existing functionality must not break.
-7. **Design Manual Validation** — Define human-executed verification steps.
-8. **Identify Automated Validation** — Define executable checks and test opportunities.
-9. **Add Considerations** — Include performance, security, observability from NFRs.
-10. **Write the verification** — Use the template at `~/.omp/agent/templates/verification_template.md`.
+2. **Check for Followup Context** — If this is a followup specification (derived from an existing milestone with prior specs), also read relevant existing verification files to identify reusable verification items.
+3. **Extract Success Criteria** — Copy from Acceptance Criteria, reframe as verification targets.
+4. **Derive Functional Validation** — For each Functional Requirement, define how to verify.
+5. **Identify Edge Cases** — From assumptions and implicit boundaries, find boundary conditions.
+6. **Identify Failure Scenarios** — From Risks and Non-Functional Requirements, define negative cases.
+7. **Define Regression Checklist** — Identify what existing functionality must not break. For followups, include items from prior specifications that remain relevant.
+8. **Design Manual Validation** — Define human-executed verification steps.
+9. **Identify Automated Validation** — Define executable checks and test opportunities. Include existing tests that apply to followup work.
+10. **Add Considerations** — Include performance, security, observability from NFRs.
+11. **Write the verification** — Use the template at `~/devcode/aef/agent/templates/verification_template.md`. Include a "Followup Reuse" section when derived from existing milestone work.
+
+## Followup Verification Reuse
+
+When generating verification for a followup specification:
+
+### Derivation References
+- List all specification documents this verification derives from in the template's "Derived From" field (e.g., `M1, M1S1, M1S1V`).
+- Note which prior verification items are being reused directly.
+
+### Reusable Verification Items
+- **Regression Checklist**: Items from prior verifications that apply to the same modules.
+- **Automated Validation**: Existing test commands and test patterns that remain valid.
+- **Edge Cases**: Previously identified edge cases that still apply to the followup scope.
+- **Failure Scenarios**: Prior failure scenarios relevant to the continued work.
+
+### Verification Reuse Analysis
+Include in the verification document:
+```markdown
+## Followup Reuse
+
+### Reusable Items from M{X}S{Y-1}V
+- Regression items: ...
+- Automated test patterns: ...
+- Edge cases: ...
+
+### New Verification Required
+- Items specific to this followup scope: ...
+```
 
 ## Verification Design Rules
 
@@ -80,7 +109,7 @@ Steps requiring human judgment:
 
 ## Output
 
-Write the verification to `M{X}S{Y}V.md` in the `milestones/M{X}/` directory using the `templates/verification_template.md`.
+Write the verification to `M{X}S{Y}V.md` in the `milestones/M{X}/` directory using the `templates/verification_template.md`. Include "Followup Reuse" section when applicable.
 
 ## Template Mapping
 
@@ -91,3 +120,16 @@ Write the verification to `M{X}S{Y}V.md` in the `milestones/M{X}/` directory usi
 | Non-Functional Requirements | Failure Scenarios, Performance, Security |
 | Architecture Impact | Regression Checklist |
 | Assumptions + Risks | Edge Cases |
+
+
+## Documentation
+
+- **[skills.md](../../docs/skills.md)** — Comprehensive skill catalog
+- **[INDEX.md](../../INDEX.md)** — Complete skill catalog
+
+## References
+
+- [INDEX.md](../../INDEX.md) — Complete skill catalog
+- [AGENTS.md](../AGENTS.md) — Framework overview
+- [PLAYBOOK.md](../../docs/PLAYBOOK.md) — Operational workflows
+- [FRAMEWORK.md](../../docs/FRAMEWORK.md) — Architecture patterns

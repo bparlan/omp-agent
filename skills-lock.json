@@ -1,0 +1,17 @@
+{
+  "version": 1,
+  "skills": {
+    "geo": {
+      "source": "leonxlnx/geo",
+      "sourceType": "github",
+      "skillPath": "skills/geo/SKILL.md",
+      "computedHash": "pending-install"
+    },
+    "humanizer": {
+      "source": "leonxlnx/humanizer",
+      "sourceType": "github",
+      "skillPath": "skills/humanizer/SKILL.md",
+      "computedHash": "pending-install"
+    }
+  }
+}

@@ -22,7 +22,7 @@ Typically executed once per repository or after major architectural changes.
 4. **Identify tests and CI/CD** — Find test patterns, configuration files, workflows.
 5. **Inventory existing documentation** — Read `README.md`, `docs/`, any project guides.
 6. **Consolidate and normalize** — Merge documentation into canonical layer, remove duplication.
-7. **Create missing documents in the `docs/` directory** — Generate `CHANGELOG.md`, `FRAMEWORK.md`, `SPEC.md`, `ROADMAP.md`, `PLAYBOOK.md`, `DATA.md`, and `MILESTONES.md` as needed.
+7. **Create missing documents in the `docs/` directory** — Generate `CHANGELOG.md`, `FRAMEWORK.md`, `SPEC.md`, `ROADMAP.md`, `PLAYBOOK.md`, `DATA.md`, `MILESTONES.md`, and `EXPERIENCES.md` as needed.
 8. **Create root-level entry point documents** — Generate `README.md` and `AGENTS.md` (repository overview, build commands, preferred tool patterns) as needed.
 9. **Create milestones directory structure** — Ensure `milestones/` and `milestones/archive/` directories exist.
 10. **Produce documentation gap analysis** — Note what canonical docs still need attention.
@@ -41,7 +41,7 @@ Typically executed once per repository or after major architectural changes.
 
 **Prefer semantic discovery:**
 
-- Use `code-search` skill if available: `~/.omp/agent/skills/code-search/code-search.sh --skeletons`
+- Use `code-search` skill if available: `~/devcode/aef/agent/skills/code-search/code-search.sh --skeletons`
 - Generate index and skeletons before reading full files
 - Identify entry points via `main` functions, route handlers, public APIs
 
@@ -109,6 +109,44 @@ Typically executed once per repository or after major architectural changes.
 - Format: `- [M{X}] - {goal} (active)` for active work
 - Format: `- [M{X}] - {goal} (archived) → milestones/archive/M{X}/` for archived work
 
+### EXPERIENCES.md
+
+- Meta-learning ledger tracking framework friction and applied skill updates
+- Two sections: "Active Friction Points" and "Applied Skill Updates (Resolved)"
+- Record issues and solutions during skill evolution and hotfix scenarios
+- Distill learnings into AGENTS.md or PLAYBOOK.md when they establish new coding conventions
+
+## Documentation Principles
+
+- **Repository reality first** — Code defines truth, docs follow
+- **Merge, distill, normalize** — Combine scattered knowledge into coherent docs
+- **Cross-reference** — Link related sections, avoid duplication
+- **Preserve knowledge** — Keep architectural decisions and rationale
+- **Eliminate obsolescence** — Remove outdated information
+
+## Output Structure
+
+```
+{repository}/
+├── README.md          # Created or updated with project overview and quick start
+├── AGENTS.md          # Created or updated (agent entry point)
+
+{repository}/docs/
+├── CHANGELOG.md       # Created (chronological record of changes)
+├── FRAMEWORK.md       # Created if missing
+├── SPEC.md            # Created or updated
+├── ROADMAP.md         # Created or updated
+├── PLAYBOOK.md        # Created or updated
+├── DATA.md            # Created if data components exist
+├── MILESTONES.md      # Created (empty initially)
+└── EXPERIENCES.md     # Created with Active Friction Points and Applied Skill Updates
+
+{repository}/milestones/
+├── archive/           # Created for archived milestones
+└── M{X}/              # Future milestone directories
+```
+
+- Documentation gap analysis summary
 ## Documentation Principles
 
 - **Repository reality first** — Code defines truth, docs follow
@@ -143,6 +181,37 @@ Typically executed once per repository or after major architectural changes.
 ## Out of Scope
 
 Never:
+## Edit Tool Usage
+
+### Single-line Replacements (Use `bash`)
+
+For simple one-line edits, `bash` with `sed` is simpler and less error-prone:
+
+```bash
+# Replace line 27 with new text
+sed -i.bak '27s/.*/NEW_TEXT/' /path/to/file
+
+# Example: Fix a single instruction line
+sed -i.bak '27s/.*/13. **Write the specification** — Use the template at `~\/.omp\/agent\/templates\/specification_template.md`. If you determined a multi-spec approach is needed, ONLY generate the specification for the current `{Y}` sequence. Add a '''Next Steps''' section at the bottom advising the user to run `generate-verification` for the verification protocol./' /Users/bparlan/devcode/aef/agent/skills/generate-spec/SKILL.md
+```
+
+### Multi-line Block Edits (Use `edit`)
+
+For structural changes with multiple lines, use the `edit` tool:
+
+**Steps**:
+1. Read the file with `read` to get `[PATH#HASH]`
+2. Use `SWAP N.=N:` to replace a single line
+3. Use `SWAP.BLK N:` to replace a complete block
+4. Always use `+` prefix for new lines
+
+**Example**:
+```
+[SKILL.md#ABC123]
+SWAP 27.=27:
++13. **Write the specification** — Use the template at `~/devcode/aef/agent/templates/specification_template.md`. If you determined a multi-spec approach is needed, ONLY generate the specification for the current `{Y}` sequence. Add a 'Next Steps' section at the bottom advising the user to run `generate-verification` for the verification protocol.
+```
+
 
 - Rewrite source code
 - Perform refactoring
@@ -150,3 +219,16 @@ Never:
 - Perform Git operations
 - Archive documents
 - Modify implementation files
+
+
+## Documentation
+
+- **[skills.md](../../docs/skills.md)** — Comprehensive skill catalog
+- **[INDEX.md](../../INDEX.md)** — Complete skill catalog
+
+## References
+
+- [INDEX.md](../../INDEX.md) — Complete skill catalog
+- [AGENTS.md](../AGENTS.md) — Framework overview
+- [PLAYBOOK.md](../../docs/PLAYBOOK.md) — Operational workflows
+- [FRAMEWORK.md](../../docs/FRAMEWORK.md) — Architecture patterns

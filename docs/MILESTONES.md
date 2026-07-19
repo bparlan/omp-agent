@@ -1,11 +1,17 @@
-# OMP Milestones
-
-This document lists active and archived milestones for the OMP Framework project.
-
-## Active Milestones
-
-*(Currently no active milestones)*
-
-## Archived Milestones
-
-*(No milestones archived yet)*
+- # OMP Milestones
+-
+- This document lists active and archived milestones for the OMP Framework project.
+-
+- ## Active Milestones
+-
+- *(Currently no active milestones)*
+-
+- ## Archived Milestones
+-
+- *(No milestones archived yet)*
+-
+- ## Infrastructure Skills
+-
+- The following Infrastructure Skills provide core capabilities used across the OMP Framework:
+- - **code-search**: Semantic code analysis and pattern matching across the codebase, enabling rapid understanding of code structure and relationships without reading every file.
+- - **session-audit**: Comprehensive session tracking and documentation generation, creating audit reports (M{X}SA{Y}.md) that track all major changes and generate outputs for all OMP AEF documents.

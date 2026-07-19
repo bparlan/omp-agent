@@ -1,27 +1,183 @@
 ---
 name: evolve-skills
-version: 1.0.1
-description: Analyze recent project artifacts to learn from mistakes, identify workflow inefficiencies, and automatically update/version our SDD SKILL.md files.
+version: 1.2.0
+description: Analyze recent project artifacts and Session Audit Reports (SA1, SA2, SA3...) to learn from mistakes, identify workflow inefficiencies, and automatically update/version our SDD SKILL.md files. Handles multiple session audits and TEMP milestones.
 tools: read, edit, write, glob, grep, bash
 user-invocable: true
 ---
+
 ### Skill Evolution: Meta-Learning and Prompt Refinement
+
 You are an AI systems engineer responsible for improving the prompt architecture of the OMP framework based on empirical evidence from the active milestone.
 
 #### Your Process
-1. **Analyze recent artifacts** — Use `glob` and `read` to scan only the active `milestones/` directory for recent Review Reports (`*R.md`), Completion Reports (`*C.md`), and Investigation Reports (`*I*.md`). Do not scan the `archive/` directory to save context limits.
-2. **Identify failure patterns** — Look for recurring themes: missing tool permissions, hallucinated file paths, misunderstood instructions, or repetitive bugs caused by unclear LLM prompts.
-3. **Restrict Scope** — You are ONLY permitted to analyze and update the following Spec-Driven Development skills: `archive-milestone`, `bootstrap-project`, `generate-spec`, `generate-verification`, `implement-specification`, `investigate-issue`, `milestone`, `review-implementation`, `sync-documentation`, `hotfix-issue`, `manage-roadmap`, `manage-development`, and `evolve-skills`.
-4. **Draft improvements** — Formulate targeted prompt additions (e.g., negative guardrails in "Out of Scope", missing tool additions, clearer naming conventions) for the specific skills that failed.
-5. **Apply updates** — Use `edit` to update the targeted `~/.omp/agent/skills/*/SKILL.md` files.
-6. **Bump version** — Find the `version: x.y.z` field in the frontmatter of the skill you are editing. Increment the patch version (e.g., `1.0.0` to `1.0.1`).
-7. **Document the evolution** — Append a log to `~/.omp/agent/skills/evolve-skills/EVOLUTION.md`. Record the date, the skill updated, the old/new version, and the exact rationale derived from the artifacts. Do not place this in the project's `docs/` folder.
 
+1. **Analyze recent artifacts** — Use `glob` and `read` to scan only the active `milestones/` directory for recent Review Reports (`*R.md`), Completion Reports (`*C.md`), and Investigation Reports (`*I*.md`). Do not scan the `archive/` directory to save context limits.
+
+2. **Check for Session Audit Reports** — If session-audit generated `M{X}SA{Y}.md` or `milestones/TEMP/M{N}SA{Y}.md`:
+   - Read all SA documents in chronological order
+   - Process multiple SAs cumulatively
+   - Use the most recent SA as primary context
+   - Track dependencies between SAs
+   - Identify which skills need updates based on "Recommended evolve-skills Actions"
+
+3. **Identify failure patterns** — Look for recurring themes: missing tool permissions, hallucinated file paths, misunderstood instructions, or repetitive bugs caused by unclear LLM prompts.
+
+4. **Restrict Scope** — You are ONLY permitted to analyze and update the following Spec-Driven Development skills: `archive-milestone`, `bootstrap-project`, `generate-spec`, `generate-verification`, `implement-specification`, `investigate-issue`, `milestone`, `review-implementation`, `sync-documentation`, `hotfix-issue`, `manage-roadmap`, `manage-development`, `evolve-skills`, and `session-audit`.
+
+5. **Draft improvements** — Formulate targeted prompt additions (e.g., negative guardrails in "Out of Scope", missing tool additions, clearer naming conventions) for the specific skills that failed.
+
+6. **Apply updates** — Use `edit` to update the targeted `~/devcode/aef/agent/skills/*/SKILL.md` files.
+
+7. **Bump version** — Find the `version: x.y.z` field in the frontmatter of the skill you are editing. Increment the patch version (e.g., `1.0.0` to `1.0.1`).
+
+8. **Document the evolution** — Append a log to `~/devcode/aef/agent/skills/evolve-skills/EVOLUTION.md`. Record the date, the skill updated, the old/new version, and the exact rationale derived from the artifacts. Do not place this in the project's `docs/` folder.
+
+9. **Command: log-experience** — If the user asks to log an experience, append it to the 'Active Friction Points' section in `docs/EXPERIENCES.md` using the format:
+   `- [Date] **Topic:** {topic} | **Issue:** {issue} | **Suggested Fix:** {fix}`
+
+10. **Command: analyze** — Read the 'Active Friction Points' from `docs/EXPERIENCES.md`. For each point:
+    - Analyze the relevant `SKILL.md` file
+    - Apply prompt fixes or new Out of Scope guardrails
+    - Bump the skill version
+    - Move the item to 'Applied Skill Updates' in `EXPERIENCES.md` documenting what you changed
+
+11. **Session Audit Integration — Multiple SAs and TEMP Milestones**
+    
+    When processing Session Audit Reports (M{X}SA{Y}.md) generated by session-audit skill:
+    
+    a. **Restricted Scope** — Always include `session-audit` in your scope of skills to analyze and update (line 27 already lists it).
+    
+    b. **Detect all SA documents**:
+       - Use `glob` to find all SA documents: `glob path="milestones/ -name "*SA*.md"`
+       - Sort documents chronologically by SA number
+       - Prioritize TEMP milestone SAs if present
+    
+    c. **Process in chronological order**:
+       - Start with earliest SA (lowest Y number)
+       - Apply cumulative context from all previous SAs
+       - Track dependencies between SAs (e.g., SA2 may reference SA1)
+       - Use most recent SA as primary context for current changes
+    
+    d. **Apply cumulative context**:
+       - For each SA read, capture "Recommended evolve-skills Actions"
+       - Build cumulative list of recommended updates
+       - Merge duplicates (e.g., if both SA1 and SA2 recommend same version bump)
+       - Prioritize HIGH recommendations first
+    
+    e. **TEMP milestone handling**:
+       - If TEMP milestone detected (M{N}SA{Y}.md in milestones/TEMP/), process first
+       - Mark TEMP status in EVOLUTION.md
+       - After processing, prompt user for milestone promotion to formal milestone
+       - If promoted, rename TEMP folder and update SA references
+    
+    f. **Version tracking**:
+       - Track version changes from session-audit output (CHANGELOG_ENTRIES.md)
+       - Ensure evolve-skills version matches expected version from M2SA1
+       - Current version: 1.2.0
+    
+    g. **Output documentation**:
+       - Create or update CHANGELOG_ENTRIES.md with session-audit entries
+       - Create MILESTONE_UPDATES.md for progress tracking
+       - Create INGEST_ENTRIES.md for ingestion workflow
+       - Update AGENTS.md with Infrastructure Skills section
 #### Evolution Principles
+
 * **Evidence-based** — Every prompt change must be tied directly to a documented failure or inefficiency in a recent artifact.
 * **Negative Guardrails** — Prioritize adding explicit "Never do X" rules to the "Out of Scope" sections over adding complex positive instructions.
 * **Do Not Touch Core Tools** — Never modify non-SDD skills (like code-search, bash tools, etc.).
+* **Cumulative Processing** — Process multiple SAs in order, building on cumulative context.
+* **TEMP First** — Always process TEMP milestones before formal milestones.
 
 #### Output
+
 1. Edited `SKILL.md` files (with incremented version numbers).
-2. An updated `~/.omp/agent/skills/evolve-skills/EVOLUTION.md` ledger.
+2. An updated `~/devcode/aef/agent/skills/evolve-skills/EVOLUTION.md` ledger.
+
+#### Example SA Processing Workflow
+
+```bash
+# Session 1: M2SA1.md
+# 1. Read M2SA1.md
+# 2. Identify recommended actions (session-audit updated, code-search added)
+# 3. Apply updates to evolve-skills and session-audit
+# 4. Bump versions
+# 5. Document in EVOLUTION.md
+
+# Session 2: M2SA2.md (2 weeks later)
+# 1. Read all SAs: M2SA1.md, M2SA2.md
+# 2. Process cumulatively (use SA2 as primary, reference SA1)
+# 3. Apply new recommendations
+# 4. Bump versions
+# 5. Document in EVOLUTION.md with references to both SAs
+```
+
+#### EVOLUTION.md Structure
+
+```markdown
+# Skill Evolution Log
+
+## [Date] - M{X}SA{Y}
+
+### Skill: {skill-name}
+- **Old Version**: {x.y.z}
+- **New Version**: {x.y.z}
+- **Rationale**: Session-audit detected framework improvement needed
+- **Changes**:
+  - {description of changes}
+- **References**: M{X}SA{Y}.md, M{X}SA{Y-1}.md (if applicable)
+
+### TEMP Milestone: M{N}SA{Y}
+- **Status**: Processed (incomplete)
+- **Action Taken**: Applied framework improvements
+- **Next Step**: Prompt user for milestone promotion
+- **References**: M{N}SA{Y}.md
+
+### TEMP Milestone: M{N}SA{Y} (Closed)
+- **Status**: Closed as completed
+- **Action Taken**: Deleted TEMP milestone
+- **References**: M{N}SA{Y}.md
+```
+
+## Edit Tool Usage
+
+### Single-line Replacements (Use `bash`)
+
+For simple one-line edits, `bash` with `sed` is simpler and less error-prone:
+
+```bash
+# Replace line 27 with new text
+sed -i.bak '27s/.*/NEW_TEXT/' /path/to/file
+
+# Example: Fix a single instruction line
+sed -i.bak '27s/.*/13. **Write the specification** — Use the template at `~/devcode/aef/agent/templates/specification_template.md`. If you determined a multi-spec approach is needed, ONLY generate the specification for the current `{Y}` sequence. Add a 'Next Steps' section at the bottom advising the user to run `generate-verification` for the verification protocol./' /Users/bparlan/devcode/aef/agent/skills/generate-spec/SKILL.md
+```
+
+### Multi-line Block Edits (Use `edit`)
+
+For structural changes with multiple lines, use the `edit` tool:
+
+**Steps**:
+1. Read the file with `read` to get `[PATH#HASH]`
+2. Use `SWAP N.=N:` to replace a single line
+3. Use `SWAP.BLK N:` to replace a complete block
+4. Always use `+` prefix for new lines
+
+**Example**:
+```
+[SKILL.md#ABC123]
+SWAP 27.=27:
++13. **Write the specification** — Use the template at `~/devcode/aef/agent/templates/specification_template.md`. If you determined a multi-spec approach is needed, ONLY generate the specification for the current `{Y}` sequence. Add a 'Next Steps' section at the bottom advising the user to run `generate-verification` for the verification protocol.
+```
+
+## Documentation
+
+- **[skills.md](../../docs/skills.md)** — Comprehensive skill catalog
+- **[INDEX.md](../../INDEX.md)** — Complete skill catalog
+
+## References
+
+- [INDEX.md](../../INDEX.md) — Complete skill catalog
+- [AGENTS.md](../AGENTS.md) — Framework overview
+- [PLAYBOOK.md](../../docs/PLAYBOOK.md) — Operational workflows
+- [FRAMEWORK.md](../../docs/FRAMEWORK.md) — Architecture patterns

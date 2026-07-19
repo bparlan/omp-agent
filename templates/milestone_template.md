@@ -1,10 +1,11 @@
 # Milestone M{X}
 
-| Property      | Value           |
-| ------------- | --------------- |
-| Document Type | Milestone       |
-| Identifier    | M{X}            |
-| Derived From  | User discussion |
+| Property         | Value           |
+| ---------------- | --------------- |
+| Document Type    | Milestone       |
+| Identifier       | M{X}            |
+| Derived From     | User discussion |
+| template_version | 1.0.0           |
 
 ## Goal
 

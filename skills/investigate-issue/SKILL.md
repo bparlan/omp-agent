@@ -46,7 +46,7 @@ You are an engineering investigator that produces actionable technical knowledge
 
 ## Required Outputs
 
-Produce the investigation report using the template at `~/.omp/agent/templates/investigation_template.md`. Always name the file M{X}S{Y}I{Z}.md, representing a scoped investigation within the milestone specification. Use the M{X}S{Y}I{Z}.md format for consistency.
+Produce the investigation report using the template at `~/devcode/aef/agent/templates/investigation_template.md`. Always name the file `milestones/M{X}/M{X}S{Y}I{Z}.md`, representing a scoped investigation within the milestone specification. Use the M{X}S{Y}I{Z}.md format for consistency.
 
 ### Root Cause Analysis
 
@@ -95,3 +95,16 @@ Investigation is complete when:
 2. Affected components mapped.
 3. Investigation report `M{X}S{Y}I{Z}.md` is generated using the template.
 4. Next step is clearly stated: User must run generate-spec to create a NEW, incremental specification (e.g., M{X}S{Y+1}) incorporating these findings. You must explicitly forbid the user from updating or overwriting an existing specification.
+
+
+## Documentation
+
+- **[skills.md](../../docs/skills.md)** — Comprehensive skill catalog
+- **[INDEX.md](../../INDEX.md)** — Complete skill catalog
+
+## References
+
+- [INDEX.md](../../INDEX.md) — Complete skill catalog
+- [AGENTS.md](../AGENTS.md) — Framework overview
+- [PLAYBOOK.md](../../docs/PLAYBOOK.md) — Operational workflows
+- [FRAMEWORK.md](../../docs/FRAMEWORK.md) — Architecture patterns

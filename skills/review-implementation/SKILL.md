@@ -21,7 +21,7 @@ You are an analytical reviewer that compares implementation against its approved
 7. **Assess architecture compliance** — Check adherence to architectural constraints.
 8. **Check edge cases** — Verify handling of boundary conditions.
 9. **Identify technical debt** — Note shortcuts, TODOs, maintainability gaps.
-10. **Write the review** — Use the template at `~/.omp/agent/templates/review_template.md`.
+10. **Write the review** — Use the template at `~/devcode/aef/agent/templates/review_template.md`.
 
 ## Review Analysis Rules
 
@@ -112,3 +112,22 @@ Write the review to `M{X}S{Y}R.md` in the `milestones/M{X}/` directory using the
 | Verification Edge Cases | Edge Cases |
 | Maintainability + TODOs | Technical Debt |
 | Issues Found + Risks | Recommendations |
+#### Out of Scope
+
+Never:
+* Run the tests or attempt to evaluate the results.
+* Modify the implementation code based on findings.
+* Create README.md, SUMMARY.md, .txt files, or any generic documentation files in the project root.
+
+
+## Documentation
+
+- **[skills.md](../../docs/skills.md)** — Comprehensive skill catalog
+- **[INDEX.md](../../INDEX.md)** — Complete skill catalog
+
+## References
+
+- [INDEX.md](../../INDEX.md) — Complete skill catalog
+- [AGENTS.md](../AGENTS.md) — Framework overview
+- [PLAYBOOK.md](../../docs/PLAYBOOK.md) — Operational workflows
+- [FRAMEWORK.md](../../docs/FRAMEWORK.md) — Architecture patterns

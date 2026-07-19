@@ -1,4 +1,3 @@
----
 name: archive-milestone
 version: 1.0.0
 description: Archive completed milestone artifacts while preserving complete engineering history.
@@ -35,7 +34,7 @@ Before archiving, verify:
 3. **Determine archive location** — Target `milestones/archive/M{X}/`.
 4. **Create archive directory** — Make the directory preserving relationships.
 5. **Move artifacts** — Move all matching artifacts to the archive directory (never copy).
-6. **Generate archive summary** — Generate `M{X}A.md` in the archive directory using the template at `~/.omp/agent/templates/archive_template.md`.
+6. **Generate archive summary** — Generate `M{X}A.md` in the archive directory using the template at `~/devcode/aef/agent/templates/archive_template.md`.
 7. **Update MILESTONES.md** — Change entry from `(active)` to `(archived) → milestones/archive/M{X}/`
 
 ## Archive Principles
@@ -73,6 +72,37 @@ No modification of archived content. No document generation beyond archive summa
 ## Out of Scope
 
 Never:
+## Edit Tool Usage
+
+### Single-line Replacements (Use `bash`)
+
+For simple one-line edits, `bash` with `sed` is simpler and less error-prone:
+
+```bash
+# Replace line 27 with new text
+sed -i.bak '27s/.*/NEW_TEXT/' /path/to/file
+
+# Example: Fix a single instruction line
+sed -i.bak '27s/.*/13. **Write the specification** — Use the template at `~\/.omp\/agent\/templates\/specification_template.md`. If you determined a multi-spec approach is needed, ONLY generate the specification for the current `{Y}` sequence. Add a '''Next Steps''' section at the bottom advising the user to run `generate-verification` for the verification protocol./' /Users/bparlan/devcode/aef/agent/skills/generate-spec/SKILL.md
+```
+
+### Multi-line Block Edits (Use `edit`)
+
+For structural changes with multiple lines, use the `edit` tool:
+
+**Steps**:
+1. Read the file with `read` to get `[PATH#HASH]`
+2. Use `SWAP N.=N:` to replace a single line
+3. Use `SWAP.BLK N:` to replace a complete block
+4. Always use `+` prefix for new lines
+
+**Example**:
+```
+[SKILL.md#ABC123]
+SWAP 27.=27:
++13. **Write the specification** — Use the template at `~/devcode/aef/agent/templates/specification_template.md`. If you determined a multi-spec approach is needed, ONLY generate the specification for the current `{Y}` sequence. Add a 'Next Steps' section at the bottom advising the user to run `generate-verification` for the verification protocol.
+```
+
 
 - Modify implementation
 - Modify tests
@@ -82,3 +112,16 @@ Never:
 - Perform Git operations
 - Delete historical information
 - Apply changes to archived artifacts
+
+
+## Documentation
+
+- **[skills.md](../../docs/skills.md)** — Comprehensive skill catalog
+- **[INDEX.md](../../INDEX.md)** — Complete skill catalog
+
+## References
+
+- [INDEX.md](../../INDEX.md) — Complete skill catalog
+- [AGENTS.md](../AGENTS.md) — Framework overview
+- [PLAYBOOK.md](../../docs/PLAYBOOK.md) — Operational workflows
+- [FRAMEWORK.md](../../docs/FRAMEWORK.md) — Architecture patterns

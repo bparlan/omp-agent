@@ -1,21 +1,21 @@
 # OMP Framework Roadmap
 
-## Existing Capabilities
-
-### Core Framework & Spec-Driven Development
-
--   **Spec-Driven Workflow**: Fully implemented 5-stage lifecycle (`milestone`, `generate-spec`, `generate-verification`, `implement-specification`, `review-implementation`).
--   **Agent-Tool Separation**: Strict architectural boundary enforced.
--   **Artifact Persistence**: Serialization of all knowledge and decisions into Markdown.
--   **Hierarchical Control**: Three-layer architecture (Project Manager, Tactical Lifecycle, Meta-Learning).
--   **Repository Bootstrapping**: `bootstrap-project` skill for initial setup and documentation generation.
-
-### Agent Orchestration & Management
-
--   **Task Delegation**: `task` tool for parallelized subagent execution.
--   **Agent Communication**: `irc` for inter-agent messaging and `job` for background task management.
--   **Tooling**: Comprehensive set of specialized tools for code analysis, editing, execution, and debugging.
-
+- ## Existing Capabilities
+-
+- ### Core Framework & Spec-Driven Development
+-
+- -   **Spec-Driven Workflow**: Fully implemented 5-stage lifecycle (`milestone` → `generate-spec` → `generate-verification` → `implement-specification` → `review-implementation`).
+- -   **Agent-Tool Separation**: Strict architectural boundary enforced.
+- -   **Artifact Persistence**: Serialization of all knowledge and decisions into Markdown.
+- -   **Hierarchical Control**: Three-layer architecture (Project Manager, Tactical Lifecycle, Meta-Learning).
+- -   **Repository Bootstrapping**: `bootstrap-project` skill for initial setup and documentation generation.
+- -   **Infrastructure Skills**: Core infrastructure skills (`code-search`, `session-audit`) providing reusable capabilities across the framework.
+-
+- ### Agent Orchestration & Management
+-
+- -   **Task Delegation**: `task` tool for parallelized subagent execution.
+- -   **Agent Communication**: `irc` for inter-agent messaging and `job` for background task management.
+- -   **Tooling**: Comprehensive set of specialized tools for code analysis, editing, execution, and debugging.
 ## Known Gaps & Future Items
 
 ### Advanced Meta-Learning & System Evolution

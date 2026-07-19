@@ -1,16 +1,17 @@
-# OMP Operational & State Files
-*.log
-*.jsonl
-sessions/
-cache/
-.archive/
-
-# Vector & SQLite Databases
+# OMP SQLite Databases
 *.db
-*.sqlite
-*.sqlite3
 *.db-shm
 *.db-wal
+*.log
+*.jsonl
+*.sqlite
+*.sqlite3
+
+# OMP Active State & Media
+blobs/
+sessions/
+cache/
+terminal-sessions/
 
 # OS Generated Files
 .DS_Store

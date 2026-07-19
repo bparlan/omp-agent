@@ -1,5 +1,16 @@
-# Changelog
-
-This document tracks changes to the OhMyPi (OMP) Framework.
-
-All significant changes will be recorded here chronologically.
+- # Changelog
+-
+- This document tracks changes to the OhMyPi (OMP) Framework.
+-
+- All significant changes will be recorded here chronologically.
+-
+- ## [unreleased]
+-
+- ### Infrastructure & Session Management
+-
+- - **Session Audit System**: New `session-audit` skill that generates comprehensive audit reports (`M{X}SA{Y}.md`) for each session, tracks all major changes, and generates outputs for CHANGELOG.md, MILESTONE_UPDATES.md, and INGEST_ENTRIES.md.
+- - **Code-Search Infrastructure**: Added `code-search` as an Infrastructure Skill with comprehensive documentation of semantic analysis patterns, usage examples, and integration points.
+- - **Multiple Session Tracking**: Support for multiple session audits per milestone (SA1, SA2, SA3...) with cumulative context and last SA becoming primary.
+- - **TEMP Milestone Structure**: Automatic TEMP milestone detection for sessions without formal milestones, creating `milestones/TEMP/M{N}SA{Y}.md` with promotion capability.
+- - **Ingestion Workflow**: Centralized data ingestion via `/docs/ingest/` folder with manage-roadmap integration, including permission + context workflow and automatic archiving.
+- - **Reverse Order Flow**: TEMP > Milestone priority, infrastructure works both ways with evolve-skills handling both TEMP and formal milestones.
