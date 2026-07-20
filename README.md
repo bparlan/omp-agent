@@ -19,6 +19,11 @@
 - [Infrastructure Skills](#infrastructure-skills)
 - [Templates & Artifacts](#templates--artifacts)
 - [Directory Standards](#directory-standards)
+
+### New Skills Introduced
+
+- **`hotfix-focus`**: Specializes in rapidly addressing and resolving minor issues, streamlining the `hotfix-issue` workflow.
+- **`diagrammer`**: Generates visual diagrams of system architecture, data flow, and project structures, aiding comprehension and documentation.
 * `~/devcode/aef/agent/sessions/`: Active development sessions and exploratory session audits awaiting formalization.
 * `docs/ingest/`: Strictly for external data, research, or third-party codebase ingestion. Not for session tracking.
 * `~/devcode/aef/agent/sessions/`: Active development sessions and exploratory session audits awaiting formalization.
