@@ -16,3 +16,38 @@ terminal-sessions/
 # OS Generated Files
 .DS_Store
 Thumbs.db
+
+
+# Node.js Dependencies
+node_modules/
+
+# Python Virtual Environments
+venv/
+*.venv/
+env/
+*.env/
+
+# Editor & IDE configuration
+.vscode/
+.idea/
+
+# Temporary Files
+*.tmp
+*.temp
+*.swp
+*~
+
+# Development artifacts and temporary files
+local://*
+test_output.log
+
+# Package manager lock files (if managed by external env)
+package-lock.json
+pnpm-lock.yaml
+
+# Configuration and generated files
+.omp/
+docs/archived/
+docs/diagrams/
+filetree.json
+schema.json
