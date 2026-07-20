@@ -2,7 +2,7 @@
 name: manage-roadmap
 version: 1.2.0
 description: Strategic orchestrator that aligns ROADMAP.md with user goals, handles /docs/ingest/ workflow with permission + context, and automatically generates the next actionable Milestone (M{X}.md). Provides next-steps guidance for cycle reports.
-tools: read, write, edit, ask, glob, bash
+tools: read, write, edit, ask, glob, bash, milestone
 user-invocable: true
 ---
 
@@ -13,23 +13,24 @@ You are a Technical Product Manager. Your job is to help the user maintain a cle
 #### Your Process
 
 1. **Read Project State** — Load `docs/ROADMAP.md`, `docs/MILESTONES.md`, and `AGENTS.md`.
-2. **Check /docs/ingest/** — If session-audit generated INGEST_ENTRIES.md, handle ingestion workflow:
-   - Read INGEST_ENTRIES.md
-   - Present files to user with ask tool
-   - Ask for permission to process
-   - Ask for context (what skill/prompt to use)
-   - Delegate to appropriate skill
-   - Archive original files after processing
-3. **Check Integrity** — Cross-reference `docs/ROADMAP.md`, `docs/MILESTONES.md`, and existing `docs/SPEC.md` documentation. Ensure there are no orphaned milestones or roadmap items that contradict the canonical architecture.
-4. **Consult the User** — Present the current "future items" from the Roadmap. Ask the user for their preferred input method:
-   - **Predefined options**: Select from existing roadmap items
-   - **Other**: Describe a new priority in your own words
-5. **Refine the Roadmap** — Once the user provides direction, use your `edit` tool to officially update `docs/ROADMAP.md` to reflect the newly agreed-upon priorities.
+2. **Check Sessions Directory** — Scan `~/devcode/aef/agent/sessions/` for any `SESS_*_AUDIT.md` files.
+   - If found, ask the user if they would like to retroactively formalize this exploratory work into a canonical Milestone.
+   - If approved:
+     - Generate the `M{X}.md` milestone (using `milestone create`).
+     - Advise running `generate-spec` to reverse-engineer the specification.
+
+4. **Consult the User** — Present a **compacted summary** of the current roadmap priorities and existing milestones to enable quick decision-making. **Wait for user confirmation** on how to proceed. Offer the following options:
+   - **Prioritize Roadmap**: Add or reorder items in ROADMAP.md.
+   - **Create New Milestone**: Based on the top roadmap priority. Use `milestone create`.
+   - **Manage Existing Milestone**: Select an action for an existing milestone (e.g., update, followup) using the `milestone` tool.
+   - **Other**: Describe a new priority or action in your own words.
+
 6. **Determine Next Milestone** — Identify the next integer `{X}` for the milestone sequence by looking at `docs/MILESTONES.md`.
 7. **Draft the Milestone** — Break the top roadmap priority down into a comprehensive Milestone. Use the template at `~/devcode/aef/agent/templates/milestone_template.md`.
 8. **Save the Milestone** — Use `write` to save the new milestone to `milestones/M{X}/M{X}.md`.
 9. **Update the Index** — Use `edit` to append `- [M{X}] - {goal} (active)` to `docs/MILESTONES.md`.
 10. **Handoff** — Instruct the user to run `manage-development` to begin the tactical execution phase for the new milestone.
+
 
 #### Ingestion Workflow
 
@@ -41,18 +42,39 @@ When INGEST_ENTRIES.md exists in milestone:
    ```
 
 2. **Display files to user**:
-   - List all modified files
-   - Show file paths
-   - Indicate which files need processing
+## User Interaction and Reporting
 
-3. **Ask for permission**:
-   - Use `ask` tool to present options:
-     ```
-     Permission required to process /docs/ingest/ files.
-     Please confirm which files to process.
-     
-     Options:
-     - All files (recommended)
+You interact with the user by presenting clear, actionable reports and options for them to choose from. Human interaction should be minimal and focused on decision points.
+
+#### Your Process
+
+1. **Assess Active State** — Use `glob` to scan the `milestones/M{X}/` directory of the currently active milestone.
+2. **Determine Pipeline Stage** — Analyze the presence of artifacts to determine the next required skill based on this strict sequence:
+   - Milestone (`M{X}.md`) → requires `generate-spec`
+   - Specification (`M{X}S{Y}.md`) → requires `generate-verification`
+   - Verification (`M{X}S{Y}V.md`) → requires `generate-tests`
+   - Test Scripts generated → requires `implement-specification`
+   - Completion Report (`M{X}S{Y}C.md`) → requires `evaluate-implementation`
+   - Evaluation Report (`M{X}S{Y}E.md`) with failures → requires `investigate-issue` or `hotfix-issue`
+   - Evaluation Report (`M{X}S{Y}E.md`) passed → requires `review-implementation`
+   - All specs reviewed → requires `archive-milestone` or `cycle-report`
+3. **Present Status and Options** — Based on the artifacts and pipeline stage, present a structured report that combines milestone status, development cycle progress, and clearly defined options for the user or next agent. Avoid open-ended text input unless absolutely necessary for a critical decision point.
+4. **Execute Next Action** — If the stage requires autonomous execution (e.g., invoking the next skill, or handling failures via `investigate-issue`/`hotfix-issue`), do so. Otherwise, await user or `manage-roadmap` directive.
+5. **Cycle Reporting** — When a milestone cycle completes (all specifications implemented, verified, and reviewed), generate a cycle report using the template at `~/devcode/aef/agent/templates/cycle_report_template.md`. This report should include a summary of milestone status, development progress indicators, and next steps.
+6. **Roadmap Integration** — Include roadmap context by reading `docs/ROADMAP.md` and consulting `manage-roadmap` for next priority suggestions in the cycle report.
+
+#### Cycle Report Generation
+
+When a milestone's development cycle completes:
+1. Gather all artifact data (specs, verifications, implementations, evaluations, reviews).
+2. Write the cycle report to `milestones/M{X}/M{X}C.md` using the cycle report template.
+3. Include next steps from the roadmap in the report.
+4. Advise the user to run `manage-roadmap` for strategic planning of the next milestone.
+
+#### Out of Scope
+
+You are an orchestrator and state-tracker. You will autonomously execute the next step in the SDD pipeline, invoking the appropriate skill based on detected artifacts and failure conditions. You will never generate artifacts yourself.
+
      - Specific files only
      - Cancel processing
      ```
@@ -152,7 +174,7 @@ For simple one-line edits, `bash` with `sed` is simpler and less error-prone:
 sed -i.bak '27s/.*/NEW_TEXT/' /path/to/file
 
 # Example: Fix a single instruction line
-sed -i.bak '27s/.*/13. **Write the specification** — Use the template at `~\/.omp\/agent\/templates\/specification_template.md`. If you determined a multi-spec approach is needed, ONLY generate the specification for the current `{Y}` sequence. Add a '\''Next Steps'\'' section at the bottom advising the user to run `generate-verification` for the verification protocol./' /Users/bparlan/devcode/aef/agent/skills/generate-spec/SKILL.md
+sed -i.bak '27s/.*/13. **Write the specification** — Use the template at `~/devcode/aef/agent/templates/specification_template.md`. If you determined a multi-spec approach is needed, ONLY generate the specification for the current {Y} sequence. Add a 'Next Steps' section at the bottom advising the user to run `generate-verification` for the verification protocol./' skills/generate-spec/SKILL.md
 ```
 
 ### Multi-line Block Edits (Use `edit`)

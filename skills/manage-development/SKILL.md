@@ -32,8 +32,10 @@ You are an Engineering Manager responsible for guiding the user through the exac
 When a milestone's development cycle completes:
 1. Gather all artifact data (specs, verifications, implementations, evaluations, reviews).
 2. Write the cycle report to `milestones/M{X}/M{X}C.md` using the cycle report template.
-3. Include next steps from the roadmap in the report.
-4. Advise the user to run `manage-roadmap` for strategic planning of the next milestone.
+3. **Verify the cycle report file was created locally.**
+4. Include next steps from the roadmap in the report.
+5. Advise the user to run `manage-roadmap` for strategic planning of the next milestone.
+
 
 #### Out of Scope
 

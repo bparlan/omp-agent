@@ -47,7 +47,7 @@ For simple one-line edits, `bash` with `sed` is simpler and less error-prone:
 sed -i.bak '27s/.*/NEW_TEXT/' /path/to/file
 
 # Example: Fix a single instruction line
-sed -i.bak '27s/.*/13. **Write the specification** — Use the template at `~\/.omp\/agent\/templates\/specification_template.md`. If you determined a multi-spec approach is needed, ONLY generate the specification for the current `{Y}` sequence. Add a '\'Next Steps\'' section at the bottom advising the user to run `generate-verification` for the verification protocol./' /Users/bparlan/devcode/aef/agent/skills/generate-spec/SKILL.md
+sed -i.bak '27s/.*/13. **Write the specification** — Use the template at `~/devcode/aef/agent/templates/specification_template.md`. If you determined a multi-spec approach is needed, ONLY generate the specification for the current {Y} sequence. Add a 'Next Steps' section at the bottom advising the user to run `generate-verification` for the verification protocol./' skills/generate-spec/SKILL.md
 ```
 
 ### Multi-line Block Edits (Use `edit`)
