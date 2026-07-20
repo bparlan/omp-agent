@@ -1,6 +1,6 @@
 # OMP AEF Skills Catalog
 
-This document provides detailed information about all 35 skills in the OMP Agentic Engineering Framework, organized by layer.
+This document provides detailed information about all 36 skills in the OMP Agentic Engineering Framework, organized by layer.
 
 ## Table of Contents
 
@@ -24,6 +24,7 @@ This document provides detailed information about all 35 skills in the OMP Agent
   - [sync-documentation](#sync-documentation)
   - [code-search](#code-search)
   - [bootstrap-project](#bootstrap-project)
+- [diagrammer](#diagrammer)
 
 ---
 
@@ -125,6 +126,254 @@ User → milestone → generate-spec → implement-specification → ...
 
 **Location**: `skills/milestone/SKILL.md`
 
+---
+
+## Support & Infrastructure Agents
+
+Support and infrastructure agents assist with specific concerns, maintain infrastructure, and handle post-implementation work.
+
+### session-audit
+
+**Purpose**: Comprehensive session tracking and documentation generation for evolve-skills.
+
+**Key Responsibilities**:
+- Detect session changes using git or filesystem timestamps
+- Classify changes (framework-critical vs cosmetic)
+- Generate multiple session audits (SA1, SA2, SA3...)
+- Generate comprehensive documentation for evolve-skills
+- Handle TEMP milestone structure for sessions without formal milestones
+- Integrate with manage-roadmap for ingestion workflow
+- Use code-search for semantic analysis
+
+**Artifacts Generated**:
+- `milestones/M{X}/M{X}SA{Y}.md` — Session Audit Document
+- `milestones/M{X}/SESSION_CHANGES.md` — Change log
+- `milestones/M{X}/CHANGELOG_ENTRIES.md` — Changelog entries
+- `milestones/M{X}/MILESTONE_UPDATES.md` — Milestone updates
+- `milestones/M{X}/INGEST_ENTRIES.md` — Ingestion entries
+
+**Location**: `milestones/M{X}/` or `milestones/TEMP/` (NOT `/docs/ingest/`)
+
+**Numbering**:
+- SA documents numbered sequentially per milestone: SA1, SA2, SA3...
+- TEMP milestones use M{N} prefix: M1SA1, M2SA1, M3SA1...
+
+**Integration**:
+- **code-search**: Semantic search and skeleton generation
+- **evolve-skills**: Receives recommended actions
+- **manage-roadmap**: Processes ingestion entries
+
+**Location**: `skills/session-audit/SKILL.md`
+
+---
+
+### investigate-issue
+
+**Purpose**: Investigates implementation issues and produces technical understanding.
+
+**Key Responsibilities**:
+- Read implementation artifacts (code, tests, spec)
+- Understand the current state
+- Identify root causes
+- Generate detailed investigation report
+- Recommend fix approach
+
+**Artifacts Generated**:
+- `milestones/M{X}/M{X}I{Z}.md` — Investigation Report
+
+**Out of Scope**:
+- Applying fixes
+- Running hotfix workflows
+- Archiving issues
+
+**Location**: `skills/investigate-issue/SKILL.md`
+
+---
+
+### hotfix-issue
+
+**Purpose**: Implements small, targeted bug fixes directly from investigation reports.
+
+**Key Responsibilities**:
+- Read investigation report from investigate-issue
+- Understand the root cause
+- Identify minimal fix location
+- Apply fix using edit tool
+- Verify fix works
+- Handoff back to investigate-issue
+
+**Artifacts Generated**:
+- Modified code files
+
+**Out of Scope**:
+- Investigating new issues
+- Major refactoring
+- Creating documentation
+
+**Location**: `skills/hotfix-issue/SKILL.md`
+
+---
+
+### archive-milestone
+
+**Purpose**: Archives completed milestone artifacts while preserving complete engineering history.
+
+**Key Responsibilities**:
+- Identify completed milestone (review-implementation passed)
+- Copy artifacts to archive
+- Preserve all docs (M{X}.md, M{X}S{Y}*.md, etc.)
+- Move implementation code to archive location
+- Update documentation links
+- Verify archive completeness
+
+**Artifacts Moved**:
+- Milestone documents
+- Specifications
+- Verification protocols
+- Test plans
+- Implementations
+- Tests
+
+**Out of Scope**:
+- Modifying live codebase
+- Re-opening closed milestones
+- Breaking traceability
+
+**Location**: `skills/archive-milestone/SKILL.md`
+
+---
+
+### evolve-skills
+
+**Purpose**: Analyze recent project artifacts and Session Audit Reports to learn from mistakes, identify workflow inefficiencies, and automatically update/version SKILL.md files.
+
+**Key Responsibilities**:
+- Analyze recent artifacts (M{X}SA{Y}.md, Review Reports, Completion Reports)
+- Read all SA documents chronologically
+- Identify failure patterns and inefficiencies
+- Draft targeted prompt improvements
+- Apply updates to SKILL.md files
+- Bump version numbers
+- Document evolution in EVOLUTION.md
+- Process TEMP milestones before formal milestones
+
+**Artifacts Modified**:
+- `skills/*/SKILL.md` files (with incremented version numbers)
+- `skills/evolve-skills/EVOLUTION.md` ledger
+
+**Out of Scope**:
+- Creating new features
+- Running implementation workflows
+- Creating new templates
+
+**Location**: `skills/evolve-skills/SKILL.md`
+
+---
+
+### sync-documentation
+
+**Purpose**: Integrate session artifacts into canonical documentation.
+
+**Key Responsibilities**:
+- Read session artifacts from `milestones/`
+- Update CHANGELOG.md
+- Update MILESTONES.md
+- Update FRAMEWORK.md
+- Update ROADMAP.md
+- Move files to `docs/ingest/`
+- Handle user permission for ingestion
+
+**Artifacts Processed**:
+- SESSION_CHANGES.md
+- CHANGELOG_ENTRIES.md
+- MILESTONE_UPDATES.md
+- INGEST_ENTRIES.md
+
+**Location**: `skills/sync-documentation/SKILL.md`
+
+---
+
+### code-search
+
+**Purpose**: Semantic repository search and skeleton generation for understanding code structure.
+
+**Key Responsibilities**:
+- Provides semantic search across OMP AEF codebase
+- Generates tree-sitter skeletons for codebase structure
+- Finds code patterns, relationships, and dependencies
+- Extracts architectural patterns and conventions
+
+**Artifacts Generated**:
+- `docs/skeletons/OMP-AEF_skeleton.md` — Tree-sitter extracted signatures and imports
+- `code_index_OMP-AEF.db` — Vector embeddings for semantic search
+
+**Usage Patterns**:
+- Used by `evolve-skills` to analyze failure patterns
+- Used by `session-audit` for semantic analysis
+- Used by SDD agents to understand codebase structure
+
+**Out of Scope**:
+- Detailed implementation review (use LSP instead)
+- Running tests or executing code
+- Modifying codebase structure
+
+**Location**: `skills/code-search/SKILL.md`
+
+---
+
+### bootstrap-project
+
+**Purpose**: Initialize the framework in a new repository.
+
+**Key Responsibilities**:
+- Analyze existing repository structure
+- Generate core documentation files (AGENTS.md, INDEX.md, README.md, etc.)
+- Set up templates
+- Configure skills-lock.json and config.yml
+- Verify installation
+
+**Artifacts Generated**:
+- Core documentation files
+- Template directory structure
+- Configuration files
+
+**Out of Scope**:
+- Running full implementation workflows
+- Creating specific features
+
+**Location**: `skills/bootstrap-project/SKILL.md`
+
+---
+
+### diagrammer
+
+**Purpose**: Generates living Mermaid diagrams from codebase reality.
+
+**Key Responsibilities**:
+- Use code-search --skeletons to read latest structural signatures
+- Use code-search --search to map relationships between skills, templates, targets
+- Generate Mermaid diagrams following strict 2-pass syntax rules
+- Validate syntax before concluding
+- Save to `docs/diagrams/` directory
+
+**Artifacts Generated**:
+- `docs/diagrams/*.md` — Mermaid diagram files
+
+**Out of Scope**:
+- Modifying source code
+- Creating documentation beyond diagrams
+
+**Location**: `skills/diagrammer/SKILL.md`
+
+---
+
+## Links to Detailed Documentation
+
+---
+
+**Last Updated**: 2026-07-20
+
+---
 ---
 
 ## Core Development Agents
@@ -551,4 +800,4 @@ Support and infrastructure agents assist with specific concerns, maintain infras
 
 ---
 
-**Last Updated**: 2026-07-18
+**Last Updated**: 2026-07-20

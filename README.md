@@ -19,6 +19,12 @@
 - [Infrastructure Skills](#infrastructure-skills)
 - [Templates & Artifacts](#templates--artifacts)
 - [Directory Standards](#directory-standards)
+* `~/devcode/aef/agent/sessions/`: Active development sessions and exploratory session audits awaiting formalization.
+* `docs/ingest/`: Strictly for external data, research, or third-party codebase ingestion. Not for session tracking.
+* `~/devcode/aef/agent/sessions/`: Active development sessions and exploratory session audits awaiting formalization.
+* `docs/ingest/`: Strictly for external data, research, or third-party codebase ingestion. Not for session tracking.
+
+
 - [Quick Start](#quick-start)
 - [Why SDD Wins](#why-sdd-wins)
 - [License](#license)
@@ -354,32 +360,32 @@ graph TD
 
 **Strategic Layer** — Define project-level strategies, roadmaps, and governance:
 
-| Skill                     | Description                                                  | Handoff                                        |
-| ------------------------- | ------------------------------------------------------------ | ---------------------------------------------- |
-| `manage-roadmap`          | Strategic PM: Creates milestones from roadmap priorities     | Hands off to `manage-development`              |
-| `manage-development`      | Tactical EM: Orchestrates SDD pipeline for active milestones | Advises next skill in sequence                 |
-| `sync-documentation`      | Updates canonical docs, archives milestone                   | Lifecycle complete                             |
-| `archive-milestone`       | Archives completed milestone artifacts while preserving history | Lifecycle complete                             |
-| `evolve-skills`           | Analyzes recent artifacts to learn from mistakes, updates SKILL.md files | Updates framework (optional)                  |
+| Skill                | Description                                                              | Handoff                           |
+| -------------------- | ------------------------------------------------------------------------ | --------------------------------- |
+| `manage-roadmap`     | Strategic PM: Creates milestones from roadmap priorities                 | Hands off to `manage-development` |
+| `manage-development` | Tactical EM: Orchestrates SDD pipeline for active milestones             | Advises next skill in sequence    |
+| `sync-documentation` | Updates canonical docs, archives milestone                               | Lifecycle complete                |
+| `archive-milestone`  | Archives completed milestone artifacts while preserving history          | Lifecycle complete                |
+| `evolve-skills`      | Analyzes recent artifacts to learn from mistakes, updates SKILL.md files | Updates framework (optional)      |
 
 **Core Development Layer** — Implement the specification-driven development workflow:
 
-| Skill                     | Description                                                  | Handoff                                        |
-| ------------------------- | ------------------------------------------------------------ | ---------------------------------------------- |
-| `milestone`               | Transforms rough feature ideas into complete milestone documents through interactive requirements elicitation | `generate-spec`                               |
-| `generate-spec`           | Transforms milestone → specification                         | `generate-verification`                        |
-| `generate-verification`   | Transforms specification → verification                      | `generate-tests`                               |
-| `generate-tests`          | Transforms verification → test scripts                       | `implement-specification`                      |
-| `implement-specification` | Transforms test scripts → implementation                     | `evaluate-implementation`                      |
-| `evaluate-implementation` | Executes tests, fixes bugs, generates evaluation             | `review-implementation` or `investigate-issue` |
-| `review-implementation`   | Evaluates implementation against spec                        | `sync-documentation`                           |
+| Skill                     | Description                                                                                                   | Handoff                                        |
+| ------------------------- | ------------------------------------------------------------------------------------------------------------- | ---------------------------------------------- |
+| `milestone`               | Transforms rough feature ideas into complete milestone documents through interactive requirements elicitation | `generate-spec`                                |
+| `generate-spec`           | Transforms milestone → specification                                                                          | `generate-verification`                        |
+| `generate-verification`   | Transforms specification → verification                                                                       | `generate-tests`                               |
+| `generate-tests`          | Transforms verification → test scripts                                                                        | `implement-specification`                      |
+| `implement-specification` | Transforms test scripts → implementation                                                                      | `evaluate-implementation`                      |
+| `evaluate-implementation` | Executes tests, fixes bugs, generates evaluation                                                              | `review-implementation` or `investigate-issue` |
+| `review-implementation`   | Evaluates implementation against spec                                                                         | `sync-documentation`                           |
 
 **Support Layer** — Assist with specific concerns:
 
-| Skill                     | Description                                                  | Handoff                                        |
-| ------------------------- | ------------------------------------------------------------ | ---------------------------------------------- |
-| `investigate-issue`       | Analyzes failures, produces investigation report             | `generate-spec` (for incremental spec)         |
-| `hotfix-issue`            | Implements minor fixes directly                              | `sync-documentation`                           |
+| Skill               | Description                                      | Handoff                                |
+| ------------------- | ------------------------------------------------ | -------------------------------------- |
+| `investigate-issue` | Analyzes failures, produces investigation report | `generate-spec` (for incremental spec) |
+| `hotfix-issue`      | Implements minor fixes directly                  | `sync-documentation`                   |
 
 ---
 
@@ -392,6 +398,7 @@ graph TD
 **Role**: Semantic search and skeleton generation for understanding code structure without reading files.
 
 **Key Responsibilities**:
+
 - Provides semantic search across the OMP AEF codebase
 - Generates tree-sitter skeletons for codebase structure
 - Enables fast understanding of patterns without reading files
@@ -399,10 +406,12 @@ graph TD
 - Creates vector embeddings for semantic search (per-project)
 
 **Artifacts**:
+
 - `docs/skeletons/OMP-AEF_skeleton.md` — Tree-sitter extracted signatures and imports
 - `code_index_code_search.db` — Vector embeddings for semantic search (per-project)
 
 **Usage Patterns**:
+
 - Find agent handoff patterns across multiple files
 - Identify template usage and consistency
 - Verify negative guardrails implementation
@@ -410,12 +419,14 @@ graph TD
 - Check code-search integration in skills
 
 **Out of Scope**:
+
 - Detailed implementation review (use LSP instead)
 - Running tests or executing code
 - Modifying codebase structure
 - Generating new features
 
 **Access**:
+
 ```bash
 # Semantic search (via agent invocation)
 task(role: "code-search", assignment: "Search for all milestone-related code")
@@ -514,29 +525,31 @@ stateDiagram-v2
         Preserved history
     end note
 ```
+
 ## Directory Standards
 
-| Document                      | Description                                                     |
-| ----------------------------- | --------------------------------------------------------------- |
-| `README.md`                   | Project overview, design principles, quick start, license       |
-| `AGENTS.md`                   | Agent documentation, build/test commands, tool patterns         |
-| `INDEX.md`                    | Quick navigation, agent overview, workflow diagrams             |
-| `ROADMAP.md`                  | Existing capabilities as completed items and future items       |
-| `FRAMEWORK.md`                | Architectural patterns, module organization, extension guidelines |
-| `PLAYBOOK.md`                 | How to run/test/deploy, operational procedures, common tasks    |
-| `CHANGELOG.md`                | Chronological record of changes and version history             |
-| `docs/EXPERIENCES.md`         | Meta-learning ledger tracking framework friction and applied skill updates |
-| `docs/SPEC.md`                | Current system architecture as specification                    |
-| `docs/DATA.md`                | Database schema, configuration schema, data flow patterns       |
-| `docs/MILESTONES.md`          | List of active and archived milestones                          |
-| `milestones/`                 | Milestone-specific artifacts (specs, tests, implementations)   |
-| `milestones/archive/`         | Archived completed milestones (read-only)                       |
-| `docs/ingest/`                | Ingestion workflow for documentation processing and archival   |
-| `templates/`                  | Template files for artifact generation (*.template.md)         |
-| `skills-lock.json`            | Skill configuration and dependencies                            |
-| `config.yml`                  | Model routing and framework configuration                       |
+| Document              | Description                                                                |
+| --------------------- | -------------------------------------------------------------------------- |
+| `README.md`           | Project overview, design principles, quick start, license                  |
+| `AGENTS.md`           | Agent documentation, build/test commands, tool patterns                    |
+| `INDEX.md`            | Quick navigation, agent overview, workflow diagrams                        |
+| `ROADMAP.md`          | Existing capabilities as completed items and future items                  |
+| `FRAMEWORK.md`        | Architectural patterns, module organization, extension guidelines          |
+| `PLAYBOOK.md`         | How to run/test/deploy, operational procedures, common tasks               |
+| `CHANGELOG.md`        | Chronological record of changes and version history                        |
+| `docs/EXPERIENCES.md` | Meta-learning ledger tracking framework friction and applied skill updates |
+| `docs/SPEC.md`        | Current system architecture as specification                               |
+| `docs/DATA.md`        | Database schema, configuration schema, data flow patterns                  |
+| `docs/MILESTONES.md`  | List of active and archived milestones                                     |
+| `milestones/`         | Milestone-specific artifacts (specs, tests, implementations)               |
+| `milestones/archive/` | Archived completed milestones (read-only)                                  |
+| `docs/ingest/`        | Ingestion workflow for documentation processing and archival               |
+| `templates/`          | Template files for artifact generation (\*.template.md)                    |
+| `skills-lock.json`    | Skill configuration and dependencies                                       |
+| `config.yml`          | Model routing and framework configuration                                  |
 
 **Directory Structure**:
+
 - **Root**: Configuration, core documentation, skills
 - **docs/**: Framework documentation and reference materials
 - **milestones/**: Active milestone work (M{X}/)
@@ -549,8 +562,6 @@ stateDiagram-v2
 **Session Artifacts**: Session audit documents and change logs (SESSION_CHANGES.md, CHANGELOG_ENTRIES.md, MILESTONE_UPDATES.md, INGEST_ENTRIES.md) are generated directly in the milestone folder (`milestones/M{X}/` or `milestones/TEMP/`). The `/docs/ingest/` folder is used for archival after processing by manage-roadmap.
 
 ---
-
-
 
 ## Why SDD Wins
 
@@ -584,6 +595,7 @@ graph LR
 ```
 
 The session audit and evolve-skills workflow ensures:
+
 - **Continuous Improvement**: Learn from every session
 - **Consistency**: Standardized patterns across all skills
 - **Traceability**: Full history of decisions and changes
@@ -639,6 +651,7 @@ Developed by **[Barış Parlan](https://bparlan.com/)**.
 Barış Parlan is an independent technology consultant and Agentic Engineer dedicated to building technology that augments human capability and enhances human agency, rather than increasing dependence.
 
 The OhMyPi (OMP) Agentic Engineering Framework is a core project developed under his independent engineering lab, **ParlanTech**. The framework reflects a deep commitment to exploring how autonomous software can expand developer empowerment through:
+
 - **Local-first AI** — Private, offline-first AI capabilities
 - **Specification-driven workflows** — Rigorous process over unguided prompting
 - **Robust agent collaboration** — Clear boundaries and deterministic execution
@@ -652,6 +665,7 @@ If your organization is looking to build stable AI workflows, optimize developer
 ### Support Independent Engineering
 
 This framework—alongside other projects like [Autonomedia](https://github.com/bparlan/autonomedia) and [Baria](https://github.com/bparlan/baria)—is built on a foundational belief in:
+
 - **Open knowledge** — Free, accessible technical documentation
 - **Building in public** — Transparent development process
 - **Open protocols** — Standards-based, interoperable systems
@@ -678,6 +692,7 @@ For consulting inquiries, sponsorships, or to offer financial support, please re
 ## Acknowledgments
 
 This framework draws inspiration from:
+
 - **Software Engineering Principles** — SOLID, Clean Code, Design Patterns
 - **AI Research** — Agentic workflows, tool use, multi-agent systems
 - **DevOps Practices** — CI/CD, infrastructure as code, monitoring
@@ -688,6 +703,7 @@ This framework draws inspiration from:
 ## Contributing
 
 While this is primarily an independent project, contributions are welcome:
+
 1. Report issues and bugs
 2. Suggest improvements and enhancements
 3. Submit pull requests for fixes and features
@@ -700,29 +716,29 @@ See [AGENTS.md](./AGENTS.md) for detailed contribution guidelines.
 ## Resources
 
 - **[Documentation](./docs)** — Comprehensive framework documentation
-- **[Roadmap](./ROADMAP.md)** — Project roadmap and feature planning
-- **[Sessions](./sessions)** — Session audit reports and change logs
-- **[Examples](./milestones)** — Example milestone artifacts
+- **[Roadmap](./docs/ROADMAP.md)** — Project roadmap and feature planning
+- **[Example Milestones](./milestones)** — Example milestone artifacts
 
 ---
 
 **Last Updated**: 2026-07-18
 **Version**: 1.0.0
 **Status**: Production-Ready
+
 ---
 
 ## References
 
-- **[skills.md](../docs/skills.md)** — Comprehensive skill catalog
-- **[INDEX.md](../INDEX.md)** — Complete skill catalog
-- **[AGENTS.md](../AGENTS.md)** — Framework overview
-- **[PLAYBOOK.md](../docs/PLAYBOOK.md)** — Operational workflows
-- **[FRAMEWORK.md](../docs/FRAMEWORK.md)** — Architecture patterns
+- **[skills.md](./docs/skills.md)** — Comprehensive skill catalog
+- **[INDEX.md](./INDEX.md)** — Complete skill catalog
+- **[AGENTS.md](./AGENTS.md)** — Framework overview
+- **[PLAYBOOK.md](./docs/PLAYBOOK.md)** — Operational workflows
+- **[FRAMEWORK.md](./docs/FRAMEWORK.md)** — Architecture patterns
 
 ## References
 
-- **[skills.md](../docs/skills.md)** — Comprehensive skill catalog
-- **[INDEX.md](../INDEX.md)** — Complete skill catalog
-- **[AGENTS.md](../AGENTS.md)** — Framework overview
-- **[PLAYBOOK.md](../docs/PLAYBOOK.md)** — Operational workflows
-- **[FRAMEWORK.md](../docs/FRAMEWORK.md)** — Architecture patterns
+- **[skills.md](./docs/skills.md)** — Comprehensive skill catalog
+- **[INDEX.md](./INDEX.md)** — Complete skill catalog
+- **[AGENTS.md](./AGENTS.md)** — Framework overview
+- **[PLAYBOOK.md](./docs/PLAYBOOK.md)** — Operational workflows
+- **[FRAMEWORK.md](./docs/FRAMEWORK.md)** — Architecture patterns

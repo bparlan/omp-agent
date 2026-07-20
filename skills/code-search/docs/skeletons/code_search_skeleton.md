@@ -1,7 +1,10 @@
 # Code-Search Codebase Skeletons
 > Use this for low-token code understanding. Prefer over reading full files.
 
-### File: /Users/bparlan/.omp/agent/skills/code-search/code_indexer.py
+### File: skills/code-search/code_indexer.py
+import json
+import os
+import tree_sitter_language_pack
 import json
 import os
 import tree_sitter_language_pack

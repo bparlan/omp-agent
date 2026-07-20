@@ -6,7 +6,7 @@ The OMP Agentic Engineering Framework is a set of specialized subagents that orc
 
 ## Skills Catalog
 
-All 35 skills are documented in detail in `docs/skills.md`.
+All 36 skills are documented in detail in `docs/SKILLS.md`.
 
 ### Quick Reference by Layer
 
@@ -23,16 +23,17 @@ All 35 skills are documented in detail in `docs/skills.md`.
 - evaluate-implementation — Run tests, auto-fix bugs, generate E.md
 - review-implementation — Compare implementation to spec, generate R.md
 
-**Support & Infrastructure (7 agents)**:
+**Support & Infrastructure (8 agents)**:
 - session-audit — Generate SESSION_CHANGES.md + supporting docs
 - investigate-issue / hotfix-issue — Debug and fix specific issues
-- archive-milestone — Archive completed milestone artifacts
+- archive-docs — Archive milestone artifacts and docs to docs/archived/
 - evolve-skills — Learn from SESSION_CHANGES.md, update SKILL.md
 - sync-documentation — Update docs from SESSION_CHANGES.md
 - code-search — Semantic code analysis (used by session-audit)
 - bootstrap-project — Initialize framework in new repo
+- diagrammer — Generates living Mermaid diagrams from codebase reality
 
-📖 **Detailed Catalog**: See `docs/skills.md`
+📖 **Detailed Catalog**: See `docs/SKILLS.md`
 
 ## Agent Interaction Pipeline
 
@@ -46,7 +47,7 @@ Each agent handoffs to the next, maintaining clear boundaries and avoiding redun
 
 ## Quick Links
 
-- **[skills.md](../docs/skills.md)** — Comprehensive skill catalog (35 skills)
+- **[SKILLS.md](../docs/SKILLS.md)** — Comprehensive skill catalog (36 skills)
 - **[AGENTS.md](./AGENTS.md)** — Lightweight navigation hub (~110 lines)
 - **[ROADMAP.md](../docs/ROADMAP.md)** — Project roadmap and feature planning
 - **[MILESTONES.md](../docs/MILESTONES.md)** — Completed milestone artifacts and history
