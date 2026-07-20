@@ -1,0 +1,9 @@
+{
+  "name": "aef-dev",
+  "version": "1.0.0",
+  "description": "OMP Agentic Engineering Framework (SDD Pipeline)",
+  "omp": {
+    "skills": "./skills",
+    "rules": "./rules"
+  }
+}
