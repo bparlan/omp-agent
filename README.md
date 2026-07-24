@@ -2,7 +2,6 @@
 
 > **Production-Grade Autonomous AI Engineering Infrastructure**
 
-`archive-docs` archives completed milestone artifacts and infrastructure reports to reduce active context while preserving history. It also provides Cleanup Mode for managing orphaned and duplicate files.
 ![Version: 1.0.0](https://img.shields.io/badge/Version-1.0.0-blue.svg)
 
 ---
@@ -10,7 +9,6 @@
 ## Table of Contents
 
 - [The Problem: Agentic Chaos in Production](#the-problem-agentic-chaos-in-production)
-| `archive-docs` | Archives completed milestones, infrastructure reports, or performs cleanup | Depends on mode
 - [Core Architectural Boundary](#core-architectural-boundary)
 - [System Architecture](#system-architecture)
 - [Deterministic Workflow](#deterministic-workflow)
@@ -18,27 +16,7 @@
 - [Lifecycle Skills](#lifecycle-skills)
 - [Infrastructure Skills](#infrastructure-skills)
 - [Templates & Artifacts](#templates--artifacts)
-
-### Cleanup Mode Workflow
-
-```bash
-# Scan workspace for orphaned files
-# Identify duplicates and mislocated files
-# Generate cleanup report
-# Request user approval
-# Execute cleanup (delete or move to .archive_trash/)
-# Terminate
-```
 - [Directory Standards](#directory-standards)
-
-### New Skills Introduced
-
-- **`hotfix-focus`**: Specializes in rapidly addressing and resolving minor issues, streamlining the `hotfix-issue` workflow.
-- **`diagrammer`**: Generates visual diagrams of system architecture, data flow, and project structures, aiding comprehension and documentation.
-- `~/devcode/aef/agent/sessions/`: Active development sessions and exploratory session audits awaiting formalization.
-- `docs/ingest/`: Strictly for external data, research, or third-party codebase ingestion. Not for session tracking.
-
-
 - [Why SDD Wins](#why-sdd-wins)
 - [About the Developer & ParlanTech](#about-the-developer--parlantech)
 
@@ -139,20 +117,11 @@ This separation enables **testability**: tools can be unit-tested with perfect r
 ## System Architecture
 
 ```mermaid
-- Delete historical information (unless user approves in Cleanup Mode)
+flowchart TB
     subgraph "Top Plane: Strategy"
         A[manage-roadmap]
-        A -->|EXECUTE| B[manage-development]
-    end
-
-    subgraph "Middle Plane: Tactical Execution"
-        B -->|Data Flow| C[Session Audit]
-        B -->|Data Flow| D[Generate Specs]
-        D -->|Requires Spec artifact| E[Implementation]
-        E -->|Requires Test Scripts| F[Evaluation]
-        F -->|Requires Review artifact| G[Documentation & Archive]
-        C -->|Session Artifacts| H[Evolve Skills]
-        H -->|System Improvements| B
+        B[manage-development]
+        A -->|EXECUTE| B
     end
 
     subgraph "Bottom Plane: Meta-Learning & Canonical Docs"
@@ -163,6 +132,14 @@ This separation enables **testability**: tools can be unit-tested with perfect r
         G[Documentation & Archive]
         H[Evolve Skills]
     end
+
+    B -->|Data Flow| C
+    B -->|Data Flow| D
+    D -->|Requires Spec artifact| E
+    E -->|Requires Test Scripts| F
+    F -->|Requires Review artifact| G
+    C -->|Session Artifacts| H
+    H -->|System Improvements| B
 
     %% Styles
     style A fill:#e1f5ff
@@ -399,6 +376,15 @@ graph TD
 | `investigate-issue` | Analyzes failures, produces investigation report | `generate-spec` (for incremental spec) |
 | `hotfix-issue`      | Implements minor fixes directly                  | `sync-documentation`                   |
 
+`archive-docs` archives completed milestone artifacts and infrastructure reports to reduce active context while preserving history. It also provides Cleanup Mode for managing orphaned and duplicate files.
+
+### New Skills Introduced
+
+- **`hotfix-focus`**: Specializes in rapidly addressing and resolving minor issues, streamlining the `hotfix-issue` workflow.
+- **`diagrammer`**: Generates visual diagrams of system architecture, data flow, and project structures, aiding comprehension and documentation.
+- `~/devcode/aef/agent/sessions/`: Active development sessions and exploratory session audits awaiting formalization.
+- `docs/ingest/`: Strictly for external data, research, or third-party codebase ingestion. Not for session tracking.
+
 ---
 
 ## Infrastructure Skills
@@ -615,6 +601,19 @@ The session audit and evolve-skills workflow ensures:
 
 ---
 
+### Cleanup Mode Workflow
+
+```bash
+# Scan workspace for orphaned files
+# Identify duplicates and mislocated files
+# Generate cleanup report
+# Request user approval
+# Execute cleanup (delete or move to .archive_trash/)
+# Terminate
+```
+
+---
+
 ## License
 
 This project is licensed under the **MIT License**.
@@ -689,7 +688,7 @@ Your support directly sustains this independent engineering effort, ensuring the
 ### External Projects
 
 - **[Autonomedia](https://github.com/bparlan/autonomedia)** — Autonomous media generation and publishing
-- **[Baria](https://github.com/bparlan/baria)** — How humans and agents govern shared resources
+- **[BariaDAO](https://github.com/bparlan/baria)** — How humans and agents govern shared resources
 
 ### Contact
 
@@ -740,13 +739,6 @@ See [AGENTS.md](./AGENTS.md) for detailed contribution guidelines.
 ---
 
 ## References
-
-- **[skills.md](./docs/skills.md)** — Comprehensive skill catalog
-- **[INDEX.md](./INDEX.md)** — Complete skill catalog
-- **[AGENTS.md](./AGENTS.md)** — Framework overview
-- **[PLAYBOOK.md](./docs/PLAYBOOK.md)** — Operational workflows
-- **[FRAMEWORK.md](./docs/FRAMEWORK.md)** — Architecture patterns
-
 
 - **[skills.md](./docs/skills.md)** — Comprehensive skill catalog
 - **[INDEX.md](./INDEX.md)** — Complete skill catalog
