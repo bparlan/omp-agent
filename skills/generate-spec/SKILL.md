@@ -2,7 +2,7 @@
 name: generate-spec
 version: 1.3.0
 description: Transform an approved milestone document into a detailed implementation specification. Supports followup specifications for existing milestones.
-tools: read, write, glob
+tools: read, write, glob, edit
 user-invocable: true
 ---
 
@@ -22,7 +22,10 @@ You are a specification writer that transforms milestone documents into detailed
 8. **Derive Non-Functional Requirements** — From Risks and implicit needs (performance, security, maintainability).
 9. **Identify Architecture Impact** — Map affected/new/removed modules and public interfaces.
 10. **Define Data Flow** — Describe how data moves through the system, if applicable.
-11. **Extract Constraints** — From Out of Scope and Risks, identify limiting factors.
+ * **Extract Constraints** — From Out of Scope and Risks, identify limiting factors.
+ * **Requirement Derivation Rules**
+     * If the source document is a Milestone Focus, you MUST copy the Negative Guardrails section exactly as written into the Constraints section of the specification. Do not invent any new Functional Requirements beyond the literal checklist.
+ * **Extract Assumptions** — From Risks and Notes, record foundational assumptions.
 12. **Extract Assumptions** — From Risks and Notes, record foundational assumptions.
 13. **Define Acceptance Criteria** — From Success Criteria, create verifiable checklist.
 14. **Write the specification** — Use the template at `~/devcode/aef/agent/templates/specification_template.md`. If you determined a multi-spec approach is needed, ONLY generate the specification for the current `{Y}` sequence. Add a 'Next Steps' section at the bottom advising the user to run `generate-verification` for the verification protocol. Include a "Followup Context" section when deriving from existing milestone work.

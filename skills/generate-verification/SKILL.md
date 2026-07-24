@@ -2,7 +2,7 @@
 name: generate-verification
 version: 1.1.0
 description: Transform an implementation specification into a verification protocol defining how correctness will be evaluated. Supports followup specifications referencing multiple sources.
-tools: read, write
+tools: read, write, edit
 user-invocable: true
 ---
 

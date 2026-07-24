@@ -44,3 +44,52 @@
 -   - Reverse order flow (TEMP > Milestone priority)
 -   - Code-search integration for semantic analysis
 - - **Outputs**: M{X}SA{Y}.md, SESSION_CHANGES.md, CHANGELOG_ENTRIES.md, MILESTONE_UPDATES.md, INGEST_ENTRIES.md
+
+- **Integration with evolve-skills**:
+  - session-audit automatically recommends prompt improvements after each session
+  - evolve-skills analyzes SA documents and updates SKILL.md files
+  - Changes require per-skill approval via evolve-skills
+  - Health dashboard used to track skill quality
+
+- **Integration with manage-roadmap**:
+  - session-audit generates INGEST_ENTRIES.md
+  - manage-roadmap processes ingestion entries after user permission
+
+### evolve-skills
+- **Purpose**: Analyze recent project artifacts (M{X}SA{Y}.md, Review Reports, Completion Reports) to learn from mistakes, identify workflow inefficiencies, and automatically update/version SKILL.md files
+- **Capabilities**:
+  - Read SA documents chronologically for each milestone
+  - Identify failure patterns, inefficiencies, and areas for improvement
+  - Draft targeted prompt improvements for each skill
+  - Apply updates to SKILL.md files with incremented version numbers
+  - Document evolution in EVOLUTION.md
+  - Process TEMP milestones before formal milestones
+- **Artifacts Modified**:
+  - `skills/*/SKILL.md` files (with incremented version numbers)
+  - `skills/evolve-skills/EVOLUTION.md` ledger
+- **Health Dashboard**:
+  - Automated quality monitoring via skills-auditor.py
+  - 13 evolve-skills dependencies audited for version consistency, required tools (read, edit), and user-invocable flags
+  - Health status values: HEALTHY, NEEDS_IMPROVEMENT, CRITICAL
+  - Priority levels: HIGH, MEDIUM, LOW
+  - YAML health reports in `evolve-skills/health/{skill-name}.yaml`
+- **Dashboard Commands**:
+  - `python3 skills-auditor.py audit` — Full audit of all 13 skills
+  - `python3 skills-auditor.py list` — Color-coded dashboard with status
+  - `python3 skills-auditor.py audit --skill <name>` — Single skill audit
+- **Integration with session-audit**:
+  - session-audit recommends evolve-skills improvements after each session
+  - evolve-skills processes session-audit recommendations and applies fixes
+  - Creates comprehensive documentation of skill evolution
+- **Out of Scope**:
+  - Creating new features
+  - Running implementation workflows
+  - Creating new templates
+
+- **Every Session Workflow**:
+  1. Run `python3 skills-auditor.py audit` to check skill health
+  2. Run `evolve-skills` to process SA recommendations
+  3. Review health dashboard for any CRITICAL issues
+  4. Address critical issues before continuing work
+
+- **Location**: `skills/evolve-skills/SKILL.md`

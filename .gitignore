@@ -50,4 +50,6 @@ pnpm-lock.yaml
 docs/archived/
 docs/diagrams/
 filetree.json
-schema.json
+schema.json__pycache__/
+*.bak
+skills/evolve-skills/health/

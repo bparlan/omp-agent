@@ -17,8 +17,15 @@ Given `M{X}S{Y}`:
 - Load `M{X}S{Y}V.md` (Verification)
 - Load `AGENTS.md` for project conventions
 
-If any required artifact missing: Stop and report exactly which file cannot be found.
-
+ 
+ If any required artifact missing: Stop and report exactly which file cannot be found.
+ 
+ ## Your Process
+ 
+ 1. **Resolve artifacts** — Find spec and verification documents by identifier.
+     * Check the specification for the #### User Approval stamp. If it is missing, STOP immediately. Instruct the user to run the approve-spec skill to verify the plan before implementation can begin.
+ 2. **Read project context** — Load `AGENTS.md` and understand conventions.
+ 3. **Analyze specification** — Identify Functional Requirements and Architecture Impact.
 ## Your Process
 
 1. **Resolve artifacts** — Find spec and verification documents by identifier.

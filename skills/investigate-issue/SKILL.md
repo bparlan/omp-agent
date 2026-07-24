@@ -2,7 +2,7 @@
 name: investigate-issue
 version: 1.0.0
 description: Investigate implementation issues and produce technical understanding for continued specification-driven development.
-tools: read, bash, glob, lsp, grep, write
+tools: read, bash, glob, lsp, grep, write, edit
 user-invocable: true
 ---
 

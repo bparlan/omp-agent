@@ -6,7 +6,7 @@ This document lists active and archived milestones for the OMP Framework project
 
 ### M2 — Framework Improvement Strategy
 
-- **Status**: 85% Complete (Documentation phase)
+- **Status**: 75% Complete (Documentation and Tooling)
 - **Phase**: Infrastructure & Session Management
 - **Session**: SA1 (completed 2026-07-18)
 - **Description**: Added session-audit skill for session-based framework improvements, enhanced code-search infrastructure with comprehensive documentation, and integrated session-audit into evolve-skills workflow.
@@ -15,11 +15,13 @@ This document lists active and archived milestones for the OMP Framework project
   - Code-search README.md infrastructure documentation
   - TEMP milestone automatic detection and handling
   - /docs/ingest/ workflow integration
+- **Health Audit Layer**: Automated skills-auditor for monitoring evolve-skills dependencies with 13 health reports and console dashboard
 - **Artifacts**:
   - `milestones/M2/M2SA1.md` — Session Audit Document
   - `milestones/M2/SESSION_CHANGES.md` — Change log
   - `milestones/M2/CHANGELOG_ENTRIES.md` — Changelog entries
   - `milestones/M2/MILESTONE_UPDATES.md` — Milestone updates
+- `milestones/M2/M2SA2.md` — Session Audit Document
 
 ---
 

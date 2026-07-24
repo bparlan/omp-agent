@@ -2,7 +2,7 @@
 name: review-implementation
 version: 1.0.0
 description: Evaluate completed implementation against approved specification and verification protocol. Purely analytical review, no modifications.
-tools: read, write, bash
+tools: read, write, bash, edit
 user-invocable: true
 ---
 

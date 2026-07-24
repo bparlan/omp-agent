@@ -2,7 +2,7 @@
 
 > **Production-Grade Autonomous AI Engineering Infrastructure**
 
-![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)
+`archive-docs` archives completed milestone artifacts and infrastructure reports to reduce active context while preserving history. It also provides Cleanup Mode for managing orphaned and duplicate files.
 ![Version: 1.0.0](https://img.shields.io/badge/Version-1.0.0-blue.svg)
 
 ---
@@ -10,7 +10,7 @@
 ## Table of Contents
 
 - [The Problem: Agentic Chaos in Production](#the-problem-agentic-chaos-in-production)
-- [The Solution: Three Pillars of SDD](#the-solution-three-pillars-of-sdd)
+| `archive-docs` | Archives completed milestones, infrastructure reports, or performs cleanup | Depends on mode
 - [Core Architectural Boundary](#core-architectural-boundary)
 - [System Architecture](#system-architecture)
 - [Deterministic Workflow](#deterministic-workflow)
@@ -18,21 +18,28 @@
 - [Lifecycle Skills](#lifecycle-skills)
 - [Infrastructure Skills](#infrastructure-skills)
 - [Templates & Artifacts](#templates--artifacts)
+
+### Cleanup Mode Workflow
+
+```bash
+# Scan workspace for orphaned files
+# Identify duplicates and mislocated files
+# Generate cleanup report
+# Request user approval
+# Execute cleanup (delete or move to .archive_trash/)
+# Terminate
+```
 - [Directory Standards](#directory-standards)
 
 ### New Skills Introduced
 
 - **`hotfix-focus`**: Specializes in rapidly addressing and resolving minor issues, streamlining the `hotfix-issue` workflow.
 - **`diagrammer`**: Generates visual diagrams of system architecture, data flow, and project structures, aiding comprehension and documentation.
-* `~/devcode/aef/agent/sessions/`: Active development sessions and exploratory session audits awaiting formalization.
-* `docs/ingest/`: Strictly for external data, research, or third-party codebase ingestion. Not for session tracking.
-* `~/devcode/aef/agent/sessions/`: Active development sessions and exploratory session audits awaiting formalization.
-* `docs/ingest/`: Strictly for external data, research, or third-party codebase ingestion. Not for session tracking.
+- `~/devcode/aef/agent/sessions/`: Active development sessions and exploratory session audits awaiting formalization.
+- `docs/ingest/`: Strictly for external data, research, or third-party codebase ingestion. Not for session tracking.
 
 
-- [Quick Start](#quick-start)
 - [Why SDD Wins](#why-sdd-wins)
-- [License](#license)
 - [About the Developer & ParlanTech](#about-the-developer--parlantech)
 
 ---
@@ -132,7 +139,7 @@ This separation enables **testability**: tools can be unit-tested with perfect r
 ## System Architecture
 
 ```mermaid
-graph TD
+- Delete historical information (unless user approves in Cleanup Mode)
     subgraph "Top Plane: Strategy"
         A[manage-roadmap]
         A -->|EXECUTE| B[manage-development]
@@ -682,7 +689,7 @@ Your support directly sustains this independent engineering effort, ensuring the
 ### External Projects
 
 - **[Autonomedia](https://github.com/bparlan/autonomedia)** — Autonomous media generation and publishing
-- **[Baria](https://github.com/bparlan/baria)** — Local-first AI applications
+- **[Baria](https://github.com/bparlan/baria)** — How humans and agents govern shared resources
 
 ### Contact
 
@@ -740,7 +747,6 @@ See [AGENTS.md](./AGENTS.md) for detailed contribution guidelines.
 - **[PLAYBOOK.md](./docs/PLAYBOOK.md)** — Operational workflows
 - **[FRAMEWORK.md](./docs/FRAMEWORK.md)** — Architecture patterns
 
-## References
 
 - **[skills.md](./docs/skills.md)** — Comprehensive skill catalog
 - **[INDEX.md](./INDEX.md)** — Complete skill catalog

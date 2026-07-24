@@ -268,6 +268,64 @@ Support and infrastructure agents assist with specific concerns, maintain infras
 
 **Location**: `skills/evolve-skills/SKILL.md`
 
+### skills-auditor (Python Tool)
+
+**Purpose**: Automated quality monitoring for evolve-skills dependencies, ensuring all skills meet required standards.
+
+**What it audits**:
+- Version consistency (version in frontmatter vs. content)
+- User-invocable flag presence
+- Required tools (read, edit) availability
+- Description quality (minimum 10 characters)
+- Dependencies list presence
+- Out-of-scope declarations
+
+**Priority calculation**:
+- **HIGH**: Critical functionality with issues
+- **MEDIUM**: Important but not critical
+- **LOW**: All checks pass
+
+**Status values**:
+- **HEALTHY**: No issues found
+- **NEEDS_IMPROVEMENT**: Minor issues, no blocking problems
+- **CRITICAL**: Major issues requiring immediate attention
+
+**Health dashboard commands**:
+- `python3 skills-auditor.py audit` — Full audit of all 13 skills
+- `python3 skills-auditor.py list` — Color-coded dashboard with status
+- `python3 skills-auditor.py audit --skill <skill-name>` — Single skill audit
+
+**Health report structure** (evolve-skills/health/{skill-name}.yaml):
+- Skill name and version
+- Last audited date
+- Priority level (HIGH/MEDIUM/LOW)
+- Issue list with severity
+- Recommendations
+- Overall status (HEALTHY/NEEDS_IMPROVEMENT/CRITICAL)
+
+**13 skills audited**:
+- bootstrap-project
+- generate-spec
+- generate-verification
+- implement-specification
+- investigate-issue
+- milestone
+- review-implementation
+- sync-documentation
+- hotfix-issue
+- manage-roadmap
+- manage-development
+- evolve-skills
+- session-audit
+
+**Critical skills fixed**:
+- All skills now include required `edit` tool in frontmatter
+- Health dashboard shows all skills as HEALTHY
+
+**Location**: `skills/evolve-skills/skills-auditor.py` (Python tool, not a skill)
+
+---
+
 ---
 
 ### sync-documentation

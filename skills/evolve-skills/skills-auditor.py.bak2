@@ -1,0 +1,325 @@
+#!/usr/bin/env python3
+"""
+Skills-Auditor: Automated quality monitoring for evolve-skills dependencies.
+
+This script audits the health of all evolve-skills dependencies and generates
+individual YAML health reports in evolve-skills/health/ directory.
+
+Usage:
+    python skills-auditor.py audit [dependency]
+    python skills-auditor.py list
+"""
+
+import os
+import sys
+import yaml
+from pathlib import Path
+from typing import Dict, List, Optional
+
+
+# evolve-skills dependencies from SKILL.md line 26
+DEPENDENCIES = [
+    "archive-milestone",
+    "bootstrap-project",
+    "generate-spec",
+    "generate-verification",
+    "implement-specification",
+    "investigate-issue",
+    "milestone",
+    "review-implementation",
+    "sync-documentation",
+    "hotfix-issue",
+    "manage-roadmap",
+    "manage-development",
+    "evolve-skills",
+    "session-audit",
+]
+
+
+def get_skill_dir(skill_name: str) -> Optional[Path]:
+    """Get the directory for a skill."""
+    skill_path = Path(f"~/devcode/aef/agent/skills/{skill_name}")
+    skill_path = skill_path.expanduser()
+
+    if not skill_path.exists():
+        return None
+
+    return skill_path
+
+
+def read_skill_frontmatter(skill_dir: Path) -> Dict:
+    """Read the SKILL.md frontmatter."""
+    skill_file = skill_dir / "SKILL.md"
+
+    if not skill_file.exists():
+        return {}
+
+    with open(skill_file, "r") as f:
+        content = f.read()
+
+    # Parse YAML frontmatter
+    if "name:" not in content:
+        return {}
+
+    # Extract frontmatter (lines 1-8)
+    lines = content.split("\n")
+    if len(lines) < 8:
+        return {}
+
+    frontmatter_lines = lines[:8]
+    frontmatter = "\n".join(frontmatter_lines)
+
+    # Parse YAML
+    try:
+        data = yaml.safe_load(frontmatter)
+        return data
+    except yaml.YAMLError:
+        return {}
+
+
+def check_version_consistency(skill_dir: Path, frontmatter: Dict) -> List[Dict]:
+    """Check if version is consistent in frontmatter and content."""
+    issues = []
+
+    version = frontmatter.get("version", "unknown")
+    expected_pattern = r"version:\s*(\d+\.\d+\.\d+)"
+
+    if version == "unknown":
+        issues.append({
+            "type": "version_missing",
+            "description": "No version specified in frontmatter",
+            "severity": "LOW"
+        })
+    else:
+        # Check if version appears in content
+        skill_file = skill_dir / "SKILL.md"
+        with open(skill_file, "r") as f:
+            content = f.read()
+
+        # Check if version is mentioned in content
+        if version not in content:
+            issues.append({
+                "type": "version_not_mentioned",
+                "description": f"Version {version} not mentioned in SKILL.md content",
+                "severity": "LOW"
+            })
+
+    return issues
+
+
+def check_user_invocable(skill_dir: Path, frontmatter: Dict) -> List[Dict]:
+    """Check if skill is user-invocable."""
+    issues = []
+
+    user_invocable = frontmatter.get("user-invocable", False)
+
+    if not user_invocable:
+        issues.append({
+            "type": "missing_user_invocable",
+            "description": "user-invocable not set to true",
+            "severity": "MEDIUM"
+        })
+
+    return issues
+
+
+def check_tool_adequacy(skill_dir: Path, frontmatter: Dict) -> List[Dict]:
+    """Check if tools are adequate for the skill's purpose."""
+    issues = []
+
+    tools = frontmatter.get("tools", [])
+
+    # Basic set of tools that should be present
+    required_tools = ["read", "edit"]
+
+    missing_tools = set(required_tools) - set(tools)
+
+    if missing_tools:
+        issues.append({
+            "type": "missing_tools",
+            "description": f"Missing required tools: {', '.join(missing_tools)}",
+            "severity": "HIGH"
+        })
+
+    return issues
+
+
+def check_description_quality(skill_dir: Path, frontmatter: Dict) -> List[Dict]:
+    """Check if description is adequate."""
+    issues = []
+
+    description = frontmatter.get("description", "")
+
+    if not description or len(description.strip()) < 10:
+        issues.append({
+            "type": "description_too_short",
+            "description": "Description too short or missing",
+            "severity": "MEDIUM"
+        })
+
+    return issues
+
+
+def audit_skill(skill_name: str) -> Optional[Dict]:
+    """Audit a single skill and generate health report."""
+    skill_dir = get_skill_dir(skill_name)
+
+    if not skill_dir:
+        return None
+
+    frontmatter = read_skill_frontmatter(skill_dir)
+
+    if not frontmatter:
+        return None
+
+    # Collect all checks
+    issues = []
+    issues.extend(check_version_consistency(skill_dir, frontmatter))
+    issues.extend(check_user_invocable(skill_dir, frontmatter))
+    issues.extend(check_tool_adequacy(skill_dir, frontmatter))
+    issues.extend(check_description_quality(skill_dir, frontmatter))
+
+    # Determine priority and status
+    high_issues = [i for i in issues if i["severity"] == "HIGH"]
+    medium_issues = [i for i in issues if i["severity"] == "MEDIUM"]
+    low_issues = [i for i in issues if i["severity"] == "LOW"]
+
+    version = frontmatter.get("version", "unknown")
+
+    # Determine status
+    if high_issues:
+        status = "critical"
+        priority = "HIGH"
+    elif medium_issues:
+        status = "needs_improvement"
+        priority = "HIGH" if len(high_issues) > 0 else "MEDIUM"
+    else:
+        status = "healthy"
+        priority = "LOW"
+
+    # Generate health report
+    health_report = {
+        "skill": skill_name,
+        "version": version,
+        "last_audited": "2026-07-23",
+        "priority": priority,
+        "priority_reason": f"{len(high_issues)} HIGH issues, {len(medium_issues)} MEDIUM issues",
+        "issues": issues,
+        "recommendations": [f"Fix {i['type']}: {i['description']}" for i in issues[:3]],
+        "status": status
+    }
+
+    return health_report
+
+
+def save_health_report(health_report: Dict, output_dir: Path):
+    """Save health report to YAML file."""
+    output_dir.mkdir(parents=True, exist_ok=True)
+
+    skill_name = health_report["skill"]
+    output_file = output_dir / f"{skill_name}.yaml"
+
+    with open(output_file, "w") as f:
+        yaml.dump(health_report, f, default_flow_style=False, sort_keys=False)
+
+
+def list_skills():
+    """List all skills and their status."""
+    print("Evolve-Skills Dependencies Health Dashboard\n")
+    print("=" * 80)
+    print()
+
+    health_dir = Path("evolve-skills/health")
+
+    if not health_dir.exists():
+        print("No health reports found. Run 'python skills-auditor.py audit' first.")
+        return
+
+    health_reports = list(health_dir.glob("*.yaml"))
+
+    if not health_reports:
+        print("No health reports found.")
+        return
+
+    # Sort by status (critical first, then needs_improvement, then healthy)
+    status_order = {"critical": 0, "needs_improvement": 1, "healthy": 2}
+    health_reports.sort(
+        key=lambda f: status_order.get(f.stem, 99)
+    )
+
+    # Print dashboard
+    for report_file in health_reports:
+        with open(report_file, "r") as f:
+            report = yaml.safe_load(f)
+
+        skill = report["skill"]
+        version = report["version"]
+        status = report["status"]
+        priority = report["priority"]
+        high_issues = len([i for i in report["issues"] if i["severity"] == "HIGH"])
+        medium_issues = len([i for i in report["issues"] if i["severity"] == "MEDIUM"])
+
+        # Status color
+        if status == "critical":
+            status_str = f"\033[91m{status.upper()}\033[0m"
+        elif status == "needs_improvement":
+            status_str = f"\033[93m{status.upper()}\033[0m"
+        else:
+            status_str = f"\033[92m{status.upper()}\033[0m"
+
+        print(f"{skill} {version}")
+        print(f"  Status: {status_str}")
+        print(f"  Priority: {priority}")
+        print(f"  Issues: HIGH={high_issues}, MEDIUM={medium_issues}")
+        print()
+
+    print("=" * 80)
+
+
+def main():
+    """Main entry point."""
+    if len(sys.argv) < 2:
+        print("Skills-Auditor: Automated quality monitoring for evolve-skills dependencies")
+        print("\nUsage:")
+        print("  python skills-auditor.py audit [dependency]    # Audit specific skill or all")
+        print("  python skills-auditor.py list                  # Show health dashboard")
+        print("  python skills-auditor.py --help               # Show this help")
+        sys.exit(1)
+
+    command = sys.argv[1]
+
+    if command == "audit":
+        target = sys.argv[2] if len(sys.argv) > 2 else None
+
+    health_dir = Path(__file__).parent / "health"
+    health_dir.mkdir(parents=True, exist_ok=True)
+
+    if target and target in DEPENDENCIES:
+            # Audit specific skill
+            report = audit_skill(target)
+            if report:
+                save_health_report(report, health_dir)
+                print(f"Audited {target}")
+            else:
+                print(f"Error: Skill {target} not found")
+                sys.exit(1)
+        else:
+            # Audit all dependencies
+            for dependency in DEPENDENCIES:
+                print(f"Auditing {dependency}...")
+                report = audit_skill(dependency)
+                if report:
+                    save_health_report(report, health_dir)
+            print(f"\nAudited {len(DEPENDENCIES)} skills")
+
+    elif command == "list":
+        list_skills()
+
+    else:
+        print(f"Unknown command: {command}")
+        print("Use 'python skills-auditor.py audit' or 'python skills-auditor.py list'")
+        sys.exit(1)
+
+
+if __name__ == "__main__":
+    main()

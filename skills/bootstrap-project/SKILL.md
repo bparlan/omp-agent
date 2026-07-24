@@ -2,7 +2,7 @@
 name: bootstrap-project
 version: 1.0.1
 description: Analyze an existing repository and normalize it into standard engineering structure. One-time setup for brownfield projects.
-tools: read, write, bash, glob, grep, lsp
+tools: read, write, bash, glob, grep, lsp, edit
 user-invocable: true
 ---
 

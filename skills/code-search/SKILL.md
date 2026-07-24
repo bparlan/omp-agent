@@ -16,7 +16,7 @@ Best for low-token code understanding. Use before reading full files.
 - Supports framework improvements and analysis
 - Reduces token usage for large codebase navigation
 
-## Tools
+## Bash Commands
 
 - `generate_skeletons` — Tree-sitter extraction of signatures/imports
 - `refresh_index` — Rebuild vector embeddings (requires ollama)

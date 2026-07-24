@@ -4,13 +4,12 @@
 -
 - All significant changes will be recorded here chronologically.
 -
-- ## [unreleased]
--
 - ### Infrastructure & Session Management
 -
-- - **Session Audit System**: New `session-audit` skill that generates comprehensive audit reports (`M{X}SA{Y}.md`) for each session, tracks all major changes, and generates outputs for CHANGELOG.md, MILESTONE_UPDATES.md, and INGEST_ENTRIES.md.
-- - **Code-Search Infrastructure**: Added `code-search` as an Infrastructure Skill with comprehensive documentation of semantic analysis patterns, usage examples, and integration points.
-- - **Multiple Session Tracking**: Support for multiple session audits per milestone (SA1, SA2, SA3...) with cumulative context and last SA becoming primary.
-- - **TEMP Milestone Structure**: Automatic TEMP milestone detection for sessions without formal milestones, creating `milestones/TEMP/M{N}SA{Y}.md` with promotion capability.
-- - **Ingestion Workflow**: Centralized data ingestion via `/docs/ingest/` folder with manage-roadmap integration, including permission + context workflow and automatic archiving.
-- - **Reverse Order Flow**: TEMP > Milestone priority, infrastructure works both ways with evolve-skills handling both TEMP and formal milestones.
+- - **Health Monitoring System**: New `skills-auditor` Python script for automated health monitoring of evolve-skills dependencies. Audits 13 skills, generates YAML health reports, and provides console dashboard.
+- - **Skills-Auditor**: Automated quality monitoring with priority levels (HIGH/MEDIUM/LOW), status values (CRITICAL/NEEDS_IMPROVEMENT/HEALTHY), and health reports for all 13 evolve-skills dependencies.
+- - **Evolve-Skills Health Audit Layer**: New Phase 4 in evolve-skills that adds automated dependency health monitoring, session-audit integration, and "Every Session" workflow.
+- - **Skills-Auditor Playbook**: New operational workflows documentation including "Every Session" workflow, single-skill audit instructions, and health report structure documentation.
+- - **Framework Documentation Updates**: Added comprehensive documentation to PLAYBOOK.md, FRAMEWORK.md, and skills.md covering session-audit, evolve-skills, and skills-auditor integrations.
+- - **Health Dashboard**: Console interface for quick status overview showing CRITICAL/NEEDS_IMPROVEMENT/HEALTHY skills with priority and issue counts.
+- - **13 Health Reports**: Generated YAML reports in `evolve-skills/health/{skill-name}.yaml` containing skill metadata, issues, recommendations, and overall status.

@@ -15,15 +15,17 @@
 
 ## Followup Reuse
 
-*(Include for followup specifications)*
+_(Include for followup specifications)_
 
 ### Reusable Items from Prior Verifications
+
 - Regression items: ...
 - Automated test patterns: ...
 - Edge cases: ...
 - Failure scenarios: ...
 
 ### New Verification Required
+
 - Items specific to this followup scope: ...
 
 ---
@@ -61,9 +63,16 @@
 
 ## Automated Validation
 
-- Existing tests
-- New tests
-- Commands
+#### Diff-Scope Verification (Pre-Merge Check)
+
+_This mechanical check must be executed by `evaluate-implementation` before tests are considered passed._
+
+- **Command:** `git diff --name-only`
+- **Assertion:** The output of this command MUST strictly match the "Allowlist" defined in the Specification. If any file appears in the diff that is not on the Allowlist, the test automatically FAILS. The agent must revert the out-of-scope file before proceeding.
+
+* Existing tests
+* New tests
+* Commands
 
 ---
 
