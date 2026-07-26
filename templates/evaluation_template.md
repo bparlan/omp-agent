@@ -30,3 +30,11 @@
 ---
 
 ## Next Steps
+
+---
+
+## Raw Evidence
+
+Every "done" claim must ship with the exact terminal command and raw output that proves it succeeded.
+
+- [ ] <requirement>: `<command>` → <raw output>

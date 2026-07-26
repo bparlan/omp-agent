@@ -76,3 +76,54 @@
 ### Dependencies
 - **SA2 (This Session)**: M2SA1.md (cumulative context)
 - **Previous SAs**: M2SA1.md
+
+## [2026-07-26] - M3SA1
+
+### Skill: review-implementation
+- **Old Version**: 1.0.0
+- **New Version**: 1.1.0
+- **Rationale**: M3S2 implemented zero-trust review pass — standing rule ("Assume the prior report is wrong") prepended to process and Live State Verification added to Review Analysis Rules
+- **Changes**:
+  - Added zero-trust standing rule blockquote after "## Your Process"
+  - Added "Live State Verification" subsection to Review Analysis Rules
+  - Added "## Live State Verification" section to review_template.md
+- **References**: M3SA1.md, M3S2R.md, M3S2C.md
+
+### Skill: evaluate-implementation
+- **Old Version**: 1.0.1
+- **New Version**: 1.0.2
+- **Rationale**: M3S2 implemented evidence-based debugging mandate — "Debug from evidence, never from memory" standing rule prepended to process
+- **Changes**:
+  - Added evidence-based debugging standing rule after title
+  - Added anti-pattern-matching clause and --help/introspection reference
+- **References**: M3SA1.md, M3S2R.md
+
+### Skill: investigate-issue
+- **Old Version**: 1.0.0
+- **New Version**: 1.0.1
+- **Rationale**: M3S2 implemented evidence-based debugging mandate — rule added to process (title) and Investigation Strategy section
+- **Changes**:
+  - Added evidence-based debugging standing rule after title (before ## Your Process)
+  - Added Evidence-First Rule blockquote at top of Investigation Strategy section
+- **References**: M3SA1.md, M3S2R.md
+
+### Skill: implement-specification
+- **Old Version**: 1.0.0
+- **New Version**: 1.0.1
+- **Rationale**: M3S2 codified the Uncertainty Marker — implement-specification must reference #NEEDS-CLARIFICATION in its "When uncertain" section
+- **Changes**:
+  - Added `#NEEDS-CLARIFICATION: <specific missing fact>` marker rule to "When uncertain" Implementation Principles
+- **References**: M3SA1.md, M3S2R.md
+
+### Skill: bootstrap-project
+- **Old Version**: 1.0.1
+- **New Version**: 1.0.2
+- **Rationale**: M3S2 mandated the Mechanical Tooling Stack — bootstrap-project must define 4 tooling categories during project setup
+- **Changes**:
+  - Added new step 8 ("Define the Mechanical Tooling Stack") between steps 7 and 9-12
+  - Renumbered subsequent steps (8→9, 9→10, 10→11, 11→12)
+- **References**: M3SA1.md, M3S2R.md
+
+### Dependencies
+- **SA1 (This Session)**: M3SA1.md (first SA for M3)
+- **Previous SAs**: None (first SA for M3)

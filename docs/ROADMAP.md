@@ -28,6 +28,14 @@
 -    -   TEMP milestone automatic detection and handling
 -    -   /docs/ingest/ workflow integration with manage-roadmap
 -    -   Skills-auditor health monitoring system with 13 health reports and console dashboard
+-
+-   **M3: The Mechanism Upgrade** (75% Complete)
+-    -   Uncertainty Marker (`#NEEDS-CLARIFICATION`) codified in FRAMEWORK.md, AGENTS.md, and implement-specification SKILL.md
+-    -   Zero-Trust Review pass with live-state verification in review-implementation and review_template.md
+-    -   Evidence-Based Debugging mandate in investigate-issue and evaluate-implementation SKILL.md files
+-    -   Raw Evidence Mandate (exact command + raw output) in completion and evaluation templates
+-    -   Ground-Truth Helper Utility (`bin/ground-truth-check.sh`) — read-only POSIX shell utility
+-    -   Mechanical Tooling Stack mandate in bootstrap-project SKILL.md and AGENTS.md
 
 ---
 

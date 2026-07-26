@@ -8,6 +8,9 @@
 -
 - A strict, five-stage sequential workflow (`milestone` → `generate-spec` → `generate-verification` → `implement-specification` → `review-implementation`) governs development. Each stage must complete before the next can begin, ensuring artifacts are stable and well-defined at each step.
 -
+- ### The Uncertainty Marker
+-
+- A mandatory literal marker `#NEEDS-CLARIFICATION: <specific missing fact>` establishes an evidence-first culture. If an agent's confidence in a fact is below "I could paste the command that proves this," it MUST either run the command immediately to prove it, or emit `#NEEDS-CLARIFICATION: <specific missing fact>` and HALT. Guessing is strictly forbidden.
 - ### Agent-Tool Separation
 -
 - A fundamental boundary exists between Agents (responsible for strategy, interpretation, and decision-making) and Tools (responsible for deterministic execution and API interaction). This separation prevents complexity creep within agents and ensures tools remain predictable.

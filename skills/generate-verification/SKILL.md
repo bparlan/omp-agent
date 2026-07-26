@@ -121,9 +121,52 @@ Write the verification to `M{X}S{Y}V.md` in the `milestones/M{X}/` directory usi
 | Architecture Impact | Regression Checklist |
 | Assumptions + Risks | Edge Cases |
 
+## Scripted Diff-Scope Verification Hook
+
+This step validates that the implementation only modifies files within the declared scope, preventing unintended scope creep.
+
+### Process
+
+1. **Accept Declared Scope** — Parse the specification to extract all files and components declared in scope. Look for:
+   - Files listed under "Affected Files" or similar sections
+   - Component names and their file paths
+   - Module boundaries and their locations
+
+2. **Query Reachable Nodes** — Use the Ladybug Python client to query the codebase graph for nodes reachable from the declared scope:
+
+3. **Run Git Diff** — Get the actual changes made in the current working directory:
+
+```bash
+git diff --name-only
+```
+
+This command returns a list of files that have been modified, added, or deleted.
+
+
+5. **Fail Task if Out-of-Scope** — If any modified file is not in the reachable set, the script fails with a clear error message indicating which files are out of scope. The task aborts and requires the developer to either:
+   - Restrict changes to the declared scope
+   - Update the scope declaration in the specification
+
+### Key Properties
+
+- **Deterministic**: No LLM involvement; all validation logic is explicit shell script
+- **Bash Access Only**: Uses standard shell tools (`git`, `ladybug` CLI) without MCP tools
+- **Agent-facing**: Designed for automation; runs as part of the verification pipeline
+- **Fail-Fast**: Immediate error if out-of-scope files are detected
+
+### Error Handling
+
+If out-of-scope files are detected, the script exits with a non-zero status and provides clear output:
+
+```
+ERROR: File 'docs/README.md' is out of scope. Only files in the reachable set from src/main.ts, src/utils.ts may be modified.
+```
+
+### Integration
+
+This hook runs automatically after "Extract Success Criteria" and before "Derive Functional Validation". It ensures that the specification's scope declaration is respected throughout the implementation phase.
 
 ## Documentation
-
 - **[skills.md](../../docs/skills.md)** — Comprehensive skill catalog
 - **[INDEX.md](../../INDEX.md)** — Complete skill catalog
 

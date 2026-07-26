@@ -38,6 +38,21 @@ Each agent:
 - Stops when complete, never continues autonomously
 - Reports exactly what was done and what files were created
 
+### The Uncertainty Marker
+
+The OMP AEF mandates the literal, grep-able marker `#NEEDS-CLARIFICATION: <specific missing fact>`. If an agent's confidence in a fact is below "I could paste the command that proves this," it MUST either run the command immediately to prove it, or emit `#NEEDS-CLARIFICATION: <specific missing fact>` and HALT. Guessing is strictly forbidden. The marker must appear literally in agent-facing documentation and prompts — never quoted, abbreviated, or wrapped.
+
+
+### Mechanical Tooling Stack
+
+Every project bootstrapped via the OMP AEF must document its chosen tooling stack covering four categories (project- and language-agnostic):
+- **Environment Manager** — Prevents version ambiguity and auto-activates the correct runtime and package manager.
+- **Fast Linter/Formatter** — Provides a deterministic, auto-fixable gate for code quality before review.
+- **Pre-commit Framework** — Runs local gates automatically on every commit without cloud CI dependencies.
+- **Type Checker** — Catches silent property and type mismatches before runtime execution.
+
+No specific tooling brands are prescribed — each project selects tools appropriate to its language ecosystem.
+
 ## Agent Roles
 
 ### Strategic Layer Agents

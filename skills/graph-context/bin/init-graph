@@ -1,0 +1,64 @@
+#!/usr/bin/env bash
+# Graph-Context: Initialize graph context structure
+# Usage: graph-context init-graph [options]
+#   --output-dir PATH     Output directory for graph files (default: .omp/graph)
+#   --project-name NAME   Project name (default: baria)
+
+set -euo pipefail
+
+# Default values
+OUTPUT_DIR="${OUTPUT_DIR:-.omp/graph}"
+PROJECT_NAME="${PROJECT_NAME:-baria}"
+GRAPH_FILE="${OUTPUT_DIR}/${PROJECT_NAME}.lbug"
+
+# Parse arguments
+while [[ $# -gt 0 ]]; do
+  case $1 in
+    --output-dir)
+      OUTPUT_DIR="$2"
+      shift 2
+      ;;
+    --project-name)
+      PROJECT_NAME="$2"
+      shift 2
+      ;;
+    *)
+      echo "Unknown option: $1"
+      echo "Usage: graph-context init-graph [--output-dir PATH] [--project-name NAME]"
+      exit 1
+      ;;
+  esac
+done
+
+# Create output directory
+mkdir -p "${OUTPUT_DIR}"
+
+# Initialize graph file (empty for now)
+touch "${GRAPH_FILE}"
+
+# Initialize schema with Cypher
+if [ ! -f "${GRAPH_FILE}" ]; then
+  echo "Error: Graph file does not exist"
+  exit 1
+fi
+
+echo "Initializing graph schema..."
+
+# Run Cypher script to create node types and metadata
+lbug "${GRAPH_FILE}" < /tmp/schema-init.cypher 2>&1 || true
+
+# Create manifest.json with metadata
+cat > "${OUTPUT_DIR}/manifest.json" <<EOF
+{
+  "project_name": "${PROJECT_NAME}",
+  "graph_file": "${GRAPH_FILE}",
+  "schema_version": "V1",
+  "node_types": ["File", "Symbol", "IMPORTS"],
+  "created_at": "$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+}
+EOF
+
+echo "✅ Graph context initialized at ${OUTPUT_DIR}"
+echo "   Graph file: ${GRAPH_FILE}"
+echo "   Manifest: ${OUTPUT_DIR}/manifest.json"
+echo "   Schema: File, Symbol, IMPORTS node types"

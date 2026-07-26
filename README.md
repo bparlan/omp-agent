@@ -1,6 +1,6 @@
-# OhMyPi (OMP) Spec-Driven Development Framework
+# OhMyPi (OMP) Agentic Engineering Framework (AEF)
 
-> **Production-Grade Autonomous AI Engineering Infrastructure**
+> **Production-Grade Spec-Driven Development**
 
 ![Version: 1.0.0](https://img.shields.io/badge/Version-1.0.0-blue.svg)
 
@@ -9,10 +9,10 @@
 ## Table of Contents
 
 - [The Problem: Agentic Chaos in Production](#the-problem-agentic-chaos-in-production)
-- [Core Architectural Boundary](#core-architectural-boundary)
 - [System Architecture](#system-architecture)
 - [Deterministic Workflow](#deterministic-workflow)
 - [Core Principles](#core-principles)
+- [The Mechanism: Mechanical Determinism](#the-mechanism-mechanical-determinism-in-agentic-workflows)
 - [Lifecycle Skills](#lifecycle-skills)
 - [Infrastructure Skills](#infrastructure-skills)
 - [Templates & Artifacts](#templates--artifacts)
@@ -41,29 +41,19 @@ Standard agentic systems fail systematically:
 
 ## The Solution: Three Pillars of SDD
 
+<img src="./docs/slides/03.jpg" alt="Slide 3: Strict Tool Boundaries & The ACI" width="600"/>
+
 ### Pillar 1: One Transform at a Time
 
 Single-responsibility skills. Each agent performs exactly one transformation with no cross-cutting concerns.
-
-- _Visual:_ Clean, unidirectional data flow with no cross-cutting concerns.
 
 ### Pillar 2: Deterministic Outputs
 
 Pure-function tool invocation. Agents parse and read state before writing — no hidden state mutations.
 
-- _Visual:_ Controlled flow where inputs are parsed, processed through deterministic logic gates, and produce predictable outputs.
-
-<img src="./docs/slides/03.jpg" alt="Slide 3: Strict Tool Boundaries & The ACI" width="600"/>
-
-- _Visual:_ Documents flowing through a structured pipeline, each version immutable and traceable.
-
 ### Pillar 3: Artifact Persistence
 
 Immutable event sourcing. Each agent writes to new artifacts rather than modifying existing files.
-
-- _Visual:_ Every transformation produces a new artifact; originals remain untouched until archival.
-
-<img src="./docs/slides/04.jpg" alt="Slide 4: Canonical State & Documentation" width="600"/>
 
 ### 💡 Wisdom
 
@@ -81,25 +71,17 @@ The genius is applying these _to agent orchestration_ rather than just code. Mos
 
 ### Agents [Strategy] ↔ Tools [Execution]
 
-**AGENTS [Strategy]**
+<img src="./docs/slides/04.jpg" alt="Slide 4: Canonical State & Documentation" width="600"/>
 
-- Focuses on **The So What**
-- Interprets patterns
-- Selects strategies
-- Handles ambiguity
-- Formulates plans
-- Transforms artifacts between stages
-- Makes high-level decisions
-
-**TOOLS [Execution]**
-
-- Focuses on **The What**
-- Deterministic APIs
-- Precise file parsing
-- Exact code execution
-- State-based tool selection
-- Write access to files
-- Stateless and pure
+| **AGENTS [Strategy]**                 | **TOOLS [Execution]**        |
+| ------------------------------------- | ---------------------------- |
+| - Focuses on **The So What**          | - Focuses on **The What**    |
+| - Interprets patterns                 | - Deterministic APIs         |
+| - Selects strategies                  | - Precise file parsing       |
+| - Handles ambiguity                   | - Exact code execution       |
+| - Formulates plans                    | - State-based tool selection |
+| - Transforms artifacts between stages | - Write access to files      |
+| - Makes high-level decisions          | - Stateless and pure         |
 
 > **"Never overload an agent with tool logic; never let a tool make strategic decisions."**
 
@@ -345,6 +327,92 @@ graph TD
 
 ---
 
+## The Mechanism: Mechanical Determinism in Agentic Workflows
+
+> **"Never guess what you can prove. Never trust what you can verify. Never pattern-match what you can read."**
+
+The Mechanism is a behavioral enforcement layer embedded into the OMP AEF's canonical architecture. It addresses a fundamental failure mode of LLM-based agents: **forward progress over accuracy**. Agents naturally default to generating output, guessing when uncertain, trusting prior reports over live state, and debugging by pattern-matching from memory.
+
+The Mechanism counters this with six mechanical rules — grep-able, auditable, enforced at the skill and template level:
+
+### 1. The Uncertainty Marker (`#NEEDS-CLARIFICATION`)
+
+Codified in `FRAMEWORK.md`, `AGENTS.md`, and `skills/implement-specification/SKILL.md`. When an agent's confidence in a fact falls below _"I could paste the command that proves this,"_ it MUST emit the literal marker `#NEEDS-CLARIFICATION: <specific missing fact>` and HALT. Guessing is strictly forbidden. This makes uncertainty a **grep-able first-class artifact** rather than a silent gamble.
+
+> **Philosophy**: If you can't paste the command that proves it, you don't know it. Halting on uncertainty is cheaper than debugging a hallucination.
+
+### 2. Zero-Trust Review
+
+Codified in `skills/review-implementation/SKILL.md` and `templates/review_template.md`. The reviewer operates from a separate context with the standing rule: _"Assume the prior report is wrong until proven otherwise. Verify every claim against the live state using bash or read commands."_ The `review_template.md` now includes a **Live State Verification** section requiring claim/command/observed-state entries — empty or self-referential entries are compliance failures.
+
+> **Philosophy**: The completion report is a hypothesis, not a fact. Trust is earned through independent verification, not asserted by the implementer.
+
+### 3. Evidence-Based Debugging
+
+Codified in `skills/investigate-issue/SKILL.md` and `skills/evaluate-implementation/SKILL.md`. Standing rule: _"Debug from evidence, never from memory. The first action on any unfamiliar error is to read the literal message and use the tool's --help or introspection command. Never pattern-match from similar tools."_
+
+> **Philosophy**: Every unfamiliar error is unique until proven otherwise. Pattern-matching from memory is guessing — read the error, use introspection, then reason.
+
+### 4. Raw Evidence Mandate
+
+Codified in `templates/completion_template.md` and `templates/evaluation_template.md`. Every "done" claim MUST ship with the exact terminal command and raw stdout/stderr output that proves it succeeded. The template enforces: `- [ ] <requirement>: \`<command>\` → <raw output>`.
+
+> **Philosophy**: A claim without raw evidence is an opinion, not a deliverable. Commands and their output are the universal language of verification.
+
+### 5. Ground-Truth Utility (`bin/ground-truth-check.sh`)
+
+A strictly read-only POSIX shell utility providing low-friction live-state verification:
+
+- `file-exists <path>` — Check file existence (PASS/FAIL)
+- `dir-exists <path>` — Check directory existence
+- `command-exists <name>` — Check if a command is on PATH
+- `file-contains <path> <pattern>` — Literal grep (no regex injection)
+- `git-status [path]` — Check git repository status
+
+Zero dependencies. Zero write operations. Exit code 0 = PASS, 1 = FAIL. Agent-facing surface is `bash` primitive only — no MCP, no Python, no side effects.
+
+> **Philosophy**: A zero-trust reviewer needs low-friction truth access. `ground-truth-check.sh` replaces complex bash one-liners with a single, auditable, read-only command.
+
+### 6. Mechanical Tooling Stack Mandate
+
+Codified in `skills/bootstrap-project/SKILL.md` and `AGENTS.md`. Every bootstrapped project must document its chosen tooling stack covering four categories (project- and language-agnostic):
+
+- **Environment Manager** — Prevents version ambiguity and auto-activates toolchains
+- **Fast Linter/Formatter** — Deterministic, auto-fixable code quality gate
+- **Pre-commit Framework** — Local gates on every commit without cloud CI
+- **Type Checker** — Catches silent type/property mismatches before runtime
+
+No specific brands are prescribed — only the _categories_ are mandated, ensuring applicability across Python, Node.js, Rust, Go, and other ecosystems.
+
+> **Philosophy**: Environment confusion (wrong Python version, missing Node runtime) is the most expensive class of bug — silent, cross-cutting, and invisible to linters. A documented tooling stack makes the implicit explicit.
+
+### Version Bumps
+
+The following skills received version bumps reflecting The Mechanism's enforcement rules:
+
+| Skill                     | Old → New         | Change                                             |
+| ------------------------- | ----------------- | -------------------------------------------------- |
+| `review-implementation`   | 1.0.0 → **1.1.0** | Zero-trust standing rule + Live State Verification |
+| `evaluate-implementation` | 1.0.1 → **1.0.2** | Evidence-based debugging rule                      |
+| `investigate-issue`       | 1.0.0 → **1.0.1** | Evidence-based debugging rule (2 placements)       |
+| `implement-specification` | 1.0.0 → **1.0.1** | Uncertainty Marker reference                       |
+| `bootstrap-project`       | 1.0.1 → **1.0.2** | Mechanical Tooling Stack step                      |
+
+### The Mechanism's Place in the SDD Pipeline
+
+Unlike a skill that executes in sequence, The Mechanism is a **cross-cutting architectural constraint** that affects every stage:
+
+| Pipeline Stage | Mechanism Impact                                     |
+| -------------- | ---------------------------------------------------- |
+| Specification  | Uncertainty Marker prevents guessing in requirements |
+| Verification   | Raw Evidence Mandate ensures verifiable assertions   |
+| Implementation | Uncertainty Marker halts guesswork during coding     |
+| Evaluation     | Evidence-Based Debugging prevents memory-based fixes |
+| Review         | Zero-Trust Review independently verifies every claim |
+| Bootstrap      | Mechanical Tooling Stack prevents environment drift  |
+
+---
+
 ## Lifecycle Skills
 
 **Strategic Layer** — Define project-level strategies, roadmaps, and governance:
@@ -433,6 +501,27 @@ task(role: "code-search", assignment: "Search for all milestone-related code")
 python3 ~/devcode/aef/agent/skills/code-search/code_indexer.py --index
 python3 ~/devcode/aef/agent/skills/code-search/code_search.sh "milestone" skills/
 ```
+
+### LadybugDB & Knowledge Graph
+
+**Role**: Graph-based scope validation and dependency mapping for the AEF codebase.
+
+The OMP AEF integrates **LadybugDB** (`lbug` CLI v0.18.3) as a lightweight embedded graph database for modeling project structure — relationships between files, symbols, and imports.
+
+**Key Capabilities**:
+
+- **File-Symbol-Imports Graph**: Nodes represent files and symbols; edges represent import relationships. Enables reachability queries like "what files would be affected by changing this module?"
+- **Diff-Scope Verification Gate**: A scripted verification step compares `git diff --name-only` against the set of files reachable from a task's declared scope. Changes touching files outside the reachable set are automatically rejected before review — no LLM judgment involved.
+- **Ad Hoc Cypher Queries**: Agents can run direct Cypher queries via `lbug --db <graph.lbug> cypher "MATCH ..."` through the bash tool — no MCP integration, no Python client.
+- **V1 Schema**: `File` and `Symbol` node types with `IMPORTS` edge type. V2 will extend to `CALLS` and `RENDERS` edges for deeper dependency analysis.
+
+**Integration**:
+
+- **graph-context Skill**: Injectable skill at `skills/graph-context/SKILL.md` that initializes `.omp/graph/<name>.lbug` and ingests `skeleton.md` output
+- **generate-verification Hook**: Integration point for the diff-scope verification gate
+- **Pilot Project**: BariaDAO graph initialized at `~/devcode/BariaDAO/.omp/graph/baria.lbug`
+
+> **Philosophy**: A knowledge graph provides mechanical, deterministic scope validation — no agent judgment, no context window loss, no "I think this file is related." The graph is the single source of truth for project structure.
 
 ---
 
@@ -629,9 +718,6 @@ Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
 in the Software without restriction, including without limitation the rights
 to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
-
 The above copyright notice and this permission notice shall be included in all
 copies or substantial portions of the Software.
 
@@ -732,8 +818,8 @@ See [AGENTS.md](./AGENTS.md) for detailed contribution guidelines.
 
 ---
 
-**Last Updated**: 2026-07-18
-**Version**: 1.0.0
+**Last Updated**: 2026-07-26
+**Version**: 1.1.0
 **Status**: Production-Ready
 
 ---

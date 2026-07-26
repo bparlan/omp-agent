@@ -1,140 +1,59 @@
----
-generated-from: M2SA1.md
-generated-date: 2026-07-18
-entries-count: 5
----
-
-# CHANGELOG_ENTRIES.md
-
-This file contains auto-generated changelog entries for all OMP AEF documents based on session M2SA1.
+# Changelog Entries
 
 ## Added
 
-### skills/session-audit/SKILL.md
-- **Added**: session-audit skill (v1.1.0) for analyzing session-based framework improvements
-- **Added**: Multiple SA document format (M{X}SA{Y}.md) with session metadata and classification
-- **Added**: TEMP milestone detection and structure support
-- **Added**: Comprehensive documentation updates (5 output formats)
-- **Added**: Ingestion entries generation (INGEST_ENTRIES.md)
-- **Added**: Code-search integration for semantic analysis
-- **Added**: SA dependency tracking across multiple sessions
-- **Added**: Session classification (major/minor changes)
+### skills/evolve-skills/skills-auditor.py
+- New automated health monitoring script for evolve-skills dependencies
+- Audits 13 dependencies (bootstrap-project, generate-spec, generate-verification, implement-specification, investigate-issue, milestone, review-implementation, sync-documentation, hotfix-issue, manage-roadmap, manage-development, evolve-skills, session-audit)
+- Generates individual YAML health reports in `evolve-skills/health/{skill-name}.yaml`
+- Provides console dashboard via `python skills-auditor.py list`
+- Monitors version consistency, user-invocable flag, required tools, and description quality
+- Calculates priority levels (HIGH/MEDIUM/LOW) and status values (CRITICAL/NEEDS_IMPROVEMENT/HEALTHY)
 
-### skills/code-search/README.md
-- **Added**: Comprehensive infrastructure documentation
-- **Added**: Usage patterns and integration points
-- **Added**: Troubleshooting guide
-- **Added**: Best practices and examples
+### skills/evolve-skills/PLAYBOOK.md
+- New operational workflows documentation
+- "Every Session" workflow: Audit evolve-skills dependencies before starting SDD work
+- Single-skill audit instructions
+- Health report structure and reading guide
+- Priority scale and status values documentation
+- Integration with session-audit and evolve-skills
 
-### skills/code-search/SKILL.md
-- **Added**: Version bump to 1.0.0
-- **Added**: README.md reference
+### skills/evolve-skills/health/
+- New directory for health reports
+- 13 individual YAML health reports generated
+- Each report contains skill metadata, issues, recommendations, and overall status
 
 ### skills/evolve-skills/SKILL.md
-- **Added**: session-audit to restricted scope list
-- **Added**: Session Audit Integration workflow step
-- **Added**: Processing of multiple SA documents with cumulative context
+- Added Phase 4: Skill Health Audit Layer section
+- Added command: `audit` — Run skills-auditor to check health of all evolve-skills dependencies
+- Added command: `log-experience` — Log experience to docs/EXPERIENCES.md
+- Added command: `analyze` — Analyze friction points from docs/EXPERIENCES.md
+- Added "Every Session" workflow section
+- Added session-audit integration details (Auto-Run After Session Audit workflow)
+- Added infrastructure skills section to AGENTS.md (referenced)
+- Added PLAYBOOK.md reference (referenced)
+- Updated version from 1.2.0 to 1.3.0
 
-### skills/sync-documentation/SKILL.md
-- **Added**: /docs/ingest/ integration workflow
-- **Added**: Permission + context selection workflow
-- **Added**: Archiving procedure after processing
-- **Added**: Version bump to 1.1.0
-
-### skills/manage-roadmap/SKILL.md
-- **Added**: /docs/ingest/ checking workflow
-- **Added**: Permission + context workflow
-- **Added**: Delegation to appropriate skills
-- **Added**: Archiving procedure
-- **Added**: Version bump to 1.2.0
-
-### AGENTS.md
-- **Added**: Infrastructure Skills section
-- **Added**: session-audit role and responsibilities documentation
-- **Added**: code-search role and responsibilities documentation
-- **Added**: Integration patterns and usage guidelines
-
-### milestones/M2/
-- **Added**: M2SA1.md — Session Audit Document
-- **Added**: M2SA1.md — Session metadata and classification
-- **Added**: M2SA1.md — Code-search analysis results
-- **Added**: M2SA1.md — Recommended evolve-skills actions
-- **Added**: M2SA1.md — Dependencies on previous SAs
-- **Added**: M2SA1.md — Progress toward milestone completion
-
-### milestones/M2/SESSION_CHANGES.md
-- **Added**: Session change log for M2SA1
-
-### /docs/ingest/
-- **Added**: TEMP/ directory for TEMP milestone ingestion files
-- **Added**: M1/ directory for M1 milestone ingestion files
-- **Added**: M2/ directory for M2 milestone ingestion files
-- **Added**: M3/ directory for M3 milestone ingestion files
-- **Added**: archived/ directory for archiving original files
-
-### milestones/TEMP/
-- **Added**: Support for TEMP milestone structure
-- **Added**: M{N}SA{Y}.md pattern for TEMP sessions
+### Milestones/M2/
+- M2SA2.md (Session Audit Report)
+- SESSION_CHANGES.md (Change log)
+- CHANGELOG_ENTRIES.md (this file)
+- MILESTONE_UPDATES.md (to be generated)
+- INGEST_ENTRIES.md (to be generated)
 
 ## Changed
 
-### skills/session-audit/SKILL.md
-- **Changed**: Version from 1.0.0 to 1.1.0
-- **Changed**: Purpose from basic analysis to comprehensive session tracking
-- **Changed**: Added 5 output format generation
-- **Changed**: Added TEMP milestone handling
-
-### skills/code-search/SKILL.md
-- **Changed**: Version from 0.0.0 to 1.0.0
-- **Changed**: Added README.md reference
-- **Changed**: Enhanced description with infrastructure role
-
 ### skills/evolve-skills/SKILL.md
-- **Changed**: Version from 1.0.0 to 1.2.0
-- **Changed**: Added session-audit to restricted scope
-- **Changed**: Added Session Audit Integration workflow
-
-### skills/sync-documentation/SKILL.md
-- **Changed**: Version from 1.0.0 to 1.1.0
-- **Changed**: Added /docs/ingest/ integration
-- **Changed**: Added permission + context workflow
-
-### skills/manage-roadmap/SKILL.md
-- **Changed**: Version from 1.0.0 to 1.2.0
-- **Changed**: Added /docs/ingest/ workflow
-- **Changed**: Added permission + context selection
+- Version bumped from 1.2.0 to 1.3.0
+- Added comprehensive health audit layer with automated monitoring
+- Added playbook integration and session-audit integration workflows
+- Added "Every Session" workflow section with audit commands
+- Added documentation links to PLAYBOOK.md, AGENTS.md, FRAMEWORK.md
 
 ## Fixed
 
-### skills/session-audit/SKILL.md
-- **Fixed**: Multi-session support with cumulative context
-- **Fixed**: TEMP milestone detection and handling
-- **Fixed**: SA dependency tracking
-- **Fixed**: Missing /docs/ingest/ integration
-
-### skills/code-search/SKILL.md
-- **Fixed**: Missing infrastructure documentation
-- **Fixed**: Missing README.md
-
-### skills/evolve-skills/SKILL.md
-- **Fixed**: Missing session-audit integration
-- **Fixed**: No support for multiple SA documents
-
-### skills/sync-documentation/SKILL.md
-- **Fixed**: Missing ingestion workflow
-- **Fixed**: Missing permission + context workflow
-
-### skills/manage-roadmap/SKILL.md
-- **Fixed**: Missing /docs/ingest/ integration
-- **Fixed**: Missing archiving procedure
-
-### AGENTS.md
-- **Fixed**: Missing Infrastructure Skills section
-- **Fixed**: Missing session-audit documentation
-- **Fixed**: Missing code-search documentation
-
----
-
-**Generated by**: session-audit v1.1.0
-**Session**: M2SA1
-**Date**: 2026-07-18
+### skills/evolve-skills/skills-auditor.py
+- Fixed multiple IndentationError issues in main function (lines 297-313)
+- Fixed read_skill_frontmatter to properly parse YAML frontmatter with multiple documents
+- Fixed dependency list (removed "archive-milestone" as skill doesn't exist)
+- Fixed health directory path to use Path(__file__).parent / "health"

@@ -1,0 +1,255 @@
+#!/usr/bin/env bash
+# Graph-Context: Ingest skeleton.md into Ladybug graph
+# Usage: graph-context ingest-skeleton [options]
+#   --skeleton PATH       Path to skeleton.md file (required)
+#   --graph-path PATH     Ladybug graph file path (default: .omp/graph/baria.lbug)
+#   --verbose             Enable detailed logging
+
+set -euo pipefail
+
+VERBOSE=0
+GRAPH_PATH="${GRAPH_PATH:-.omp/graph/baria.lbug}"
+
+# Parse arguments
+while [[ $# -gt 0 ]]; do
+  case $1 in
+    --skeleton)
+      SKELETON_PATH="$2"
+      shift 2
+      ;;
+    --graph-path)
+      GRAPH_PATH="$2"
+      shift 2
+      ;;
+    --verbose)
+      VERBOSE=1
+      shift
+      ;;
+    *)
+      echo "Unknown option: $1"
+      echo "Usage: graph-context ingest-skeleton --skeleton PATH [--graph-path PATH] [--verbose]"
+      exit 1
+      ;;
+  esac
+done
+
+if [ -z "${SKELETON_PATH:-}" ]; then
+  echo "Error: --skeleton is required"
+  echo "Usage: graph-context ingest-skeleton --skeleton PATH [--graph-path PATH] [--verbose]"
+  exit 1
+fi
+
+if [ ! -f "${SKELETON_PATH}" ]; then
+  echo "Error: Skeleton file not found: ${SKELETON_PATH}"
+  exit 1
+fi
+
+if [ ! -f "${GRAPH_PATH}" ]; then
+  echo "Error: Graph file not found: ${GRAPH_PATH}"
+  echo "Run 'graph-context init-graph' first to create the graph."
+  exit 1
+fi
+
+# Parse skeleton.md
+PYTHON_CMD="python3"
+
+if $PYTHON_CMD -c "import yaml" 2>/dev/null; then
+  PARSER_CMD="python3"
+elif node -e "console.log('Node available')" 2>/dev/null; then
+  PARSER_CMD="node"
+else
+  echo "Error: Neither python3 nor node available for parsing skeleton.md"
+  echo "Install python3 with pyyaml or node for skeleton parsing"
+  exit 1
+fi
+
+if [ "$VERBOSE" -eq 1 ]; then
+  echo "Parsing skeleton.md: ${SKELETON_PATH}"
+fi
+
+# Generate Python script to parse skeleton and create graph nodes
+cat > /tmp/ingest_skeleton.py <<'PYTHON_SCRIPT'
+import sys
+import json
+from pathlib import Path
+
+def parse_skeleton(skeleton_path):
+    """Parse skeleton.md and extract File, Symbol, and IMPORTS data."""
+    with open(skeleton_path, 'r') as f:
+        content = f.read()
+    
+    # Parse YAML-like structure (simplified parser)
+    # Expected format:
+    # files:
+    #   - path: ...
+    #     name: ...
+    #     language: ...
+    #     symbols:
+    #       - name: ...
+    #         kind: ...
+    #         line: ...
+    #     imports:
+    #       - from: ...
+    #         to: ...
+    #       ...
+    # unresolved_imports: []
+    # imports:
+    
+    files = []
+    imports = []
+    
+    # Extract files section
+    in_files = False
+    in_symbols = False
+    in_imports = False
+    
+    current_file = None
+    current_symbols = []
+    current_imports = []
+    
+    for line in content.split('\n'):
+        line = line.strip()
+        
+        if not line:
+            continue
+        
+        if line.startswith('files:'):
+            in_files = True
+            continue
+        
+        if line.startswith('imports:'):
+            in_files = False
+            in_symbols = False
+            in_imports = False
+            continue
+        
+        if in_files:
+            if line.startswith('- path:'):
+                # Save previous file
+                if current_file:
+                    files.append({
+                        'path': current_file.get('path'),
+                        'name': current_file.get('name'),
+                        'language': current_file.get('language', 'unknown'),
+                        'symbols': current_symbols,
+                        'imports': current_imports,
+                        'unresolved': []
+                    })
+                
+                current_file = {'path': line.split(':', 1)[1].strip()}
+                current_symbols = []
+                current_imports = []
+                continue
+            
+            elif line.startswith('  - name:'):
+                if current_file:
+                    current_file['name'] = line.split(':', 1)[1].strip()
+                continue
+            
+            elif line.startswith('  - language:'):
+                if current_file:
+                    current_file['language'] = line.split(':', 1)[1].strip()
+                continue
+            
+            elif line.startswith('    symbols:'):
+                in_symbols = True
+                continue
+            
+            elif line.startswith('    imports:'):
+                in_imports = True
+                continue
+            
+            elif in_symbols and line.startswith('      - name:'):
+                kind = 'unknown'
+                line_num = 0
+                
+                # Extract kind from next line
+                for next_line in content.split('\n')[content.split('\n').index(line)+1:content.split('\n').index(line)+3]:
+                    if next_line.strip().startswith('kind:'):
+                        kind = next_line.split(':', 1)[1].strip()
+                    elif next_line.strip().startswith('line:'):
+                        line_num = int(next_line.split(':', 1)[1].strip())
+                
+                current_symbols.append({
+                    'name': line.split(':', 1)[1].strip(),
+                    'kind': kind,
+                    'line': line_num
+                })
+                continue
+            
+            elif in_imports and line.startswith('      - from:'):
+                to = ''
+                import_str = ''
+                
+                # Extract 'to' from next line
+                for next_line in content.split('\n')[content.split('\n').index(line)+1:content.split('\n').index(line)+2]:
+                    if next_line.strip().startswith('to:'):
+                        to = next_line.split(':', 1)[1].strip()
+                
+                current_imports.append({
+                    'from': line.split(':', 1)[1].strip(),
+                    'to': to,
+                    'import_statement': ''
+                })
+                continue
+    
+    # Add last file
+    if current_file:
+        files.append({
+            'path': current_file.get('path'),
+            'name': current_file.get('name'),
+            'language': current_file.get('language', 'unknown'),
+            'symbols': current_symbols,
+            'imports': current_imports,
+            'unresolved': []
+        })
+    
+    return {'files': files, 'imports': current_imports}
+
+
+def main():
+    skeleton_path = sys.argv[1]
+    
+    skeleton_data = parse_skeleton(skeleton_path)
+    cypher_statements = generate_cypher(skeleton_data)
+    
+    # Output Cypher statements to stdout
+    for stmt in cypher_statements:
+        print(stmt)
+
+if __name__ == '__main__':
+    main()
+PYTHON_SCRIPT
+
+# Run parser
+if [ "$VERBOSE" -eq 1 ]; then
+  echo "Parsing skeleton..."
+fi
+
+$PYTHON_CMD /tmp/ingest_skeleton.py "${SKELETON_PATH}" > /tmp/ingest_cypher.txt
+
+# Create graph nodes using lbug
+if [ "$VERBOSE" -eq 1 ]; then
+  echo "Creating graph nodes..."
+fi
+
+# Read Cypher statements and execute via lbug
+while IFS= read -r cypher_line; do
+  # Skip empty lines and comments
+  if [[ -z "${cypher_line}" ]] || [[ "${cypher_line}" =~ ^[[:space:]]*# ]]; then
+    continue
+  fi
+  
+  # Execute Cypher query via lbug
+  echo "${cypher_line}" | lbug "${GRAPH_PATH}"
+done < /tmp/ingest_cypher.txt
+
+# Count created nodes
+file_count=$(echo "MATCH (f:File) RETURN count(f)" | lbug "${GRAPH_PATH}")
+symbol_count=$(echo "MATCH (s:Symbol) RETURN count(s)" | lbug "${GRAPH_PATH}")
+import_count=$(echo "MATCH ()-[i:IMPORTS]->() RETURN count(i)" | lbug "${GRAPH_PATH}")
+
+echo "✅ Skeleton ingested successfully"
+echo "   Files: ${file_count}"
+echo "   Symbols: ${symbol_count}"
+echo "   IMPORTS edges: ${import_count}"

@@ -1,6 +1,6 @@
 ---
 name: bootstrap-project
-version: 1.0.1
+version: 1.0.2
 description: Analyze an existing repository and normalize it into standard engineering structure. One-time setup for brownfield projects.
 tools: read, write, bash, glob, grep, lsp, edit
 user-invocable: true
@@ -23,10 +23,15 @@ Typically executed once per repository or after major architectural changes.
 5. **Inventory existing documentation** — Read `README.md`, `docs/`, any project guides.
 6. **Consolidate and normalize** — Merge documentation into canonical layer, remove duplication.
 7. **Create missing documents in the `docs/` directory** — Generate `CHANGELOG.md`, `FRAMEWORK.md`, `SPEC.md`, `ROADMAP.md`, `PLAYBOOK.md`, `DATA.md`, `MILESTONES.md`, and `EXPERIENCES.md` as needed.
-8. **Create root-level entry point documents** — Generate `README.md` and `AGENTS.md` (repository overview, build commands, preferred tool patterns) as needed.
-9. **Create milestones directory structure** — Ensure `milestones/` and `milestones/archive/` directories exist.
-10. **Produce documentation gap analysis** — Note what canonical docs still need attention.
-11. **Recommend first milestone** — Suggest appropriate starting scope.
+8. **Define the Mechanical Tooling Stack** — The project must document its chosen tooling stack covering the following four categories (project- and language-agnostic):
+   - **Environment Manager**: Prevents version ambiguity and auto-activates the correct runtime and package manager.
+   - **Fast Linter/Formatter**: Provides a deterministic, auto-fixable gate for code quality before review.
+   - **Pre-commit Framework**: Runs local gates automatically on every commit without cloud CI dependencies.
+   - **Type Checker**: Catches silent property and type mismatches before runtime execution.
+9. **Create root-level entry point documents** — Generate `README.md` and `AGENTS.md` (repository overview, build commands, preferred tool patterns) as needed.
+10. **Create milestones directory structure** — Ensure `milestones/` and `milestones/archive/` directories exist.
+11. **Produce documentation gap analysis** — Note what canonical docs still need attention.
+12. **Recommend first milestone** — Suggest appropriate starting scope.
 
 ## Discovery Priority
 

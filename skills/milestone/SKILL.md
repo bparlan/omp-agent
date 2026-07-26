@@ -48,6 +48,22 @@ This skill assists in creating, managing, and iteratively developing project mil
     - **Arguments**:
         - `<milestone_path>`: (Required) The file path to the existing milestone.
     - **Output**: Summary of reusable verifications, tests that need updates, and recommendations.
+- **Run**:
+    - **Description**: Execute the complete SDD pipeline from milestone creation to review, with automation for steps that don't require user decisions.
+    - **Process**:
+        1. **Create milestone** — Initialize new milestone using "Create" workflow (steps 2-4).
+        2. **Auto-generate verification and tests** — After milestone creation, automatically run generate-verification and generate-tests.
+        3. **Generate specification** — Run generate-spec to create M{X}S{1}.md.
+        4. **Manual approval** — User reviews and confirms specification via approve-spec.
+        5. **Auto-implement** — After approval, automatically run implement-specification.
+        6. **Auto-evaluate** — Automatically run evaluate-implementation.
+        7. **Auto-review** — Automatically run review-implementation.
+        8. **Output summary** — Display final completion summary.
+    - **User intervention points**:
+        - Milestone creation (Create command)
+        - Specification approval (via approve-spec skill)
+    - **When to use**: Ideal for focused, well-defined milestones where you're confident about scope and requirements. Useful when you've done sufficient investigation and want to accelerate development.
+    - **Safety**: If investigation reveals significant issues or scope changes, the user can interrupt at any approval point or manually invoke investigate-issue.
 
 ## Template Mapping
 

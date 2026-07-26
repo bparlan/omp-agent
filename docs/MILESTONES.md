@@ -23,6 +23,31 @@ This document lists active and archived milestones for the OMP Framework project
   - `milestones/M2/MILESTONE_UPDATES.md` — Milestone updates
 - `milestones/M2/M2SA2.md` — Session Audit Document
 
+### M3 — The Mechanism Upgrade
+
+- **Status**: 75% Complete (M3S2 Accepted; M3S1 pending remediation)
+- **Phase**: Implementation & Mechanical Tooling
+- **Description**: Embed "The Mechanism" into the OMP AEF canonical architecture to enforce mechanical uncertainty markers, zero-trust reviews, evidence-based debugging, raw evidence mandates, and project-agnostic mechanical tooling gates.
+- **Key Deliverables**:
+  - Mandatory `#NEEDS-CLARIFICATION` marker codified in FRAMEWORK.md and AGENTS.md
+  - Zero-trust review pass with live-state verification in review-implementation
+  - Evidence-based debugging mandate in investigate-issue and evaluate-implementation
+  - Raw Evidence section in completion and evaluation templates
+  - Read-only ground-truth check utility script
+  - Mechanical Tooling Stack mandate in bootstrap-project
+  - `milestones/M3/M3S2.md` — Specification (Accepted)
+  - `milestones/M3/M3S2V.md` — Verification protocol
+  - `milestones/M3/M3S2T1.md` — Test plan
+  - `milestones/M3/M3S2C.md` — Completion report
+  - `milestones/M3/M3S2E.md` — Evaluation report
+  - `milestones/M3/M3S2R.md` — Review report (Accepted)
+  - `milestones/M3/M3SA1.md` — Session Audit Document
+  - `milestones/M3/SESSION_CHANGES.md` — Change log
+  - `milestones/M3/CHANGELOG_ENTRIES.md` — Changelog entries
+  - `milestones/M3/MILESTONE_UPDATES.md` — Milestone updates
+  - `milestones/M3/INGEST_ENTRIES.md` — Ingestion entries
+  - `tests/M3/` — Test scripts (7 files, 70 assertions, 6/6 passing)
+
 ---
 
 ## Archived Milestones

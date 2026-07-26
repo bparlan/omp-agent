@@ -1,6 +1,6 @@
 ---
 name: implement-specification
-version: 1.0.0
+version: 1.0.1
 description: Implement an approved specification using project architecture, conventions, and verification plan. Orchestrates implementation workflow without redundant documentation generation.
 tools: read, write, bash, glob, lsp, edit, ask, todo, task
 user-invocable: true
@@ -53,7 +53,7 @@ Given `M{X}S{Y}`:
 - Maintain coding consistency
 
 **When uncertain:**
-Ask concise clarification via `ask` before proceeding.
+Ask concise clarification via `ask` before proceeding. If your confidence in a fact is below "I could paste the command that proves this," emit the literal marker `#NEEDS-CLARIFICATION: <specific missing fact>` and HALT — do NOT guess.
 
 ## Todo Structure
 

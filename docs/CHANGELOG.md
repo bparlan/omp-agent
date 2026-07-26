@@ -13,3 +13,13 @@
 - - **Framework Documentation Updates**: Added comprehensive documentation to PLAYBOOK.md, FRAMEWORK.md, and skills.md covering session-audit, evolve-skills, and skills-auditor integrations.
 - - **Health Dashboard**: Console interface for quick status overview showing CRITICAL/NEEDS_IMPROVEMENT/HEALTHY skills with priority and issue counts.
 - - **13 Health Reports**: Generated YAML reports in `evolve-skills/health/{skill-name}.yaml` containing skill metadata, issues, recommendations, and overall status.
+-
+- ### The Mechanism (M3S2)
+-
+- - **Uncertainty Marker**: `#NEEDS-CLARIFICATION: <specific missing fact>` marker codified in FRAMEWORK.md, AGENTS.md, and implement-specification SKILL.md with HALT-on-guessing rule.
+- - **Zero-Trust Review**: Standing rule "Assume the prior report is wrong" added to review-implementation SKILL.md. Live State Verification section added to review_template.md.
+- - **Evidence-Based Debugging**: "Debug from evidence, never from memory" rule added to investigate-issue and evaluate-implementation SKILL.md files.
+- - **Raw Evidence Mandate**: "## Raw Evidence" sections with exact command + raw output template appended to completion_template.md and evaluation_template.md.
+- - **Ground-Truth Utility**: `bin/ground-truth-check.sh` — new read-only POSIX shell utility for live-state verification (5 commands, zero write operations).
+- - **Mechanical Tooling Stack**: bootstrap-project mandates 4 tooling categories (Environment Manager, Linter/Formatter, Pre-commit, Type Checker) during project setup. Codified in AGENTS.md.
+- - **Version Bumps**: review-implementation 1.1.0, evaluate-implementation 1.0.2, investigate-issue 1.0.1, implement-specification 1.0.1, bootstrap-project 1.0.2.

@@ -29,6 +29,13 @@
 
 | Requirement | Status | Notes |
 
+
+## Live State Verification
+
+### Claims Verified
+
+- <claim>: `<command>` → <observed state>
+
 ---
 
 ## Verification Results
