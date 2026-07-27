@@ -831,3 +831,306 @@ See [AGENTS.md](./AGENTS.md) for detailed contribution guidelines.
 - **[AGENTS.md](./AGENTS.md)** — Framework overview
 - **[PLAYBOOK.md](./docs/PLAYBOOK.md)** — Operational workflows
 - **[FRAMEWORK.md](./docs/FRAMEWORK.md)** — Architecture patterns
+# Post-Approval Orchestration (M5S1)
+
+## New Capabilities
+
+After user approval, `manage-development` autonomously executes the complete post-approval execution chain:
+
+```
+approval
+    ↓
+IMPLEMENT (implements approved specification)
+    ↓
+EVALUATE (evaluates implementation)
+    ↓
+┌───────────────────────────────────────┐
+│ ROUTING DECISION                      │
+├───────────────────────────────────────┤
+│ PASS                                  │
+│   → REVIEW (automatic)                │
+│   → Final Report → USER               │
+├───────────────────────────────────────┤
+│ MINOR DEFECT                          │
+│   → HOTFIX (no approval)               │
+│   → EVALUATE (re-run)                 │
+│   → ... (loop repeats up to limit)    │
+│   → STOP after MAX_AUTO_REPAIR_CYCLES │
+├───────────────────────────────────────┤
+│ COMPLEX ISSUE                         │
+│   → INVESTIGATE                       │
+│   → DETECT REQUIREMENT CHANGE?         │
+│     YES: spec → verif → tests → readi → approval → implement (NEW CYCLE)
+│     NO:  EVALUATE (re-run)             │
+├───────────────────────────────────────┤
+│ HUMAN ESCALATION                      │
+│   → REPORT (evidence-based)           │
+│   → WAIT FOR USER DECISION            │
+└───────────────────────────────────────┘
+```
+
+## New Public Interface Methods
+
+### 1. execute_post_approval_workflow()
+
+**Purpose**: Orchestrates complete post-approval execution chain (implement → evaluate → route → repair/review).
+
+**Parameters**:
+  - `milestone_id` (string): Current milestone identifier
+  - `spec_id` (string): Specification identifier
+  - `implementation_report` (string): Report from implement-specification
+
+**Return Value**: 
+  - `SUCCESS`: Workflow completed successfully
+  - `REQUIRES_REAPPROVAL`: Requirements changed, need approval
+  - `HUMAN_INTERVENTION`: User escalation required
+  - `FAILURE`: Fatal error or unresolvable issue
+
+**Behavior**:
+  - Chains: implement → evaluate → route → repair/review (automatic)
+  - No manual invocation between stages (except escalation)
+  - Provides approved artifacts (spec, verif, test plan) to implementation
+  - Does not declare success merely because implementation completed
+
+### 2. route_evaluation_result()
+
+**Purpose**: Determine next step based on evaluation outcome (PASS, MINOR, COMPLEX, HUMAN).
+
+**Parameters**:
+  - `evaluation_result` (string): Evaluation outcome (PASS, MINOR_IMPLEMENTATION_DEFECT, COMPLEX_OR_UNCLEAR_ISSUE, HUMAN_ESCALATION)
+  - `milestone_id` (string): Current milestone identifier
+  - `spec_id` (string): Specification identifier
+  - `issue_details` (dict, optional): Details about the evaluation issue
+
+**Return Value**: 
+  - Evaluation action to take (next step or human gate)
+
+**Behavior**:
+  - **PASS path**: evaluate → review-implementation → final report to user
+  - **MINOR DEFECT path**: evaluate → hotfix-issue → evaluate again (no approval required, provided root cause clear, defect localized, all criteria valid)
+  - **COMPLEX ISSUE path**: evaluate → investigate-issue, then check if requirement/architecture/scope change needed
+  - **HUMAN ESCALATION path**: Ask user for intervention with evidence-based report containing current state, root cause, attempted actions, failed tests, proposed options, exact decision required
+
+### 3. auto_repair()
+
+**Purpose**: Execute hotfix-issue for MINOR defects.
+
+**Parameters**:
+  - `issue_details` (dict): Details about the MINOR defect
+  - `repair_type` (string): Type of repair (MINOR, COMPLEX)
+
+**Return Value**: 
+  - Repair report string
+
+**Behavior**:
+  - Increments repair attempt counter
+  - Stops and reports after MAX_AUTO_REPAIR_CYCLES reached
+  - Executes hotfix-issue for MINOR defects
+  - Does not require approval for localized scope changes
+
+### 4. investigate_issue()
+
+**Purpose**: Execute investigate-issue for COMPLEX issues.
+
+**Parameters**:
+  - `issue_details` (dict): Details about the COMPLEX issue
+  - `milestone_id` (string): Current milestone identifier
+  - `spec_id` (string): Specification identifier
+
+**Return Value**: 
+  - Investigation report
+
+**Behavior**:
+  - Executes investigate-issue skill
+  - Checks if requirement/architecture/scope must change
+  - Returns "REQUIRES_REAPPROVAL" if change needed
+
+### 5. should_return_to_approval_gate()
+
+**Purpose**: Check if repair requires re-approval.
+
+**Parameters**:
+  - `issue_details` (dict): Details about the issue
+
+**Return Value**: 
+  - True if re-approval required, False otherwise
+
+**Behavior**:
+  - Detects requirement changes, architecture changes, approved scope changes, test expectation changes
+  - Ensures no repair path bypasses verification → tests → readiness → approval
+
+### 6. enforce_repair_limit()
+
+**Purpose**: Validate MAX_AUTO_REPAIR_CYCLES limit.
+
+**Return Value**: 
+  - True if limit not exceeded, False if limit reached
+
+**Behavior**:
+  - Checks current repair counter against MAX_AUTO_REPAIR_CYCLES (default 2 or 3)
+  - Stops repair loop and reports when limit reached
+  - Resets counter on new approval
+
+### 7. trigger_review()
+
+**Purpose**: Automatically invoke review-implementation after PASS.
+
+**Parameters**:
+  - `milestone_id` (string): Current milestone identifier
+  - `spec_id` (string): Specification identifier
+
+**Return Value**: 
+  - Review report
+
+**Behavior**:
+  - Automatically invokes review-implementation when evaluation passes
+  - Collects and formats final report
+  - Returns report to user
+  - Does not automatically start new milestone
+
+### 8. human_escalation_report()
+
+**Purpose**: Format and deliver evidence-based escalation report.
+
+**Parameters**:
+  - `state` (string): Current workflow state
+  - `cause` (string): Root cause/uncertainty
+  - `attempted_actions` (list): Actions taken
+  - `failed_tests` (list): Failed tests
+  - `options` (list): Proposed options
+  - `decision` (string): Exact decision required
+
+**Return Value**: 
+  - Formatted escalation report string
+
+**Behavior**:
+  - Reports include: current state, root cause/uncertainty, attempted actions, failed tests, proposed options, exact decision required
+  - Concise but evidence-based format
+  - Enables informed user decisions during escalation
+
+## Repair Loop Tracker Module
+
+**Purpose**: Track repair attempts per implementation task.
+
+**State**:
+  - `current_implementation_task`: Task identifier
+  - `repair_attempt_counter`: Integer (starts at 0)
+  - `max_repair_cycles`: Integer (default 2 or 3)
+
+**Operations**:
+  - `increment_repair_counter()`: Increment counter by 1
+  - `get_repair_cycle_count()`: Get current counter value
+  - `reset_repair_counter()`: Reset counter to 0 (on new approval)
+  - `check_repair_limit()`: Returns true if counter >= max_repair_cycles
+
+**Lifecycle**:
+  - Starts with new approval
+  - Resets for each new implementation cycle
+  - Tracks per task for isolation
+  - Stops repair loop after MAX_AUTO_REPAIR_CYCLES reached
+
+## Approval Gate Protection (M5S1)
+
+### Safety Boundaries
+
+1. **Approval gate from M4 remains non-negotiable**
+   - No route from specification → implementation bypasses: verification → tests → readiness → explicit approval
+   - All repair paths that change requirements MUST automatically return to approval gate
+
+2. **Hotfix never becomes approval bypass**
+   - If repair changes requirements, architecture, approved scope, acceptance criteria, verification criteria, or test expectations:
+     - It is NOT a simple hotfix
+     - Workflow automatically returns to: specification → verification → tests → readiness → human approval
+     - Only after human approval may implementation continue
+
+### Requirement-Change Detection
+
+Detection occurs in:
+  - `hotfix-issue`: Detects when requirements or scope change
+  - `investigate-issue`: Detects when architecture or scope must change
+  - `should_return_to_approval_gate()`: Checks for changes before proceeding
+
+### Limit Enforcement
+
+MAX_AUTO_REPAIR_CYCLES limit (default 2-3) prevents infinite repair loops:
+  - Counter increments on each MINOR repair
+  - Before each repair, check if counter >= max_cycles
+  - Stop, report, and ask human after limit reached
+  - Counter resets only on genuinely new approved implementation cycle
+  - Each task has its own repair counter (task isolation)
+
+## Test-Driven Completion (M5S1)
+
+### Success Condition
+
+### Test Failures as Real Failures
+
+1. **Test failures prevent final success**
+   - Final success condition: implementation completed AND tests pass AND verification passes AND evaluation passes AND review passes
+   - Test failures block workflow completion
+
+2. **No test weakening**
+   - Orchestrator does NOT weaken, remove, skip, or rewrite tests merely to make pipeline green
+   - Test failures treated as real implementation failures
+   - If test is genuinely incorrect, identified as specification/verification/test integrity issue
+
+## Review Automation (M5S1)
+
+### Automatic Review After PASS
+
+1. **Review automatically invoked**
+   - When evaluation result = PASS
+   - Orchestrator automatically calls review-implementation
+   - No manual intervention required
+
+2. **Review report includes required fields**
+   - What was implemented
+   - Specification compliance
+   - Verification results
+   - Test results
+   - Review findings
+   - Known limitations
+   - Any follow-up technical debt
+
+3. **Report returned to user**
+   - Final review report delivered to user
+   - Enables informed decision-making
+   - No new milestone automatically started
+
+## Full Lifecycle Orchestration (M5S1)
+
+### Pre-Approval Stages
+
+```
+generate-spec → generate-verification → generate-tests → readiness → approval
+```
+
+### Post-Approval Stages
+
+```
+implementation → evaluation → repair/investigate/review
+```
+
+### Orchestrator Responsibilities
+
+manage-development owns:
+  - **Pre-approval**: Sequencing, state, preconditions, postconditions (existing M4)
+  - **Post-approval**: Sequencing, state, routing, repair loop tracking, human gates (new M5)
+  - **No duplication**: Individual skills own their domain-specific work
+  - **Coordination only**: Orchestrator coordinates, does not rewrite
+
+### Manage-Roadmap Strategic Focus
+
+manage-roadmap remains responsible for:
+  - Roadmap state
+  - Milestone planning
+  - Milestone creation
+  - Milestone decomposition
+  - Documentation
+  - Readiness for development
+
+**Interaction Flow**:
+```
+manage-roadmap → manage-development → implementation → evaluate → route → repair/review
+```
+

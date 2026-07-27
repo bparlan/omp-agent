@@ -36,6 +36,12 @@
 -    -   Raw Evidence Mandate (exact command + raw output) in completion and evaluation templates
 -    -   Ground-Truth Helper Utility (`bin/ground-truth-check.sh`) — read-only POSIX shell utility
 -    -   Mechanical Tooling Stack mandate in bootstrap-project SKILL.md and AGENTS.md
+-
+-   **M7: Restore Determinism** (Completed 2026-07-27)
+-    -   generate-tests v2.0.0: file classification guardrails, test-first enforcement, language-specific rules, Guardrail Breach Protocol, machine-readable output
+-    -   Meta-tests A–G in tests/M7/ validating generate-tests behavior
+-    -   Lifecycle postmortem: 10 architectural findings on test validity, isolated baselines, platform assumptions, meta-test vs project test distinction, and lifecycle precondition gates
+-    -   Version bumps: generate-tests 2.0.0, implement-specification 1.0.2, evaluate-implementation 1.0.3
 
 ---
 
@@ -56,6 +62,10 @@
 
 -   **Self-Improving Framework**: Developing mechanisms for the Meta-Learning layer to proactively suggest architectural improvements or new skills based on observed workflow patterns and failure modes.
 -   **Dynamic Skill Generation**: Investigating the feasibility of agents generating new skills or adapting existing ones based on evolving requirements.
+
+### Lifecycle Integrity
+
+- **Lifecycle Precondition Gates**: Formalize test-validity, artifact-integrity, and platform-compatibility checks before each lifecycle phase transition. M7 demonstrated that test-validity preconditions prevent implementation against invalid tests. Extend this pattern to all SDD phase boundaries (spec→verification, verification→tests, tests→implementation, implementation→evaluation).
 
 ### Scalability and Performance
 

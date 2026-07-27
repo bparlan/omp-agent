@@ -538,37 +538,43 @@ implement-specification → generate-verification → generate-tests
 
 ### generate-tests
 
-**Purpose**: Translates verification protocols into executable use-case scripts and tests.
+**Purpose**: Translates verification protocols into executable test scripts with deterministic output, test-first enforcement, and hard boundary guardrails against production code. (v2.0.0)
 
 **Key Responsibilities**:
 - Read M{X}S{Y}V.md verification protocol
-- Generate executable test scripts (Python pytest, JS, bash, etc.)
-- Save test plan documentation
-- Save executable scripts to tests/M{X}/ directory
-- Document expected coverage
+- Classify each proposed file into 5-category system (TEST_ARTIFACT, TEST_FIXTURE, TEST_HELPER, PRODUCTION_IMPLEMENTATION, DOCUMENTATION)
+- STOP on any PRODUCTION_IMPLEMENTATION classification with Guardrail Breach Protocol
+- Define test contract (purpose, spec ID, ver ID, file path, setup, execution command, expected initial/post results, exit-code semantics)
+- Generate test design document at milestones/M{X}/M{X}S{Y}T{Z}.md
+- Generate executable test files (`.sh`/`.py`) with language-specific rules and cross-language prohibition
+- Run syntax validation (bash -n / python -m py_compile)
+- Execute generated tests and capture exit codes
+- Expect initial failure (WARNING on pre-implementation pass)
+- Report machine-readable summary: TESTS_RUN, TESTS_PASSED, TESTS_FAILED, EXIT_CODE
 
 **Artifacts Generated**:
 - `milestones/M{X}/M{X}S{Y}T{Z}.md` — Test Plan documentation
-- `tests/M{X}/` — Executable test scripts
+- `tests/M{X}/` — Executable test scripts (`.sh`/`.py`)
 
 **Out of Scope**:
-- Running tests
-- Modifying implementation code
-- Updating specifications
-
-**Location**: `skills/generate-tests/SKILL.md`
+- Writing production implementation code
+- Modifying production source files
+- Invoking implement-specification
+- Silently fixing failing tests
 
 ---
 
 ### evaluate-implementation
 
-**Purpose**: Executes tests, autonomously fixes minor bugs, and generates the Evaluation Report.
+**Purpose**: Executes tests, classifies failures, autonomously fixes minor implementation bugs, and generates the Evaluation Report. (v1.0.3)
 
 **Key Responsibilities**:
 - Locate test scripts from generate-tests
 - Execute tests using bash
 - Analyze stack traces and errors
-- Autonomously fix minor bugs (logical errors, typos)
+- Classify each failure as Valid failure, Invalid test, Environment failure, or Specification mismatch
+- Only fix implementation for valid failures (never fix invalid tests)
+- Autonomously fix minor bugs (logical errors, typos) for valid failures only
 - Re-run tests to verify fix
 - Generate structured Evaluation Report
 - Handoff to review-implementation
@@ -577,18 +583,13 @@ implement-specification → generate-verification → generate-tests
 - `milestones/M{X}/M{X}S{Y}E.md` — Evaluation Report
 
 **Autonomy Level**:
-- **Minor bugs only**: Logical errors, typos, missing basic connections
-- **Not allowed**: Major architectural changes, rewriting entire modules
+- **Valid failures only**: Minor logical errors, typos, missing basic connections
+- **Not allowed**: Fixing invalid tests, rewriting entire test scripts, major architectural changes
 
 **Out of Scope**:
-- Rewriting entire test scripts
-- Major architectural changes
-- Creating documentation in project root
-
-**Interaction Flow**:
-```
-generate-tests → evaluate-implementation → review-implementation
-```
+- Rewriting test scripts entirely (report structural issues)
+- Modifying implementation to make an invalid test pass
+- Modifying specifications, milestones, or canonical documentation
 
 **Location**: `skills/evaluate-implementation/SKILL.md`
 
@@ -596,7 +597,7 @@ generate-tests → evaluate-implementation → review-implementation
 
 ### review-implementation
 
-**Purpose**: Evaluates completed implementation against approved specifications and verification protocols.
+**Purpose**: Evaluates completed implementation against approved specifications and verification protocols. (v1.0.2)
 
 **Key Responsibilities**:
 - Read implementation artifacts (spec, verification, completion)

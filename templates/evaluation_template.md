@@ -13,6 +13,19 @@
 
 ---
 
+## Validity Gate Results
+
+- **VALID_TESTS:** <count>
+- **INVALID_TESTS:** <count>
+
+### Invalidation Reports (if any)
+
+| Test File | Violated Criterion | Raw Evidence | Recommended Repair |
+|-----------|-------------------|--------------|-------------------|
+| <path> | <criterion> | <exit_code+stdout+stderr> | <repair action> |
+
+---
+
 ## Passed Tests
 
 ---

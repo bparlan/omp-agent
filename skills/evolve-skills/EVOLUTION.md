@@ -127,3 +127,31 @@
 ### Dependencies
 - **SA1 (This Session)**: M3SA1.md (first SA for M3)
 - **Previous SAs**: None (first SA for M3)
+
+## [2026-07-27] - M7SA1
+
+### Skill: implement-specification
+- **Old Version**: 1.0.1
+- **New Version**: 1.0.2
+- **Rationale**: M7 lifecycle revealed that test-validity must be established before interpreting failures. Implementation must not proceed against invalid tests (Finding 2, Finding 10).
+- **Changes**:
+  - Removed duplicate "## Your Process" section (leftover from prior bad merge)
+  - Added step 6 "Validate test preconditions" — execute tests, classify failures as valid/invalid/pre-impl-pass, STOP on invalid tests
+  - Added to Out of Scope: "Never implement against tests that produce invalid evidence"
+  - Added to Out of Scope: "Never skip the test-validity precondition check"
+- **References**: M7SA1.md, M7S1R.md, M7S1C.md
+
+### Skill: evaluate-implementation
+- **Old Version**: 1.0.2
+- **New Version**: 1.0.3
+- **Rationale**: M7 lifecycle demonstrated that test failures must be classified before fixing. Invalid tests must not trigger implementation fixes (Finding 1, Finding 9).
+- **Changes**:
+  - Added step 4 "Classify each failure" — 4-category system: Valid failure, Invalid test, Environment failure, Specification mismatch
+  - Updated step 5 "Autonomously Fix Minor Bugs" — scoped to valid failures only; explicit "Do NOT fix invalid tests by modifying implementation"
+  - Added to Out of Scope: "Never modify implementation code to make an invalid test pass"
+  - Added to Out of Scope: "Never ignore failure classification"
+- **References**: M7SA1.md, M7S1R.md, M7S1E.md
+
+### Dependencies
+- **SA1 (This Session)**: M7SA1.md (first SA for M7)
+- **Previous SAs**: None (first SA for M7)

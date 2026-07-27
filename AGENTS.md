@@ -53,6 +53,27 @@ Every project bootstrapped via the OMP AEF must document its chosen tooling stac
 
 No specific tooling brands are prescribed — each project selects tools appropriate to its language ecosystem.
 
+### Valid Evidence
+
+**VALID_TEST**: A test whose result exercised the intended subject and whose failure/success is attributable to that subject.
+
+**INVALID_TEST**: A test whose result is not attributable to the intended subject — the pipeline must stop.
+
+**VALIDITY CHECK**: The mandatory evaluation-time pre-processing step that classifies each test before interpreting its exit code.
+
+Six validity criteria:
+
+1. **The test exercised the intended subject** — it loaded, imported, or invoked the correct code path.
+2. **The failure is attributable to the subject** — not to infrastructure, config, or environment.
+3. **The test environment is deterministic** — same inputs produce same results.
+4. **The working tree is clean** — no uncommitted changes that could affect behavior.
+5. **The test does not scan itself** — the test script is not testing its own contents.
+6. **The failure message is diagnostic** — it identifies WHAT failed and WHY, not just an exit code.
+
+> Never advance the lifecycle based solely on test exit codes. First establish that the test itself is valid and that its failure is attributable to the intended subject.
+
+For more on the Valid Evidence lifecycle concept, see `milestones/M8/M8S1.md` or `milestones/M8/M8S1V.md`.
+
 ## Agent Roles
 
 ### Strategic Layer Agents
