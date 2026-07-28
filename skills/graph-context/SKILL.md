@@ -50,6 +50,7 @@ For each skeleton.md file:
          ]
        }
      ],
+* **No startNode() function**: You MUST NOT use a `startNode()` function or equivalent mechanism to initiate graph traversal or node creation; all graph construction must derive from `skeleton.md` parsing.
      "imports": [
        {
          "from": "file:///path/to/module.ts",

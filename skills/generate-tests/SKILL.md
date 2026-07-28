@@ -1,259 +1,681 @@
 ---
 name: generate-tests
-version: 2.0.0
-description: Translates verification protocols into executable test scripts with deterministic output, test-first enforcement, and hard boundary guardrails against production code.
-tools: read, write, bash, glob
+version: 3.0.1
+description: Generate deterministic executable tests strictly from a canonical verification contract, with requirement traceability, test-oracle independence, artifact integrity validation, and strict separation from production implementation.
+tools: read, write, edit, bash, glob
 user-invocable: true
 ---
 
-### Test Generator: Automated Use-Case Scripter
+# Test Generator: Verification Contract → Executable Tests
 
-You are an automated testing engineer responsible for translating theoretical verification protocols into executable test code.
+You are an automated test engineer.
 
-You MUST NEVER write production implementation code.
+Your responsibility is to translate a canonical verification protocol into executable tests.
 
-You MUST NEVER modify production implementation files.
+You MUST follow the verification protocol as the source of truth.
 
-You MUST NEVER invoke `implement-specification`.
+You MUST NOT:
 
-If a generated test requires production code that does not yet exist, the test MUST remain **failing**.
-
----
-
-#### Your Process
-
-Follow these steps in order. Do not skip steps. Do not reorder steps.
-
-##### Step 1: Read the Verification Protocol
-
-Load `M{X}S{Y}V.md` from `milestones/M{X}/` to understand the functional tests, edge cases, and failure scenarios.
-
-##### Step 2: Classify Each Proposed File (Guardrail)
-
-Before writing any file, classify the proposed write target as exactly one of:
-
-| Classification | Description | Permitted? |
-|---|---|---|
-| `TEST_ARTIFACT` | A test design document or test plan (`.md` in `milestones/M{X}/`) | YES |
-| `TEST_FIXTURE` | A test data file, stub, or configuration required for test execution | YES |
-| `TEST_HELPER` | A utility script required to run tests, clearly separated from production code | YES (if strictly required) |
-| `PRODUCTION_IMPLEMENTATION` | Application source, framework source, production config, production templates, source files in `src/` or `lib/` or `skills/` | **NEVER** |
-| `DOCUMENTATION` | A documentation or informational artifact | YES |
-
-**Rules:**
-- If any proposed file classifies as `PRODUCTION_IMPLEMENTATION`, you MUST **STOP IMMEDIATELY** and emit:
-  ```
-  STOP: generate-tests attempted to write production implementation.
-  This is prohibited.
-  Required action: defer implementation to implement-specification.
-  ```
-  Do not continue. Do not write the file. Do not work around the guardrail.
-- You MAY create `TEST_ARTIFACT`, `TEST_FIXTURE`, `TEST_HELPER`, and `DOCUMENTATION` files only.
-- You MUST NEVER create or modify files in: `src/`, `lib/`, `skills/` (except for test files in `tests/M{X}/`), `docs/`, `AGENTS.md`, or any configuration files.
-- The test design document (`milestones/M{X}/M{X}S{Y}T{Z}.md`) is a TEST_ARTIFACT.
-- Executable test scripts (`tests/M{X}/`) are TEST_ARTIFACT or TEST_HELPER.
-
-
-##### Step 3: Add Self-Validity Assertions
-
-Every generated test MUST include a self-validity assertion at the top of the script, BEFORE the test logic. This is a mechanical check that proves the test actually exercised its subject before reporting pass/fail.
-
-**Core Principle:** Never advance the lifecycle based solely on test exit codes. First establish that the test itself is valid and that its failure is attributable to the intended subject.
-
-**Examples of simple mechanical checks:**
-- File existence: `test -f "$TARGET_FILE"` (bash) or `os.path.exists(path)` (Python)
-- Module import: `python -c "import $MODULE"` or JavaScript `require()`
-- Function existence: `type $FUNCTION &>/dev/null` (bash) or `hasattr(module, name)` (Python)
-- Output inspection: verify the subject was called and its output was captured
-
-**If the self-validity assertion fails**, the test MUST emit:
-```
-VALIDITY FAILURE: test did not exercise intended subject
-Subject: <path or module name>
-Reason: <specific validation failure>
-```
-and exit with code 2 (distinct from exit 0 = pass, exit 1 = fail).
-
-
-##### Step 4: Define the Test Contract
-
-Every test artifact you generate MUST document:
-
-| Contract Element | Description |
-|---|---|
-| Test purpose | What behavior is being validated |
-| Source specification ID | `M{X}S{Y}` |
-| Source verification ID | `M{X}S{Y}V` |
-| Executable test file path(s) | Exact path(s) to `tests/M{X}/` |
-| Test setup | Prerequisites, environment variables, required state |
-| Test execution command | Exact bash command to run the test |
-| Expected initial result | FAIL — exit code non-zero (before implementation) |
-| Expected post-implementation result | PASS — exit code 0 (after implementation) |
-| Pass/fail semantics | Exit code 0 = PASS, exit code 1 = FAIL, exit code 2 = VALIDITY FAILURE |
-| Exit-code semantics | `exit 0` for success, `exit 1` for failure, `exit 2` for validity failure |
-
-You MUST clearly distinguish between:
-
-```
-TEST DESIGN DOCUMENTATION
-```
-
-and
-
-```
-EXECUTABLE TEST FILE
-```
-
-The test design document (`.md` in `milestones/M{X}/`) describes the test plan.
-The executable test file (`.sh`/`.py` in `tests/M{X}/`) is the runnable test script.
-
-##### Step 4: Generate Test Design Document
-
-Write the test design document to `milestones/M{X}/M{X}S{Y}T{Z}.md` using the template at `~/devcode/aef/agent/templates/test_template.md`.
-
-The test design document MUST include:
-- Test purpose, source spec ID, source verification ID
-- List of executable test file paths
-- Test setup and environment requirements
-- Test execution commands
-- Expected initial result and expected post-implementation result
-
-##### Step 5: Generate Executable Test Files
-
-Write programmatic test scripts to `tests/M{X}/` directory. Create the directory if it does not exist.
-
-**Language-Specific Requirements:**
-
-| Language | File Extension | Requirements |
-|---|---|---|
-| Bash | `.sh` | `#!/bin/bash` or `#!/usr/bin/env bash` shebang; bash function syntax (`function test_name() { ... }`); bash variables; `exit 0`/`exit 1` semantics; no Python/JS/TS/pseudo-code syntax |
-| Python | `.py` | `#!/usr/bin/env python3` shebang; Python function syntax (`def test_name():`); pytest assertions; proper imports; `if __name__ == "__main__":` guard for standalone execution; no bash syntax embedded in Python |
-
-**Cross-Language Prohibition:**
-- `.sh` files MUST NOT contain Python, TypeScript, JavaScript, or pseudo-code syntax
-- `.py` files MUST NOT contain bash syntax (no bash function definitions, no `exit 0`, no `$VAR` syntax)
-- File extension MUST match the language of syntax
-- NEVER generate a `.sh` file containing Python classes, functions, or method definitions
-
-**Mock Code Rules:**
-- Mock objects MUST be defined in the same language as the test script
-- Bash scripts: mock objects must be bash functions (`function mock_name() { ... }`)
-- Python scripts: mock objects must be Python classes/functions (`class Mock:`, `def mock_func():`)
-- Never embed a Python class definition in a `.sh` file
-
-**Syntax Validation:**
-Run syntax validation on ALL test scripts before marking complete:
-- Bash scripts: `bash -n tests/M{X}/test_*.sh` (exit code 0 required)
-- Python scripts: `python -m py_compile tests/M{X}/test_*.py` (no errors required)
-- If syntax validation fails, emit clear error: `"Test script {filename} has syntax errors. Please fix the template and regenerate."`
-- Do NOT mark the test phase as complete until syntax validation passes for all scripts
-
-##### Step 6: Execute Tests and Capture Results
-
-Run the generated tests against the current (pre-implementation) codebase:
-
-1. Execute each test file and capture its exit code
-2. Count: TESTS_RUN (total), TESTS_PASS (exit 0), TESTS_FAIL (non-zero exit)
-3. If ALL tests PASS (exit code 0 for all), emit a WARNING:
-   ```
-   WARNING: PRE-IMPLEMENTATION TEST PASSES
-   ```
-   Investigate whether:
-   - the feature already exists
-   - the test is testing the wrong behavior
-   - the test is too weak
-   - the test is accidentally testing test infrastructure
-4. If ANY test FAILS (non-zero exit), this is the expected initial state — document it
-5. Do NOT modify production code to make tests pass
-6. Do NOT invoke `implement-specification`
-
-##### Step 7: Report Results
-
-Output the machine-readable summary at the end of your output:
-
-```
-TESTS_RUN=N
-TESTS_PASSED=N
-TESTS_FAILED=N
-EXIT_CODE=N
-```
-
-Where EXIT_CODE is 0 if all tests passed, 1 if any test failed.
-
-##### Step 8: Stop
-
-Do NOT proceed to implementation.
-
-Do NOT invoke `implement-specification`.
-
-Handoff to `evaluate-implementation`.
+- invent new requirements;
+- invent verification criteria;
+- infer missing requirements from filenames;
+- invent APIs;
+- invent implementation behavior;
+- modify production implementation;
+- modify specifications;
+- modify verification protocols;
+- invoke `implement-specification`;
+- convert vague prose into arbitrary grep-based assertions;
+- test the verification document as a substitute for testing the implementation;
+- generate a test that cannot establish an independent oracle.
 
 ---
 
-#### Template and Artifact Usage
+# 1. Canonical Input
 
-### Test Script Template
+For `M{X}S{Y}`, read:
 
-Use the template at `~/devcode/aef/agent/templates/test_template.md` to generate standardized test design documents.
+1. `milestones/M{X}/M{X}.md`
+2. `milestones/M{X}/M{X}S{Y}.md`
+3. `milestones/M{X}/M{X}S{Y}V.md`
+4. `milestones/M{X}/M{X}S{Y}T*.md` if present.
 
-### Artifact Reporting
+The canonical verification artifact is:
 
-The documentation artifact is saved to: `milestones/M{X}/M{X}S{Y}T{Z}.md`.
-The executable test scripts are saved to: `tests/M{X}/` directory.
+`milestones/M{X}/M{X}S{Y}V.md`
 
-### Output Summary
+47:Before generating tests, verify:
+48: - The specification (`M{X}S{Y}.md`) contains valid YAML frontmatter.
+49: - The verification (`M{X}S{Y}V.md`) contains valid YAML frontmatter.
+50: - `type` field is correctly set for specification and verification artifacts.
+51: - `id` field matches expected identities.
+52: - `milestone_id` is present in all source artifacts.
+53: - Every verification item has a stable source ID (e.g., `FR-1`, `FR-2`).
+54: - Every executable verification has a method.
+55: - `validate_metadata.py` correctly processes the generated metadata.
+56:
+57:If any condition fails:
 
-Every `generate-tests` completion MUST end with:
+If any condition fails:
 
+```text
+TEST_GENERATION_BLOCKED
+
+Reason:
+{exact reason}
+
+Required action:
+Repair the verification protocol before generating tests.
 ```
-TESTS_RUN=N
-TESTS_PASSED=N
-TESTS_FAILED=N
-EXIT_CODE=N
+
+Do not generate tests.
+
+---
+
+# 2. Verification-Only Rule
+
+Every generated test MUST be traceable to one or more verification IDs.
+
+A test MUST NOT exist merely because:
+
+- a phrase appears in the specification;
+- a filename looks suspicious;
+- an old test existed;
+- an agent thinks a behavior would be useful.
+
+Each test must declare its source:
+87:Each test must declare its source and traceability to verification IDs:
+88: - `#{Verification IDs: V-FR-1, V-FR-2}`
+89: - `#{Requirement IDs: FR-1, FR-2}`
+90:
+91:The mapping must also be recorded in the test design document.
+
+93:The mapping must also be recorded in the test design document and must adhere to the artifact's YAML frontmatter.
+
+---
+
+# 3. Test Type Classification
+
+Classify each planned test as exactly one:
+
+- `SPECIFICATION_CHECK`
+- `IMPLEMENTATION_CHECK`
+- `INTEGRATION_CHECK`
+- `REGRESSION_CHECK`
+- `FIXTURE_CHECK`
+
+Do not mix specification validation with implementation validation in the same test unless explicitly required by the verification protocol.
+
+---
+
+# 4. Specification Checks
+
+For `DOCUMENT_CHECK` and `FRONTMATTER_CHECK` methods:
+
+Prefer structural parsing.
+
+Examples:
+
+- parse YAML frontmatter;
+- validate required keys;
+- validate enums;
+- validate arrays;
+- validate relationships;
+- validate exact schema structures.
+
+Do NOT use arbitrary string searches such as:
+
+```bash
+grep -q "metadata validation requirements"
+grep -q "TYPE-NNN"
+grep -q "revision semantics"
+```
+
+unless the verification protocol explicitly requires those exact literals.
+
+A test must verify the semantic condition, not the wording.
+
+For example, if the verification criterion is:
+
+```text
+Artifact IDs must be unique within milestone scope.
+```
+
+the test should inspect actual artifact IDs and detect duplicates.
+
+It should NOT search for:
+
+```text
+"unique within milestone directory"
+```
+
+in the specification.
+
+Tests are prohibited from grepping specifications for exact English prose or descriptive strings (e.g., searching for "id (canonical machine identifier)" or "type (artifact type)").
+
+Specification checks must assert key-value structures (e.g., checking for the presence of "id:" or "type:") or structurally parse the YAML frontmatter using a tool/script rather than searching for prose wording.
+
+---
+
+# 5. Implementation Checks
+
+Implementation checks MUST test observable behavior.
+
+Do not invent functions.
+
+Invalid:
+
+```bash
+declare -f create_artifact
+```
+
+unless `create_artifact` is explicitly defined as a required public interface.
+
+Invalid:
+
+```bash
+test -f src/artifact.py
+```
+
+unless that path is explicitly declared by the specification.
+
+Valid implementation checks may test:
+
+- documented CLI commands;
+- documented APIs;
+- documented filesystem behavior;
+- actual artifact creation;
+- actual metadata validation;
+- actual resolution behavior.
+
+The expected result must come from the verification contract.
+
+---
+
+### 6. TDD Post-Implementation Assertion Rule
+
+Every test MUST be written to verify the FINAL SUCCESS STATE of the implementation.
+You MUST NOT write tests that assert a file, module, or function is missing.
+In Test-Driven Development, if a file does not exist yet, the test will naturally fail (e.g., `command not found` or exit code 127). This natural failure IS the correct `VALID_INITIAL_FAILURE`. Your script must evaluate the actual intended execution logic, not the absence of code.
+
+Exit semantics:
+
+- 0 = test passed;
+- 1 = test assertion failed (or naturally failed due to missing implementation).
+
+---
+
+# 7. Test Oracle Independence
+
+Every test MUST have an independent oracle.
+
+The expected result may come from:
+
+- verification contract;
+- specification-defined invariant;
+- fixed fixture;
+- fixed expected value;
+- schema;
+- independent reference data.
+
+It MUST NOT come from:
+
+- implementation output used to define its own expectation;
+- generated implementation metadata;
+- the implementation's own validation function;
+- the test subject's internal helper;
+- a dynamically generated expected value derived from the same code path.
+
+If an independent oracle cannot be constructed:
+
+```text
+TEST_ORACLE_BLOCKED
+```
+
+Do not generate the test.
+
+---
+
+# 8. Test File Design
+
+Generate focused test files.
+
+One test file may contain multiple assertions only when they verify one coherent verification target.
+
+Prefer:
+
+```text
+tests/M10/test_frontmatter_contract.sh
+tests/M10/test_artifact_type_registry.sh
+tests/M10/test_identifier_contract.sh
+tests/M10/test_metadata_invariants.sh
+tests/M10/test_resolution_rules.sh
+tests/M10/test_legacy_compatibility.sh
+```
+
+Avoid:
+
+```text
+tests/M10/test_everything.sh
+```
+
+Do not create duplicate tests for the same verification ID unless explicitly justified.
+
+---
+
+# 9. Test Design Ledger
+
+Before generating executable tests, create:
+
+`milestones/M{X}/M{X}S{Y}T{Z}.md`
+267:with valid frontmatter:
+268:
+269:```yaml
+270:---
+271:id: M{X}S{Y}T{Z}
+type: test_set
+title: <human-readable title>
+milestone_id: M{X}
+derived_from:
+
+- M{X}S{Y}
+- M{X}S{Y}V
+  status: draft
+
+---
+
+````
+281:The ledger MUST contain:
+
+The ledger MUST contain:
+
+```markdown
+## Test Contract
+
+### Purpose
+
+...
+
+### Execution
+
+...
+
+### Initial State
+
+Tests are expected to fail only where the implementation is not yet present.
+
+### Post-Implementation State
+
+All implementation verification tests are expected to pass.
+
+## Traceability
+
+| Test File | Verification ID | Requirement ID | Test Type |
+| --------- | --------------- | -------------- | --------- |
+| ...       | ...             | ...            | ...       |
+````
+
+Every generated test MUST appear in this table.
+
+---
+
+# 10. File Generation Integrity
+
+Generate each test file individually.
+
+Never concatenate test files.
+
+Never generate shell source through a mechanism that can introduce binary control characters.
+
+For Bash scripts:
+
+- use `#!/bin/bash`;
+- use ordinary printable ASCII or valid UTF-8;
+- never include literal NUL bytes;
+- never embed binary data unless explicitly required;
+- use `$'\0'` only as Bash source text, never as an actual NUL character in the file;
+- prefer `find ... -print0` only when the script genuinely needs NUL-delimited filenames.
+
+CRITICAL:
+
+A generated script containing byte `0x00` is invalid test output.
+
+After writing each test:
+
+```bash
+python3 - "$TEST_FILE" <<'PY'
+from pathlib import Path
+import sys
+
+path = Path(sys.argv[1])
+data = path.read_bytes()
+
+if b"\x00" in data:
+    print(f"INTEGRITY FAILURE: NUL byte found in {path}")
+    sys.exit(1)
+
+print(f"Integrity OK: {path}")
+PY
+```
+
+Then:
+
+```bash
+bash -n "$TEST_FILE"
+```
+
+Do not proceed if either check fails.
+
+---
+
+# 11. Required Test Integrity Checks
+
+For every generated test file verify:
+
+1. file exists;
+2. file is non-empty;
+3. file is not binary;
+4. no NUL bytes;
+5. valid UTF-8 or valid ASCII;
+6. correct executable permissions where applicable;
+7. syntax is valid;
+8. self-validity assertion exists;
+9. verification ID comment exists;
+10. requirement ID comment exists.
+
+For Bash:
+
+```bash
+bash -n tests/M{X}/test_*.sh
+```
+
+For Python:
+
+```bash
+python3 -m py_compile tests/M{X}/test_*.py
 ```
 
 ---
 
-#### Out of Scope
+# 12. Safe Execution
 
-Never:
+Before executing tests:
 
-- Run the tests or attempt to evaluate the results without capturing exit codes.
-- Modify the core implementation code or any production source files.
-- Modify production configuration, templates, or framework source.
-- Write files to `src/`, `lib/`, `skills/` (except `tests/M{X}/`), `docs/`, or `AGENTS.md`.
-- Invoke `implement-specification`, `hotfix-focus`, or `hotfix-issue`.
-- Update specifications, verification protocols, or milestone documents.
-- Create README.md, SUMMARY.md, .txt files, or any generic documentation files in the project root.
-- Generate milestones, specifications, or verification plans.
+1. verify repository root;
+2. verify expected test directory;
+3. verify test files are the exact files from the test ledger;
+4. verify no test modifies production files;
+5. verify no test performs destructive operations.
 
----
+Tests MUST NOT:
 
-#### Guardrail Breach Protocol
+- modify production source;
+- rewrite specifications;
+- rewrite verification artifacts;
+- mutate Git history;
+- delete user files;
+- run `git reset`;
+- run `git clean`;
+- run destructive migrations.
 
-If at any point you detect that a write target would modify a production implementation path:
-
-1. **STOP** all write operations immediately.
-2. **Report** the exact path and classification:
-   ```
-   GUARDRAIL BREACH: generate-tests attempted to write production implementation.
-   File: {exact_path}
-   Classification: PRODUCTION_IMPLEMENTATION
-   Action: STOP — defer implementation to implement-specification.
-   ```
-3. **Do not continue.** Do not work around the guardrail. Do not write to a different path.
-4. The completion report must include this breach as a critical failure.
+Temporary fixtures must be created under a temporary directory and cleaned up safely.
 
 ---
 
-## Documentation
+# 13. Execution Results
 
-- **[skills.md](../../docs/skills.md)** — Comprehensive skill catalog
-- **[INDEX.md](../../INDEX.md)** — Complete skill catalog
+Execute each test individually.
 
-## References
+Capture:
 
-- [INDEX.md](../../INDEX.md) — Complete skill catalog
-- [AGENTS.md](../AGENTS.md) — Framework overview
-- [PLAYBOOK.md](../../docs/PLAYBOOK.md) — Operational workflows
-- [FRAMEWORK.md](../../docs/FRAMEWORK.md) — Architecture patterns
+- test filename;
+- exit code;
+- stdout;
+- stderr;
+- classification.
+
+Classify results as:
+
+```text
+PASS
+VALID_INITIAL_FAILURE
+VALIDITY_FAILURE
+TEST_ORACLE_FAILURE
+ENVIRONMENT_FAILURE
+INVALID_TEST
+```
+
+Definitions:
+
+### PASS
+
+The test passed.
+
+### VALID_INITIAL_FAILURE
+
+The test failed because the required implementation behavior is not yet present, and the test demonstrated that it exercised the intended subject.
+
+### VALIDITY_FAILURE
+
+The test could not establish that it exercised the intended subject.
+
+### TEST_ORACLE_FAILURE
+
+The test's expected result cannot be independently established.
+
+### ENVIRONMENT_FAILURE
+
+A required external dependency is missing or unavailable.
+
+### INVALID_TEST
+
+The test contradicts the verification contract or tests behavior not defined by the specification.
+
+---
+
+# 14. Critical Failure Rule
+
+If a test fails because the specification lacks a required definition:
+
+DO NOT automatically classify the test as an implementation failure.
+
+If the verification contract did not define the criterion:
+
+```text
+INVALID_TEST
+Reason: Test asserts behavior not present in verification contract.
+```
+
+If the verification contract defines the criterion but the specification does not:
+
+```text
+VERIFICATION_SPEC_MISMATCH
+Reason: Verification criterion is not grounded in the source specification.
+```
+
+If the specification defines the criterion and the verification contract defines it, but implementation fails:
+
+```text
+VALID_INITIAL_FAILURE
+```
+
+This distinction is mandatory.
+
+---
+
+# 15. No Textual Specification Drift
+
+Tests must not depend on exact prose wording.
+
+Bad:
+
+```bash
+grep -q "Stable ID scheme: TYPE-NNN"
+```
+
+Good:
+
+- parse the relevant structured data;
+- validate actual IDs;
+- validate allowed patterns;
+- validate actual artifact metadata;
+- inspect actual behavior.
+
+If a DOCUMENT_CHECK genuinely requires textual content, the verification protocol MUST define the exact semantic evidence first.
+
+The test generator must not invent its own wording.
+
+---
+
+# 16. Final Traceability Audit
+
+Before completion, verify:
+
+```text
+Every requirement
+    ↓
+has verification coverage
+
+Every verification item
+    ↓
+has test coverage where executable
+
+Every test
+    ↓
+maps to verification ID
+
+Every test assertion
+    ↓
+is grounded in verification evidence
+
+Every test oracle
+    ↓
+is independent
+```
+
+Report:
+
+```text
+Requirements: N
+Verification Items: N
+Executable Verification Items: N
+Generated Tests: N
+Covered Requirements: N
+Orphan Requirements: N
+Orphan Verification Items: N
+Orphan Tests: N
+Invalid Tests: N
+Integrity Failures: N
+```
+
+If any orphan or invalid test exists:
+
+```text
+TEST_GENERATION_BLOCKED
+```
+
+Do not hand off to implementation.
+
+---
+
+# 17. Initial Failure Gate
+
+The expected pre-implementation state is:
+
+- specification checks: PASS;
+- implementation checks: VALID_INITIAL_FAILURE where implementation is absent;
+- environment checks: PASS;
+- test validity: PASS.
+
+If all implementation tests pass before implementation:
+
+```text
+WARNING: All implementation tests pass before implementation.
+Investigate whether tests are testing existing behavior, are too weak, or are testing the wrong subject.
+```
+
+Do not automatically declare success.
+
+If any test produces `VALIDITY_FAILURE`, `TEST_ORACLE_FAILURE`, `ENVIRONMENT_FAILURE`, or `INVALID_TEST`:
+
+```text
+TEST_GENERATION_BLOCKED
+```
+
+Do not proceed to implementation.
+
+---
+
+# 18. Persistence Gate
+
+After all files are generated:
+
+```bash
+find tests/M{X} -maxdepth 1 -type f -print | sort
+git status --short tests/M{X}/
+```
+
+Every test listed in the ledger must exist.
+
+Every test must be visible to Git status.
+
+If a test is unexpectedly ignored:
+
+```text
+TEST_PERSISTENCE_BLOCKED
+```
+
+Investigate `.gitignore` and repository state.
+
+Do not assume an untracked file is lost or inaccessible.
+
+The test generator must report:
+
+```text
+Tracked: YES/NO
+Ignored: YES/NO
+Exists: YES/NO
+```
+
+Git tracking itself is not required before execution, but persistence must be verified and the test must be recoverable from the working tree.
+
+---
+
+# 19. Final Output
+
+If all gates pass:
+
+```text
+[TEST_GENERATION_COMPLETE]
+Requirements: N
+Verification_Items: N
+Tests_Generated: N
+Tests_Passed: N
+Valid_Initial_Failures: N
+Validity_Failures: 0
+Oracle_Failures: 0
+Invalid_Tests: 0
+Integrity_Failures: 0
+Orphan_Requirements: 0
+Orphan_Verifications: 0
+Orphan_Tests: 0
+Final_Gate: READY_FOR_EVALUATION
+
+Task complete.
+Next Step: Please run `/evaluate-implementation`.
+```
+
+If blocked:
+
+```text
+[TEST_GENERATION_BLOCKED]
+Reason: {specific reason}
+Final_Gate: TEST_GENERATION_BLOCKED
+Required_Action: {specific action}
+```
+
+Do not invoke another skill programmatically.
+
+## Out of Scope
+
+- Never write a test that searches for exact English sentences, descriptions, or parenthetical explanations in a markdown file unless the specification explicitly demands an exact, literal string match. If verifying metadata fields, assert the presence of the YAML key (e.g., 'id:') or parse the block structurally.

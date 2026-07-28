@@ -1,32 +1,41 @@
-# Completion M{X}S{Y}C
-
-| Property         | Value             |
-| ---------------- | ----------------- |
-| Document Type    | Completion Report |
-| Identifier       | M{X}S{Y}C         |
-| Derived From     | M{X}S{Y}          |
-| template_version | 1.0.0             |
-
+---
+id: COMP-000
+type: completion
+title: Template Completion Report
+milestone_id: M0
+status: draft
+derived_from: []
+template_version: 1.0.2
 ---
 
-## Files Modified
+### Completion Report: Implementation Details & Evidence
 
----
+#### 1. Files Modified
 
-## Tests Executed
+_(List all physical files created or modified with their relative repository paths)_
 
----
+-
 
-## Edge Cases Handled
+#### 2. Tests Executed & Pre-Implementation State
 
----
+_(Document the tests run, their exit codes, and how they validated the pre-implementation state)_
 
-## Technical Debt incurred
+-
 
----
+#### 3. Technical Changes Summary
 
-## Raw Evidence
+_(A high-level description of code additions, refactorings, or modifications made)_
 
-Every "done" claim must ship with the exact terminal command and raw output that proves it succeeded.
+-
 
-- [ ] <requirement>: `<command>` → <raw output>
+#### 4. Edge Cases Handled
+
+_(Document how the implementation defends against edge cases and failure scenarios)_
+
+-
+
+#### 5. Identified Technical Debt
+
+_(Record any shortcuts taken, temporary workarounds, or follow-up tasks required for maintainability)_
+
+-

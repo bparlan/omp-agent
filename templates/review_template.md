@@ -1,14 +1,11 @@
-# Review M{X}S{Y}R
-
-| Property         | Value               |
-| ---------------- | ------------------- |
-| Document Type    | Review              |
-| Identifier       | M{X}S{Y}R           |
-| Derived From     | M{X}S{Y}, M{X}S{Y}V |
-| template_version | 1.0.0               |
-
-## Executive Summary
-
+---
+id: REVIEW-{N}
+type: review
+title: Review Report for M{X}S{Y}
+milestone_id: M{X}
+status: completed
+derived_from: [EVAL-{N}]
+template_version: 1.0.2
 ---
 
 ## Implementation Summary
@@ -28,7 +25,6 @@
 ## Specification Compliance
 
 | Requirement | Status | Notes |
-
 
 ## Live State Verification
 

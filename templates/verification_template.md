@@ -1,11 +1,12 @@
-# Verification M{X}S{Y}V
-
-| Property         | Value        |
-| ---------------- | ------------ |
-| Document Type    | Verification |
-| Identifier       | M{X}S{Y}V    |
-| Derived From     | M{X}S{Y}     |
-| template_version | 1.1.0        |
+---
+id: VER-000
+type: verification
+title: Template Verification Protocol
+milestone_id: M0
+status: draft
+derived_from: []
+template_version: 1.1.0
+---
 
 ## Success Criteria
 

@@ -1,125 +1,68 @@
 ---
 name: milestone
-version: 2.3.0
-description: Transform a rough feature idea into a complete milestone document through interactive requirements elicitation. Supports followup specifications and verification reuse analysis.
+version: 2.4.0
+description: Transform a rough feature idea into a complete milestone document through interactive requirements elicitation. Ensures strict, observable scope boundaries.
 tools: read, write, ask, edit, glob
 user-invocable: true
 ---
 
-# Milestone Builder: Interactive Requirements Elicitation
+### Milestone Builder: Interactive Requirements Elicitation
 
 This skill assists in creating, managing, and iteratively developing project milestones. It supports starting new milestones and continuing, editing, and improving existing ones, including followup specifications for completed milestones.
 
-## Usage
+You are the definitive gatekeeper of scope. You must ensure that milestone goals and success criteria are concrete, observable, and implementation-independent.
+
+#### Usage
 
 `milestone <command> [options]`
 
-### Commands
+##### Commands
 
-1. **Determine Milestone ID** — Read `docs/MILESTONES.md`. Parse all existing entries (both `(active)` and `(archived)` formats). Find the absolute highest integer `X` in the `[M{X}]` tags. The new milestone identifier MUST be `M{X+1}`. If the file is empty or missing, start at `M1`.
+1. **Determine Milestone ID** — Read `docs/MILESTONES.md`. Parse all existing entries. Find the absolute highest integer `X` in the `[M{X}]` tags. The new identifier MUST be `M{X+1}`. If empty, start at `M1`.
 2. **Create**:
-    - Initializes a new project milestone.
-    - Creates a directory and a markdown file for the milestone (e.g., `/milestones/M1/M1.md`).
-    - Sets up a basic structure for the milestone.
+   - Initializes a new project milestone in `/milestones/M{X}/M{X}.md`.
 3. **Update**:
-    - **Description**: Continues building on an existing milestone, allowing for edits, updates, and improvements to the specified milestone file.
-        - **Preserve and Evaluate**: Reads the existing milestone file, evaluates user-provided data and prompts against milestone requirements, and then appends or refines content. Existing milestone documents are preserved and not deleted.
-        - **Content Update**: Appends new information, refines existing content, or resolves outstanding questions within the `<milestone_path>` file.
-    - **Arguments**:
-        - `<milestone_path>`: (Required) The file path to the existing milestone document that needs to be updated.
-        - `[user_prompt>`: (Optional) A natural language prompt containing the new information, answers, or directives for updating the milestone. The skill will attempt to intelligently parse this prompt for actionable data.
+   - **Description**: Continues building on an existing milestone, appending new information or resolving outstanding questions within the `<milestone_path>` file.
+   - **Arguments**: `<milestone_path>` (Required), `[user_prompt]` (Optional).
 4. **Followup**:
-    - **Description**: Generate a new specification (M{X}S{Y}.md) for followup work on an existing or completed milestone. This creates a "new specification" addition without modifying the original milestone.
-    - **Arguments**:
-        - `<milestone_path>`: (Required) The file path to the existing milestone document.
-        - `[focus_area]`: (Optional) A text description of the specific area or aspect to focus on for the followup work. If omitted, prompts the user for clarification.
-    - **Process**:
-        - Reads the milestone and scans for existing specifications.
-        - Determines next available specification sequence number.
-        - Checks for reusable verifications and tests from existing specifications.
-        - Generates a new specification document with appropriate derivation references.
-    - **Verification Reuse Analysis**:
-        - Scans existing M{X}S{Y}V.md files for relevant verification protocols.
-        - Identifies which verification items apply to the followup scope.
-        - Notes reusable automated validation items.
-        - Flags tests that may need updates or re-running.
+   - **Description**: Generate a new specification (`M{X}S{Y}.md`) for followup work on an existing or completed milestone without modifying the original milestone.
+   - **Arguments**: `<milestone_path>` (Required), `[focus_area]` (Optional).
+   - **Process**: Reads the milestone, determines next available sequence number, checks for reusable verifications, and generates a new specification document.
+   - **Verification Reuse Analysis (Strict)**: Scans existing `M{X}S{Y}V.md` files. You MUST only map existing, stable `VER-` or `FR-` IDs to the new work. Do not invent arbitrary connections.
 5. **Analyze-reuse**:
-    - **Description**: Check whether existing milestone verifications and tests are reusable for a proposed followup.
-    - **Arguments**:
-        - `<milestone_path>`: (Required) The file path to the existing milestone.
-    - **Output**: Summary of reusable verifications, tests that need updates, and recommendations.
-- **Run**:
-    - **Description**: Execute the complete SDD pipeline from milestone creation to review, with automation for steps that don't require user decisions.
-    - **Process**:
-        1. **Create milestone** — Initialize new milestone using "Create" workflow (steps 2-4).
-        2. **Auto-generate verification and tests** — After milestone creation, automatically run generate-verification and generate-tests.
-        3. **Generate specification** — Run generate-spec to create M{X}S{1}.md.
-        4. **Manual approval** — User reviews and confirms specification via approve-spec.
-        5. **Auto-implement** — After approval, automatically run implement-specification.
-        6. **Auto-evaluate** — Automatically run evaluate-implementation.
-        7. **Auto-review** — Automatically run review-implementation.
-        8. **Output summary** — Display final completion summary.
-    - **User intervention points**:
-        - Milestone creation (Create command)
-        - Specification approval (via approve-spec skill)
-    - **When to use**: Ideal for focused, well-defined milestones where you're confident about scope and requirements. Useful when you've done sufficient investigation and want to accelerate development.
-    - **Safety**: If investigation reveals significant issues or scope changes, the user can interrupt at any approval point or manually invoke investigate-issue.
+   - **Description**: Check whether existing milestone verifications and tests are reusable for a proposed followup.
+   - **Arguments**: `<milestone_path>` (Required).
+   - **Output**: Summary of reusable verifications and tests that need updates.
 
-## Template Mapping
+#### Template Mapping & Strict Requirements
 
-| Template Section | Required Questions |
-|-----------------|------------------|
-| Goal | Clear, one-sentence objective |
-| Motivation | Why it matters, consequences of inaction |
-| Scope | 2-5 concrete deliverables |
-| Out of Scope | Explicit exclusions |
-| Success Criteria | Measurable checklist items |
-| Risks | 2-3 identified risks |
-| Notes | Optional observations |
+| Template Section     | Required Constraints                                                                                                                          |
+| :------------------- | :-------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Goal**             | Clear, one-sentence objective.                                                                                                                |
+| **Motivation**       | Why it matters, consequences of inaction.                                                                                                     |
+| **Scope**            | 2-5 concrete deliverables. MUST describe "What", not "How".                                                                                   |
+| **Out of Scope**     | Explicit exclusions to prevent scope creep.                                                                                                   |
+| **Success Criteria** | Measurable checklist items. MUST be defined as observable system states, artifacts, or behaviors. MUST NOT rely on exact prose/text matching. |
+| **Risks**            | 2-3 identified technical or architectural risks.                                                                                              |
+| **Notes**            | Optional observations.                                                                                                                        |
 
----
-*This documentation outlines the enhanced capabilities for iterative milestone management, including continuation, editing, followup specifications, and verification reuse analysis.*
+#### Edit Tool Usage
 
-## Edit Tool Usage
+##### Single-line Replacements (Use bash)
 
-### Single-line Replacements (Use `bash`)
+For simple one-line edits, bash with `sed` is simpler and less error-prone:
+`sed -i 's/old/new/' file`
 
-For simple one-line edits, `bash` with `sed` is simpler and less error-prone:
+##### Multi-line Block Edits (Use edit)
 
-```bash
-# Replace line 27 with new text
-sed -i.bak '27s/.*/NEW_TEXT/' /path/to/file
+For structural changes with multiple lines, use the edit tool:
 
-# Example: Fix a single instruction line
-sed -i.bak '27s/.*/13. **Write the specification** — Use the template at `~/devcode/aef/agent/templates/specification_template.md`. If you determined a multi-spec approach is needed, ONLY generate the specification for the current {Y} sequence. Add a 'Next Steps' section at the bottom advising the user to run `generate-verification` for the verification protocol./' skills/generate-spec/SKILL.md
-```
-
-### Multi-line Block Edits (Use `edit`)
-
-For structural changes with multiple lines, use the `edit` tool:
-
-**Steps**:
-1. Read the file with `read` to get `[PATH#HASH]`
-2. Use `SWAP N.=N:` to replace a single line
+1. Read the file with `read` to get `[PATH#HASH]` (Must be on its own isolated line)
+2. On the NEXT line, use `SWAP N.=N:` to replace a single line
 3. Use `SWAP.BLK N:` to replace a complete block
 4. Always use `+` prefix for new lines
 
-**Example**:
-```
-[SKILL.md#ABC123]
-SWAP 27.=27:
-+13. **Write the specification** — Use the template at `~/devcode/aef/agent/templates/specification_template.md`. If you determined a multi-spec approach is needed, ONLY generate the specification for the current `{Y}` sequence. Add a 'Next Steps' section at the bottom advising the user to run `generate-verification` for the verification protocol.
-```
-
-
-## Documentation
+#### Documentation
 
 - **[skills.md](../../docs/skills.md)** — Comprehensive skill catalog
 - **[INDEX.md](../../INDEX.md)** — Complete skill catalog
-
-## References
-
-- [INDEX.md](../../INDEX.md) — Complete skill catalog
-- [AGENTS.md](../AGENTS.md) — Framework overview
-- [PLAYBOOK.md](../../docs/PLAYBOOK.md) — Operational workflows
-- [FRAMEWORK.md](../../docs/FRAMEWORK.md) — Architecture patterns

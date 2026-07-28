@@ -1,12 +1,11 @@
-# Investigation M{X}S{Y}I{Z}
-
-| Property         | Value                |
-| ---------------- | -------------------- |
-| Document Type    | Investigation Report |
-| Identifier       | M{X}S{Y}I{Z}         |
-| Derived From     | Issue {Z}            |
-| template_version | 1.0.0                |
-
+---
+id: INV-{N}
+type: investigation
+title: Investigation Report for Issue {Z}
+milestone_id: M{X}
+status: completed
+derived_from: [EVAL-{N}]
+template_version: 1.0.2
 ---
 
 ## Root Cause Analysis

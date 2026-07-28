@@ -1,12 +1,11 @@
-### Test Plan M{X}S{Y}T
-
-| Property         | Value     |
-| ---------------- | --------- |
-| Document Type    | Test Plan |
-| Identifier       | M{X}S{Y}T |
-| Derived From     | M{X}S{Y}V |
-| template_version | 1.0.0     |
-
+---
+id: TEST-000
+type: test_set
+title: Template Test Set
+milestone_id: M0
+status: draft
+derived_from: []
+template_version: 1.0.0
 ---
 
 ## Validity Metadata
@@ -24,6 +23,7 @@
 - **Setup Requirements:** (e.g., Environment variables, mock databases needed)
 
 ---
+
 #### Output Format Constraints
 
 **Language-Specific Requirements:**
@@ -57,6 +57,7 @@
 **Example:**
 
 **Invalid (Bash file with Python syntax):**
+
 ```bash
 #!/bin/bash
 # WRONG: Python class in bash file
@@ -66,6 +67,7 @@ class Mock:
 ```
 
 **Valid (Bash file with bash syntax):**
+
 ```bash
 #!/bin/bash
 # CORRECT: Bash function for mock
@@ -83,7 +85,9 @@ function test_example() {
     exit 0
 }
 ```
+
 ---
+
 #### Executable Scripts Generated
 
 _(List the actual code scripts generated and saved to the `tests/M{X}/` directory)_

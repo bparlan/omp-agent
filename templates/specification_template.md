@@ -1,12 +1,12 @@
-# Specification M{X}S{Y}
-
-| Property         | Value         |
-| ---------------- | ------------- |
-| Document Type    | Specification |
-| Identifier       | M{X}S{Y}      |
-| Derived From     | M{X}          |
-| Scope            | Topic         |
-| template_version | 1.2.0         |
+---
+id: SPEC-000
+type: specification
+title: Template Specification
+milestone_id: M0
+status: draft
+derived_from: []
+template_version: 1.2.0
+---
 
 ## Objective
 

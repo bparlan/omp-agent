@@ -1,12 +1,11 @@
-# Evaluation M{X}S{Y}E
-
-| Property         | Value                    |
-| ---------------- | ------------------------ |
-| Document Type    | Evaluation Report        |
-| Identifier       | M{X}S{Y}E                |
-| Derived From     | Implementation M{X}S{Y}C |
-| template_version | 1.0.0                    |
-
+---
+id: EVAL-{N}  # Sequential integer matching the evaluation run
+type: evaluation
+title: Evaluation Report for M{X}S{Y}
+milestone_id: M{X}
+status: completed
+derived_from: [SPEC-{Y}, VER-{Y}]
+template_version: 1.0.2
 ---
 
 ## Test Execution Summary
@@ -20,9 +19,9 @@
 
 ### Invalidation Reports (if any)
 
-| Test File | Violated Criterion | Raw Evidence | Recommended Repair |
-|-----------|-------------------|--------------|-------------------|
-| <path> | <criterion> | <exit_code+stdout+stderr> | <repair action> |
+| Test File | Violated Criterion | Raw Evidence              | Recommended Repair |
+| --------- | ------------------ | ------------------------- | ------------------ |
+| <path>    | <criterion>        | <exit_code+stdout+stderr> | <repair action>    |
 
 ---
 

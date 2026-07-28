@@ -1,18 +1,18 @@
-### Hotfix Focus Report {ID}
-| Property | Value |
-| ------ | ------ |
-| Document Type | Hotfix Focus |
-| Identifier | HF_{YYYYMMDD}_{ID} |
-| Date | {YYYY-MM-DD} |
-| Documentation Impact | [MINOR / MODERATE / MAJOR] |
-| template_version | 1.0.0 |
-
---------------------------------------------------------------------------------
+---
+id: HOT-{N}
+type: hotfix
+title: Hotfix Focus Report
+milestone_id: M{X}
+status: completed
+template_version: 1.0.2
+---
 
 #### Literal Checklist Executed
-*(List the exact, mechanical tasks requested by the user)*
 
---------------------------------------------------------------------------------
+_(List the exact, mechanical tasks requested by the user)_
+
+---
 
 #### Mechanical Code Changes
-*(List the exact files modified and a literal description of the code/CSS changed. Derive this strictly from the codebase reality)*
+
+_(List the exact files modified and a literal description of the code/CSS changed. Derive this strictly from the codebase reality)_
