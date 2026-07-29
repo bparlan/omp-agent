@@ -10,13 +10,19 @@ Parses YAML frontmatter from a file and validates:
 import sys
 import os
 import re
-import yaml
+
+from _frontmatter import extract_frontmatter
 
 
 REQUIRED_FIELDS = ["id", "type", "title", "milestone_id", "status", "derived_from"]
-ALLOWED_TYPES = ["specification", "verification", "test_set", "investigation", "completion", "evaluation", "review", "hotfix"]
+ALLOWED_TYPES = [
+    "specification", "verification", "test_set", "investigation",
+    "completion", "evaluation", "review", "hotfix", "architecture",
+]
 ALLOWED_STATUSES = ["draft", "active", "completed", "superseded"]
-CANONICAL_ID_PATTERN = re.compile(r"^(SPEC|VER|TEST|INV|COMP|EVAL|REVIEW|HOT)-\d+$")
+CANONICAL_ID_PATTERN = re.compile(
+    r"^(SPEC|VER|TEST|INV|COMP|EVAL|REVIEW|HOT|ARCH)-\d+$",
+)
 
 
 def validate_file(filepath: str) -> bool:
@@ -25,23 +31,10 @@ def validate_file(filepath: str) -> bool:
         print(f"Error: File not found: {filepath}", file=sys.stderr)
         return False
 
-    with open(filepath, "r") as fh:
-        content = fh.read()
-
-    # Extract YAML frontmatter delimited by --- ... ---
-    match = re.match(r"^---\s*\n(.*?)\n---", content, re.DOTALL)
-    if not match:
-        print(f"Error: No YAML frontmatter found in {filepath}", file=sys.stderr)
-        return False
-
-    try:
-        metadata = yaml.safe_load(match.group(1))
-    except yaml.YAMLError as exc:
-        print(f"Error: Invalid YAML in {filepath}: {exc}", file=sys.stderr)
-        return False
-
-    if not isinstance(metadata, dict):
-        print(f"Error: Frontmatter is not a mapping in {filepath}", file=sys.stderr)
+    # Extract YAML frontmatter via shared module
+    metadata = extract_frontmatter(filepath)
+    if metadata is None:
+        print(f"Error: No valid YAML frontmatter found in {filepath}", file=sys.stderr)
         return False
 
     # FR-3: check required fields

@@ -676,6 +676,10 @@ Required_Action: {specific action}
 
 Do not invoke another skill programmatically.
 
+# 20. Stop and Handoff
+
+You MUST NOT attempt to invoke the next skill as a programmatic tool. To advance the pipeline, you must STOP your execution and output a plain text message: _"Task complete. Next Step: Please run `/approve-spec` to continue."_
+
 ## Out of Scope
 
 - Never write a test that searches for exact English sentences, descriptions, or parenthetical explanations in a markdown file unless the specification explicitly demands an exact, literal string match. If verifying metadata fields, assert the presence of the YAML key (e.g., 'id:') or parse the block structurally.

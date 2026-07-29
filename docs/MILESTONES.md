@@ -4,9 +4,54 @@ This document lists active and archived milestones for the OMP Framework project
 
 ## Active Milestones
 
+- ### M9 — AEF Artifact-System Integration & Project Workspace Alignment
+  - **Status**: Active (Proposed)
+  - **Phase**: Specification & Verification
+  - **Description**: Integrate the canonical artifact architecture established by M9 into the existing AEF/OMP development infrastructure. This milestone ensures that AEF skills which create, locate, validate, or update artifacts operate consistently with the canonical artifact identity, type, metadata, lineage, storage, and legacy-compatibility rules defined by M9. The milestone also establishes project-level workspace isolation so that AEF can be used both to develop AEF itself and to bootstrap and maintain independent application projects without leaking AEF-specific documentation, metadata, or development artifacts into those projects.
+  - **Key Deliverables**:
+    - Artifact-system adoption across all affected skills
+    - Canonical artifact resolution mechanism integration
+    - Canonical artifact creation primitives
+    - Metadata validation integration
+    - Project-scoped configuration (.omp/config.yml)
+    - Mode-aware bootstrapping (framework/application modes)
+    - Project isolation guarantees
+    - Milestone integration with canonical artifacts
+    - Specification/verification/test pipeline integration
+    - Legacy compatibility verification
+    - Cross-project isolation verification
+    - Verification tests in isolated fixtures
+    - Implementation review and completion report
+  - **Skills Updated**:
+    - `skills/bootstrap-project/SKILL.md` — (expected)
+    - `skills/generate-spec/SKILL.md` — (expected)
+    - `skills/generate-verification/SKILL.md` — (expected)
+    - `skills/generate-tests/SKILL.md` — (expected)
+    - `skills/implement-specification/SKILL.md` — (expected)
+    - `skills/evaluate-implementation/SKILL.md` — (expected)
+    - `skills/review-implementation/SKILL.md` — (expected)
+    - `skills/sync-documentation/SKILL.md` — (expected)
+    - `skills/archive-docs/SKILL.md` — (expected)
+    - `skills/approve-specs/SKILL.md` — (expected)
+    - `skills/code-search/SKILL.md` — (expected)
+    - `skills/evolve-skills/SKILL.md` — (expected)
+    - `skills/hotfix-focus/SKILL.md` — (expected)
+    - `skills/hotfix-issue/SKILL.md` — (expected)
+    - `skills/investigate-issue/SKILL.md` — (expected)
+    - `skills/milestone/SKILL.md` — (expected)
+    - `skills/session-audit/SKILL.md` — (expected)
+  - **Artifacts**:
+    - `milestones/M9/M9.md` — Milestone definition (this document)
+    - `milestones/M9/M9S1.md` — Specification (to be generated)
+    - `milestones/M9/M9S1V.md` — Verification protocol (to be generated)
+    - `milestones/M9/M9S1T1.md` — Test plan (to be generated)
+    - `milestones/M9/M9S1C.md` — Completion report (to be generated)
+    - `milestones/M9/M9S1E.md` — Evaluation report (to be generated)
+    - `milestones/M9/M9S1R.md` — Review report (to be generated)
+    - `tests/M9/` — Verification tests (to be generated)
 - ### M8 — Valid Evidence — Formalise Test Validity as a Lifecycle Concept
-  - **Status**: COMPLETE ✅
-  - **Phase**: Requirements Elicitation
+  - **Status**: ✅ Successful
+  - **Phase**: Testing & Validation
   - **Date**: 2026-07-27
   - **Description**: Introduce a mandatory validity check between test execution and evidence interpretation in the SDD pipeline. Test exit codes alone are insufficient — we must first establish that a test failure is attributable to the intended subject before advancing the lifecycle. This is a direct architectural followup to M7's finding that "test failed" is not equivalent to "implementation missing."
   - **Key Deliverables**:
@@ -18,11 +63,11 @@ This document lists active and archived milestones for the OMP Framework project
     - Validity analysis in `review-implementation` — distinguish "test is wrong" from "implementation is wrong"
     - Meta-test for the validity gate
   - **Skills Updated**:
-    - `skills/evaluate-implementation/SKILL.md` — v1.0.4 (expected)
+    - `skills/evaluate-implementation/SKILL.md` — v1.0.4
     - `skills/review-implementation/SKILL.md` — (expected)
-    - `skills/generate-tests/SKILL.md` — v2.0.x (expected)
+    - `skills/generate-tests/SKILL.md` — v2.0.x
   - **Artifacts**:
-    - `milestones/M8/M8.md` — Milestone definition (this document)
+    - `milestones/M8/M8.md` — Milestone definition
     - `milestones/M8/M8S1.md` — Specification (to be generated)
     - `milestones/M8/M8S1V.md` — Verification protocol (to be generated)
     - `milestones/M8/M8S1T1.md` — Test plan (to be generated)
@@ -30,119 +75,141 @@ This document lists active and archived milestones for the OMP Framework project
     - `milestones/M8/M8S1E.md` — Evaluation report (to be generated)
     - `milestones/M8/M8S1R.md` — Review report (to be generated)
     - `tests/M8/` — Meta-test scripts (to be generated)
-
-- ### M4 — Harden OMP Pre-Implementation Orchestration and Approval Gate
 -
-- - **Status**: In Progress
-- - **Phase**: Orchestration & Integrity
-- - **Description**: Harden OMP Pre-Implementation Orchestration and Approval Gate — stabilize the SDD pipeline with explicit state machine, artifact validation, and strict pre-implementation gates to prevent workflow-state violations.
-- - **Key Deliverables**:
--   - Incident analysis of orchestration failure
--   - Pre-implementation state machine
--   - Mandatory pre-implementation chain enforcement
--   - Test-first readiness validation
--   - Human approval gate
--   - Resume/recovery support
--   - Artifact integrity validation
--   - Tests for ordering, blocking, approval gates, and resume
-- - **Artifacts**:
--   - `milestones/M4/M4.md` — Milestone definition
--   - `milestones/M4/M4S1.md` — Specification (to be generated)
--   - `milestones/M4/M4S1V.md` — Verification protocol (to be generated)
--   - `milestones/M4/M4S1T1.md` — Test plan (to be generated)
--   - `milestones/M4/M4S1C.md` — Completion report (to be generated)
--   - `milestones/M4/M4S1E.md` — Evaluation report (to be generated)
--   - `milestones/M4/M4S1R.md` — Review report (to be generated)
--   - `milestones/M4/M4SA1.md` — Session Audit Document (to be generated)
--   - `milestones/M4/SESSION_CHANGES.md` — Change log (to be generated)
--   - `milestones/M4/CHANGELOG_ENTRIES.md` — Changelog entries (to be generated)
--   - `milestones/M4/MILESTONE_UPDATES.md` — Milestone updates (to be generated)
--   - `milestones/M4/INGEST_ENTRIES.md` — Ingestion entries (to be generated)
--   - `tests/M4/` — Test scripts (to be generated)
--
-- - **Status**: 75% Complete (Documentation and Tooling)
-- - **Phase**: Infrastructure & Session Management
-- - **Session**: SA1 (completed 2026-07-18)
-- - **Description**: Added session-audit skill for session-based framework improvements, enhanced code-search infrastructure with comprehensive documentation, and integrated session-audit into evolve-skills workflow.
-- - **Key Deliverables**:
--   - Session-audit v1.1.0 with 5 output formats
--   - Code-search README.md infrastructure documentation
--   - TEMP milestone automatic detection and handling
--   - /docs/ingest/ workflow integration
-- - **Health Audit Layer**: Automated skills-auditor for monitoring evolve-skills dependencies with 13 health reports and console dashboard
-- - **Artifacts**:
--   - `milestones/M2/M2SA1.md` — Session Audit Document
--   - `milestones/M2/SESSION_CHANGES.md` — Change log
--   - `milestones/M2/CHANGELOG_ENTRIES.md` — Changelog entries
--   - `milestones/M2/MILESTONE_UPDATES.md` — Milestone updates
-- - `milestones/M2/M2SA2.md` — Session Audit Document
 
 
-### M3 — The Mechanism Upgrade
-
-- **Status**: 75% Complete (M3S2 Accepted; M3S1 pending remediation)
-- **Phase**: Implementation & Mechanical Tooling
-- **Description**: Embed "The Mechanism" into the OMP AEF canonical architecture to enforce mechanical uncertainty markers, zero-trust reviews, evidence-based debugging, raw evidence mandates, and project-agnostic mechanical tooling gates.
-- **Key Deliverables**:
-  - Mandatory `#NEEDS-CLARIFICATION` marker codified in FRAMEWORK.md and AGENTS.md
-  - Zero-trust review pass with live-state verification in review-implementation
-  - Evidence-based debugging mandate in investigate-issue and evaluate-implementation
-  - Raw Evidence section in completion and evaluation templates
-  - Read-only ground-truth check utility script
-  - Mechanical Tooling Stack mandate in bootstrap-project
-  - `milestones/M3/M3S2.md` — Specification (Accepted)
-  - `milestones/M3/M3S2V.md` — Verification protocol
-  - `milestones/M3/M3S2T1.md` — Test plan
-  - `milestones/M3/M3S2C.md` — Completion report
-  - `milestones/M3/M3S2E.md` — Evaluation report
-  - `milestones/M3/M3S2R.md` — Review report (Accepted)
-  - `milestones/M3/M3SA1.md` — Session Audit Document
-  - `milestones/M3/SESSION_CHANGES.md` — Change log
-  - `milestones/M3/CHANGELOG_ENTRIES.md` — Changelog entries
-  - `milestones/M3/MILESTONE_UPDATES.md` — Milestone updates
-  - `milestones/M3/INGEST_ENTRIES.md` — Ingestion entries
-
+- ### M3 — The Mechanism Upgrade
+-   - **Status**: ✅ Done
+-   - **Phase**: Infrastructure & Mechanical Tooling
+-   - **Date**: 2026-07-18
+-   - **Description**: Embed "The Mechanism" into the OMP AEF canonical architecture to enforce mechanical uncertainty markers, zero-trust reviews, evidence-based debugging, raw evidence mandates, and project-agnostic mechanical tooling gates.
+-   - **Key Deliverables**:
+-     - Mandatory `#NEEDS-CLARIFICATION` marker codified in FRAMEWORK.md and AGENTS.md
+-     - Zero-trust review pass with live-state verification in review-implementation
+-     - Evidence-based debugging mandate in investigate-issue and evaluate-implementation
+-     - Raw Evidence section in completion and evaluation templates
+-     - Read-only ground-truth check utility script
+-     - Mechanical Tooling Stack mandate in bootstrap-project
+-     - `milestones/M3/M3S2.md` — Specification (Accepted)
+-     - `milestones/M3/M3S2V.md` — Verification protocol
+-     - `milestones/M3/M3S2T1.md` — Test plan
+-     - `milestones/M3/M3S2C.md` — Completion report
+-     - `milestones/M3/M3S2E.md` — Evaluation report
+-     - `milestones/M3/M3S2R.md` — Review report (Accepted)
+-     - `milestones/M3/M3SA1.md` — Session Audit Document
+-     - `milestones/M3/SESSION_CHANGES.md` — Change log
+-     - `milestones/M3/CHANGELOG_ENTRIES.md` — Changelog entries
+-     - `milestones/M3/MILESTONE_UPDATES.md` — Milestone updates
+-     - `milestones/M3/INGEST_ENTRIES.md` — Ingestion entries
+-     - `tests/M3/` — Meta-test scripts (to be generated)
+- - ### M7 — Restore Determinism — Repair `generate-tests` Test-First Integrity
+-   - **Status**: ⏸️ Paused
+-   - **Phase**: Testing & Remediation
+-   - **Session**: SA1 (paused 2026-07-29)
+-   - **Description**: Restored test-first integrity to the SDD pipeline by making `generate-tests` deterministic — it now produces executable tests that initially fail, enforces hard boundary guardrails against production code, and generates machine-readable output. Includes investigation report, test contract, test-first enforcement, language-specific executable test rules, guardrail breach protocol, and meta-tests A–G.
+-   - **Key Deliverables**:
+-     - Investigation report identifying contamination root cause (7 questions)
+-     - Hard boundary guardrails with 5-category file classification
+-     - Test contract defining strict test artifact requirements
+-     - Test-first enforcement (run tests, capture exit codes, expect failure)
+-     - Language-specific executable test rules with cross-language prohibition
+-     - Guardrail Breach Protocol with STOP-and-report
+-     - Machine-readable output (TESTS_RUN, TESTS_PASSED, TESTS_FAILED, EXIT_CODE)
+-     - 7 meta-tests (Tests A–G) for the test generator
+-     - Lifecycle postmortem with 10 architectural findings
+-   - **Skills Updated**:
+-     - `skills/generate-tests/SKILL.md` — v1.1.0 → v2.0.0
+-     - `skills/implement-specification/SKILL.md` — v1.0.1 → v1.0.2
+-     - `skills/evaluate-implementation/SKILL.md` — v1.0.2 → v1.0.3
+-   - **Artifacts**:
+-     - `milestones/M7/M7.md` — Milestone definition
+-     - `milestones/M7/M7S1.md` — Specification (Approved)
+-     - `milestones/M7/M7S1V.md` — Verification protocol
+-     - `milestones/M7/M7S1T1.md` — Test plan
+-     - `milestones/M7/M7S1C.md` — Completion report
+-     - `milestones/M7/M7S1E.md` — Evaluation report
+-     - `milestones/M7/M7S1R.md` — Review report
+-     - `milestones/M7/M7INVESTIGATION.md` — Investigation report
+-     - `milestones/M7/M7SA1.md` — Session Audit Document (SA1)
+-     - `milestones/M7/SESSION_CHANGES.md` — Change log
+-     - `milestones/M7/CHANGELOG_ENTRIES.md` — Changelog entries
+-     - `milestones/M7/MILESTONE_UPDATES.md` — Milestone updates
+-     - `milestones/M7/INGEST_ENTRIES.md` — Ingestion entries
+-     - `tests/M7/` — 7 meta-test scripts (Tests A–G)
+- - ### M6 — Orchestration Infrastructure — Project Lifecycle Management
+-   - **Status**: ⏸️ Paused (Superseded by M10)
+-   - **Phase**: Orchestration & Project Management
+-   - **Description**: Establish unified project lifecycle management for the OMP AEF, integrating work-in-progress tracking, scheduling, and resource allocation across milestones and session audits. This milestone provides a dedicated workspace for planning, coordination, and oversight of AEF development activities, enabling systematic tracking of progress, blockers, and dependencies.
+-   - **Key Deliverables**:
+-     - Unified project lifecycle workspace in `.omp/orchestration/`
+-     - Work-in-progress tracker for milestones and session audits
+-     - Dependency graph visualization of milestone relationships
+-     - Resource allocation tracking (time, effort, scope)
+-     - Blocker and issue tracking integration
+-     - Multi-project coordination panel (AEF + application projects)
+-     - Scheduled release planning tools
+-     - Meta-skill for orchestration lifecycle management
+-   - **Artifacts**:
+-     - `milestones/M6/M6.md` — Milestone definition
+-     - `milestones/M6/M6S1.md` — Specification (to be generated)
+-     - `milestones/M6/M6S1V.md` — Verification protocol (to be generated)
+-     - `milestones/M6/M6S1T1.md` — Test plan (to be generated)
+-     - `milestones/M6/M6S1C.md` — Completion report (to be generated)
+-     - `milestones/M6/M6S1E.md` — Evaluation report (to be generated)
+-     - `milestones/M6/M6S1R.md` — Review report (to be generated)
+- - ### M5 — Environment Manager — Prevent Version Ambiguity & Auto-Activation
+-   - **Status**: ⏸️ Paused
+-   - **Phase**: Environment Management
+-   - **Session**: PAUSED
+-   - **Description**: Prevent version ambiguity and auto-activate the correct runtime and package manager for each project using standardized environment markers in `package.json` and `.env` files. This milestone ensures that AEF skills can automatically detect and switch between different project types (Python, Node.js, Rust, Go, etc.) without manual intervention, while preserving existing project-specific tooling and configurations.
+-   - **Key Deliverables**:
+-     - Environment marker convention for `package.json` (.env + runtime fields)
+-     - Auto-detection logic for runtime and package manager
+-     - Environment activation script for framework projects
+-     - Multi-runtime support (Python, Node.js, Rust, Go)
+-     - Configuration file preservation (`.env`, `package.json`, `Cargo.toml`)
+-     - Runtime validation script for checking version compatibility
+-     - Cross-platform environment activation (Windows/macOS/Linux)
+-     - Environment manager skill integration
+-   - **Artifacts**:
+-     - `milestones/M5/M5.md` — Milestone definition
+-     - `milestones/M5/M5S1.md` — Specification (to be generated)
+-     - `milestones/M5/M5S1V.md` — Verification protocol (to be generated)
+-     - `milestones/M5/M5S1T1.md` — Test plan (to be generated)
+-     - `milestones/M5/M5S1C.md` — Completion report (to be generated)
+-     - `milestones/M5/M5S1E.md` — Evaluation report (to be generated)
+-     - `milestones/M5/M5S1R.md` — Review report (to be generated)
+-     - `tests/M5/` — Environment tests (to be generated)
+- - ### M4 — Valid Evidence — Formalise Test Validity as a Lifecycle Concept
+-   - **Status**: ⏸️ Paused
+-   - **Phase**: Testing & Validation
+-   - **Session**: SA1 (paused 2026-07-29)
+-   - **Description**: Introduce a mandatory validity check between test execution and evidence interpretation in the SDD pipeline. Test exit codes alone are insufficient — we must first establish that a test failure is attributable to the intended subject before advancing the lifecycle. This is a direct architectural followup to M7's finding that "test failed" is not equivalent to "implementation missing."
+-   - **Key Deliverables**:
+-     - "Valid Evidence" concept codified in framework documentation with the core principle: "Never advance the lifecycle based solely on test exit codes"
+-     - Validity gate in `evaluate-implementation` — mandatory pre-processing before test interpretation
+-     - Self-validity assertions in all generated tests — tests prove they exercised their subject
+-     - INVALID_TEST classification as a formal test result state
+-     - Invalidation protocol — pipeline stops on INVALID_TEST, produces diagnostic report
+-     - Validity analysis in `review-implementation` — distinguish "test is wrong" from "implementation is wrong"
+-     - Meta-test for the validity gate
+-   - **Skills Updated**:
+-     - `skills/evaluate-implementation/SKILL.md` — (expected)
+-     - `skills/review-implementation/SKILL.md` — (expected)
+-     - `skills/generate-tests/SKILL.md` — (expected)
+-   - **Artifacts**:
+-     - `milestones/M4/M4.md` — Milestone definition
+-     - `milestones/M4/M4S1.md` — Specification (to be generated)
+-     - `milestones/M4/M4S1V.md` — Verification protocol (to be generated)
+-     - `milestones/M4/M4S1T1.md` — Test plan (to be generated)
+-     - `milestones/M4/M4S1C.md` — Completion report (to be generated)
+-     - `milestones/M4/M4S1E.md` — Evaluation report (to be generated)
+-     - `milestones/M4/M4S1R.md` — Review report (to be generated)
+-     - `tests/M4/` — Meta-test scripts (to be generated)
 ---
 
 ## Archived Milestones
 
-- ### M7 — Restore Determinism — Repair `generate-tests` Test-First Integrity
-  - **Status**: ✅ Complete
-  - **Phase**: Testing & Remediation
-  - **Date**: 2026-07-27
-  - **Session**: SA1 (completed 2026-07-27)
-  - **Description**: Restored test-first integrity to the SDD pipeline by making `generate-tests` deterministic — it now produces executable tests that initially fail, enforces hard boundary guardrails against production code, and generates machine-readable output. Includes investigation report, test contract, test-first enforcement, language-specific executable test rules, guardrail breach protocol, and meta-tests A–G.
-  - **Key Deliverables**:
-    - Investigation report identifying contamination root cause (7 questions)
-    - Hard boundary guardrails with 5-category file classification
-    - Test contract defining strict test artifact requirements
-    - Test-first enforcement (run tests, capture exit codes, expect failure)
-    - Language-specific executable test rules with cross-language prohibition
-    - Guardrail Breach Protocol with STOP-and-report
-    - Machine-readable output (TESTS_RUN, TESTS_PASSED, TESTS_FAILED, EXIT_CODE)
-    - 7 meta-tests (Tests A–G) for the test generator
-    - Lifecycle postmortem with 10 architectural findings
-  - **Skills Updated**:
-    - `skills/generate-tests/SKILL.md` — v1.1.0 → v2.0.0
-    - `skills/implement-specification/SKILL.md` — v1.0.1 → v1.0.2
-    - `skills/evaluate-implementation/SKILL.md` — v1.0.2 → v1.0.3
-  - **Artifacts**:
-    - `milestones/M7/M7.md` — Milestone definition
-    - `milestones/M7/M7S1.md` — Specification (Approved)
-    - `milestones/M7/M7S1V.md` — Verification protocol
-    - `milestones/M7/M7S1T1.md` — Test plan
-    - `milestones/M7/M7S1C.md` — Completion report
-    - `milestones/M7/M7S1E.md` — Evaluation report
-    - `milestones/M7/M7S1R.md` — Review report
-    - `milestones/M7/M7INVESTIGATION.md` — Investigation report
-    - `milestones/M7/M7SA1.md` — Session Audit Document (SA1)
-    - `milestones/M7/SESSION_CHANGES.md` — Change log
-    - `milestones/M7/CHANGELOG_ENTRIES.md` — Changelog entries
-    - `milestones/M7/MILESTONE_UPDATES.md` — Milestone updates
-    - `milestones/M7/INGEST_ENTRIES.md` — Ingestion entries
-    - `tests/M7/` — 7 meta-test scripts (Tests A–G)
-    - `docs/MILESTONES.md` — Archived entry (this section)
-  - **Architectural Findings**: 10 lifecycle lessons preserved in M7SA1.md
 
 ---
 

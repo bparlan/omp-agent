@@ -34,3 +34,6 @@
   persistent newline escaping issues in bash. The process was halted due to a
   tool_call_loop_detected error. No successful edits were made for this specific task.
 - evolve-skills/SKILL.md - Health Audit Layer: Successfully implemented automated health monitoring for evolve-skills dependencies, discovering and fixing critical issues in 5 skills (missing edit tool in frontmatter).
+
+- `bin/_frontmatter.py` - BOM Handling: M7.md (and potentially other files) has a UTF-8 BOM prefix (`\ufeff`) that prevented `extract_frontmatter()` from matching the `^---` regex. Fixed by adding BOM stripping before regex matching. Discovered during M7S3 review-implementation phase.
+- YAML `&` Anchor Operator: `milestones/M7/M7S3E.md` had `title: Evaluation Report for M7S3: Legacy Compatibility & Transition` — the `&` is a YAML anchor operator, causing `validate_metadata.py` to fail silently. Fixed by quoting the title string. Discovered during M7S3 evaluation phase.
