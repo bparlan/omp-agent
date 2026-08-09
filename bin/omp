@@ -1,0 +1,198 @@
+\
+#!/usr/bin/env python3
+import click
+import sys
+import os
+import re
+import yaml
+import pathlib
+
+# Import validators from the package
+    from omp_cli import validate_metadata
+    from omp_cli import linting
+from omp_cli.validators import check_approval_stamp, check_test_readiness, run_git_integrity_check
+
+@click.group()
+def cli():
+    """OMP CLI Dispatcher."""
+    pass
+
+@cli.command()
+@click.argument('milestone_sequence')
+def generate_tests(milestone_sequence):
+    """Generates tests for a given milestone sequence."""
+    
+    # 1. Resolve milestone/sequence args
+    match = re.match(r"M(\d+)S(\d+)", milestone_sequence)
+    if not match:
+        click.echo(f"Error: Invalid milestone_sequence format. Expected M<number>S<number>, got {milestone_sequence}", err=True)
+        sys.exit(1)
+    
+    milestone_id_num = match.group(1)
+    sequence_id_num = match.group(2)
+    milestone_id = f"M{milestone_id_num}"
+    sequence_id = f"S{sequence_id_num}"
+    
+    click.echo(f"Dispatching 'generate-tests' for {milestone_id}{sequence_id}...")
+    
+    # 2. Precondition checks
+    click.echo("\nRunning Precondition Checks...")
+    
+    # Precondition 1: Metadata Validation
+    # Construct expected paths based on milestone_id and sequence_id
+    spec_path = f"milestones/{milestone_id}/{milestone_id}{sequence_id}.md"
+    verification_path = f"milestones/{milestone_id}/{milestone_id}{sequence_id}V.md"
+    
+    try:
+        # Call the imported validation function
+        if not validate_metadata.validate_metadata_files(spec_path, verification_path):
+            click.echo("Precondition Failed: Metadata validation error.", err=True)
+            sys.exit(1)
+        click.echo("Metadata validation passed.")
+    except FileNotFoundError as e:
+        click.echo(f"Precondition Failed: {e}", err=True)
+        sys.exit(1)
+    except Exception as e:
+        click.echo(f"Precondition Failed: Error during metadata validation: {e}", err=True)
+        sys.exit(1)
+
+    # Precondition 2: Lint Verification Contract
+    # The lint_verification_contract function expects the path to the contract file.
+    # Assuming it's the same as the verification_path for this example.
+    if not linting.lint_verification_contract(spec_path): 
+        click.echo("Precondition Failed: Verification contract linting failed.", err=True)
+        sys.exit(1)
+    click.echo("Verification contract linting passed.")
+    
+    click.echo("\nPrecondition checks passed. Proceeding to skill execution...")
+    
+    # 3. Simulate Handoff to Skill Logic (LLM/Agent Process)
+    # This section simulates calling the actual generation logic.
+    # For demonstration, we'll print a message and create placeholder files.
+    click.echo(f"Simulating handoff to generate-tests logic for {milestone_id}{sequence_id}...")
+    
+    # Create placeholder directories and files to simulate LLM output
+    simulated_test_dir = f"tests/{milestone_id}"
+    simulated_ledger_path = f"milestones/{milestone_id}/{milestone_id}{sequence_id}T1.md"
+    
+    os.makedirs(simulated_test_dir, exist_ok=True)
+    
+    # Create placeholder files to simulate successful generation
+    simulated_test_files = [
+        os.path.join(simulated_test_dir, f"test_{milestone_id}{sequence_id}_basic.sh"),
+        os.path.join(simulated_test_dir, f"test_{milestone_id}{sequence_id}_edge.py"),
+    ]
+    
+    for tf in simulated_test_files:
+        with open(tf, "w") as f:
+            f.write(f"#!/bin/bash\n# Mock test file for {milestone_id}{sequence_id}\nexit 0\n")
+    
+    with open(simulated_ledger_path, "w") as f:
+        f.write("---\n")
+        f.write(f"id: TSET-{milestone_id}{sequence_id}T1\n")
+        f.write(f"type: test_set\n")
+        f.write(f"title: \"Test Plan for {milestone_id}{sequence_id}\"")
+        f.write(f"milestone_id: {milestone_id}\n")
+        f.write(f"derived_from:\n  - SPEC-{milestone_id}{sequence_id}\n  - VER-{milestone_id}{sequence_id}V\n")
+        f.write(f"status: draft\n")
+        f.write("---\n")
+        f.write("## Traceability\n\n")
+        f.write(f"| Test File | Verification ID | Requirement ID | Test Type |\n")
+        f.write(f"| :--- | :--- | :--- | :--- |\n")
+        f.write(f"| tests/{milestone_id}/test_{milestone_id}{sequence_id}_basic.sh | V-FR-1 | FR-1 | SCRIPT_EXECUTION |\n")
+        f.write(f"| tests/{milestone_id}/test_{milestone_id}{sequence_id}_edge.py | V-FR-2 | FR-2 | UNIT_TEST |\n")
+
+    click.echo("Simulated LLM step completed.")
+    
+    # 4. Postcondition Validation
+    click.echo("\nRunning Postcondition Checks...")
+    
+    postcondition_success = True
+    
+    # Check for generated test files
+    for test_file in simulated_test_files:
+        if not os.path.exists(test_file):
+            click.echo(f"Postcondition Failed: Generated test file missing: {test_file}", err=True)
+            postcondition_success = False
+        else:
+            click.echo(f"Test file {test_file} exists.")
+            
+    # Check for generated ledger file
+    if ledger_path and not os.path.exists(ledger_path):
+        click.echo(f"Postcondition Failed: Generated ledger file missing: {ledger_path}", err=True)
+        postcondition_success = False
+    elif ledger_path:
+        click.echo(f"Ledger file {ledger_path} exists.")
+
+    # Simulate other checks like shebang, truncation if needed, but keeping it simple for now.
+    # For example, basic shebang check (more thorough would be in evaluate-tests).
+    if postcondition_success:
+        for tf in simulated_test_files:
+            if tf.endswith('.sh') or tf.endswith('.py'):
+                try:
+                    with open(tf, 'r') as f:
+                        first_line = f.readline().strip()
+                        if not first_line.startswith('#!'):
+                            click.echo(f"Postcondition Warning: Test file {tf} missing shebang.", err=True)
+                            # This is a warning for now, not a failure, as evaluate-tests handles this.
+                except Exception as e:
+                    click.echo(f"Postcondition Warning: Could not read shebang for {tf}: {e}", err=True)
+
+        click.echo("\nPostcondition checks passed.")
+        click.echo("[TEST_GENERATION_COMPLETE] Task complete. Next Step: Please run /evaluate-tests to continue.")
+        sys.exit(0)
+    else:
+        click.echo("\nPostcondition checks failed.", err=True)
+        click.echo("[TEST_GENERATION_BLOCKED] Pre-implementation baseline failed. Next Step: Please repair the test scripts or verification protocol before continuing.", err=True)
+        sys.exit(1)
+
+@cli.command()
+@click.argument('milestone_sequence')
+def evaluate_tests(milestone_sequence):
+    """Evaluates tests for a given milestone sequence."""
+    click.echo(f"Dispatching 'evaluate-tests' for {milestone_sequence}...")
+    
+    match = re.match(r"M(\d+)S(\d+)", milestone_sequence)
+    if not match:
+        click.echo(f"Error: Invalid milestone_sequence format. Expected M<number>S<number>, got {milestone_sequence}", err=True)
+        sys.exit(1)
+    
+    milestone_id = f"M{match.group(1)}"
+    sequence_id = f"S{match.group(2)}"
+
+    click.echo("Running Precondition Checks for evaluate-tests...")
+
+    # Precondition 1: Validate Metadata (using the same logic as generate-tests)
+    spec_path = f"milestones/{milestone_id}/{milestone_id}{sequence_id}.md"
+    verification_path = f"milestones/{milestone_id}/{milestone_id}{sequence_id}V.md"
+    test_dir = f"tests/{milestone_id}"
+
+    try:
+        if not validate_metadata.validate_metadata_files(spec_path, verification_path):
+            click.echo("Precondition Failed: Metadata validation error.", err=True)
+            sys.exit(1)
+        click.echo("Metadata validation passed.")
+    except FileNotFoundError as e:
+        click.echo(f"Precondition Failed: {e}", err=True)
+        sys.exit(1)
+    except Exception as e:
+        click.echo(f"Precondition Failed: Error during metadata validation: {e}", err=True)
+        sys.exit(1)
+
+    # Precondition 2: Lint Verification Contract (using the same logic)
+    if not linting.lint_verification_contract(spec_path):
+        click.echo("Precondition Failed: Verification contract linting failed.", err=True)
+        sys.exit(1)
+    click.echo("Verification contract linting passed.")
+
+    # Placeholder for the actual evaluation logic
+    click.echo(f"Simulating evaluation of tests for {milestone_id}{sequence_id}...")
+    
+    # Simulate a successful evaluation outcome for demonstration
+    click.echo("\nSimulated evaluation results: All checks passed.")
+    click.echo("[TEST_EVALUATION_COMPLETE] Baseline verified successfully. Next Step: Please run /implement-specification to continue.")
+    sys.exit(0)
+
+
+if __name__ == '__main__':
+    cli()

@@ -10,21 +10,24 @@ Usage:
     python skills-auditor.py list
 """
 
-import os
-import sys
-import yaml
-from pathlib import Path
-from typing import Dict, List, Optional
-
-
-# evolve-skills dependencies from SKILL.md line 26
-DEPENDENCIES = [
-    "bootstrap-project",
-    "generate-spec",
-    "generate-verification",
-    "implement-specification",
-    "investigate-issue",
-    "milestone",
+    # 14 skills audited
+    skills_list = [
+        "bootstrap-project",
+        "generate-spec",
+        "generate-verification",
+        "implement-specification",
+        "evaluate-tests",
+        "evaluate-implementation",
+        "investigate-issue",
+        "milestone",
+        "review-implementation",
+        "sync-documentation",
+        "hotfix-issue",
+        "manage-roadmap",
+        "manage-development",
+        "evolve-skills",
+        "session-audit"
+    ]
     "review-implementation",
     "sync-documentation",
     "hotfix-issue",

@@ -15,14 +15,14 @@ All 36 skills are documented in detail in `docs/SKILLS.md`.
 - manage-development — Orchestrate SDD pipeline, report cycles
 - milestone — Elicit requirements, create M{X}.md
 
-**Core Development (7 agents)**:
-- generate-spec — Milestone → detailed specification (M{X}S{Y}.md)
-- implement-specification — Spec → working code (M{X}S{Y}C.md)
-- generate-verification — Spec → verification protocol (M{X}S{Y}V.md)
-- generate-tests — Verification → test plan + scripts (M{X}S{Y}T{Z}.md)
-- evaluate-implementation — Run tests, auto-fix bugs, generate E.md
-- review-implementation — Compare implementation to spec, generate R.md
-
+**Core Development (8 agents)** :
+*  generate-spec — Milestone → detailed specification (M{X}S{Y}.md)
+*  generate-verification — Spec → verification protocol (M{X}S{Y}V.md)
+*  generate-tests — Verification → test plan + scripts (M{X}S{Y}T{Z}.md)
+*  evaluate-tests — Verify pre-implementation baselines & shebang checks (M{X}S{Y}TE.md)
+*  implement-specification — Spec → working code (M{X}S{Y}C.md)
+*  evaluate-implementation — Run tests, execute optimizer auto-fixes (M{X}S{Y}E.md)
+*  review-implementation — Compare implementation to spec, generate R.md
 **Support & Infrastructure (8 agents)**:
 - session-audit — Generate SESSION_CHANGES.md + supporting docs
 - investigate-issue / hotfix-issue — Debug and fix specific issues

@@ -1,510 +1,85 @@
-# OMP Agentic Engineering Framework Guide
+# OMP Agentic Engineering Framework: System & Agent Guide (v2.0.0)
 
-## Core Concepts
-
-### Agent Architecture
-
-The OMP Agentic Engineering Framework is built around specialized subagents, each with a narrow, well-defined scope. This architecture ensures:
-
-- **Clear Boundaries**: Each agent has explicit responsibilities and handoffs
-- **No Redundancy**: Agents don't duplicate work; they orchestrate specialized tasks
-- **Template-Driven**: All artifacts follow standardized templates
-- **Negative Guardrails**: Out of Scope sections prevent unwanted actions
-
-### Spec-Driven Development (SDD)
-
-The framework follows a specification-driven development pipeline:
-
-1.  **Milestone** — Interactive requirements elicitation → M{X}.md
-2.  **Generate Spec** — Approved milestone → M{X}S{Y}.md (Specification)
-3.  **Implement** — Specification → Working Code
-4.  **Generate Verification** — Specification → M{X}S{Y}V.md (Verification Protocol)
-5.  **Generate Tests** — Verification → M{X}S{Y}T{Z}.md (Test Plan) + tests/M{X}/ (Executable Scripts)
-6.  **Evaluate** — Execute tests, auto-fix bugs, generate M{X}S{Y}E.md
-7.  **Review** — Compare implementation vs specification, generate M{X}S{Y}R.md
-
-### Agent Handoffs
-
-Agents always handoff to specific next agents, never arbitrary code or external tools:
-
-```
-User → milestone → generate-spec → implement-specification → generate-verification → generate-tests → evaluate-implementation → review-implementation
-```
-
-Each agent:
-
-- Reads required artifacts from `milestones/M{X}/`
-- Writes its artifact to `milestones/M{X}/` or `tests/M{X}/`
-- Stops when complete, never continues autonomously
-- Reports exactly what was done and what files were created
-
-### The Uncertainty Marker
-
-The OMP AEF mandates the literal, grep-able marker `#NEEDS-CLARIFICATION: <specific missing fact>`. If an agent's confidence in a fact is below "I could paste the command that proves this," it MUST either run the command immediately to prove it, or emit `#NEEDS-CLARIFICATION: <specific missing fact>` and HALT. Guessing is strictly forbidden. The marker must appear literally in agent-facing documentation and prompts — never quoted, abbreviated, or wrapped.
-
-
-### Mechanical Tooling Stack
-
-Every project bootstrapped via the OMP AEF must document its chosen tooling stack covering four categories (project- and language-agnostic):
-- **Environment Manager** — Prevents version ambiguity and auto-activates the correct runtime and package manager.
-- **Fast Linter/Formatter** — Provides a deterministic, auto-fixable gate for code quality before review.
-- **Pre-commit Framework** — Runs local gates automatically on every commit without cloud CI dependencies.
-- **Type Checker** — Catches silent property and type mismatches before runtime execution.
-
-No specific tooling brands are prescribed — each project selects tools appropriate to its language ecosystem.
-
-### Valid Evidence
-
-**VALID_TEST**: A test whose result exercised the intended subject and whose failure/success is attributable to that subject.
-
-**INVALID_TEST**: A test whose result is not attributable to the intended subject — the pipeline must stop.
-
-**VALIDITY CHECK**: The mandatory evaluation-time pre-processing step that classifies each test before interpreting its exit code.
-
-Six validity criteria:
-
-1. **The test exercised the intended subject** — it loaded, imported, or invoked the correct code path.
-2. **The failure is attributable to the subject** — not to infrastructure, config, or environment.
-3. **The test environment is deterministic** — same inputs produce same results.
-4. **The working tree is clean** — no uncommitted changes that could affect behavior.
-5. **The test does not scan itself** — the test script is not testing its own contents.
-6. **The failure message is diagnostic** — it identifies WHAT failed and WHY, not just an exit code.
-
-> Never advance the lifecycle based solely on test exit codes. First establish that the test itself is valid and that its failure is attributable to the intended subject.
-
-For more on the Valid Evidence lifecycle concept, see `milestones/M8/M8S1.md` or `milestones/M8/M8S1V.md`.
-
-## Agent Roles
-
-### Strategic Layer Agents
-
-**Purpose**: Define project-level strategies, roadmaps, and governance.
-
-#### manage-roadmap
-
-**Role**: Strategic orchestrator aligning ROADMAP.md with user goals and generating actionable Milestones (M{X}.md).
-
-**Key Responsibilities**:
-
-- Read and interpret ROADMAP.md
-- Elicit requirements from users via milestone agent
-- Generate M{X}.md with: Problem Statement, Goals, Architecture Impact, Success Criteria
-- Align with user's long-term vision and constraints
-
-**Artifacts**:
-
-- `milestones/M{X}/M{X}.md` — Milestone definition document
-
-**Out of Scope**:
-
-- Implementing specifications
-- Writing verification protocols
-- Creating test plans
-- Archiving milestones
-
-**Interaction Flow**:
-
-```
-User (via milestone) → manage-roadmap → milestone → generate-spec → ...
-```
-
-#### manage-development
-
-**Role**: Tactical Engineering Manager orchestrating the Spec-Driven Development pipeline with cycle reporting and roadmap integration.
-
-**Key Responsibilities**:
-
-- Monitor SDD pipeline progress
-- Ensure each phase completes before handoff
-- Report cycle status and issues
-- Coordinate between milestone planning and execution
-
-**Artifacts**:
-
-- None (pure orchestrator)
-
-**Out of Scope**:
-
-- Writing specifications
-- Implementing code
-- Running tests
-- Reviewing implementations
-
-**Interaction Flow**:
-
-```
-manage-roadmap → milestone → generate-spec → implement-specification → generate-verification → generate-tests → evaluate-implementation → review-implementation → manage-development → ...
-```
-
-### Core Development Agents
-
-**Purpose**: Implement the specification-driven development workflow.
-
-#### milestone
-
-**Role**: Transforms rough feature ideas into complete milestone documents through interactive requirements elicitation.
-
-**Key Responsibilities**:
-
-- Elicit requirements from users via question-driven process
-- Generate M{X}.md with: Problem Statement, Goals, Architecture Impact, Success Criteria
-- Ensure clear, unambiguous requirements
-- Validate against user constraints and preferences
-
-**Artifacts**:
-
-- `milestones/M{X}/M{X}.md` — Milestone definition document
-
-**Process**:
-
-1. Ask clarifying questions
-2. Gather constraints (time, scope, tech stack)
-3. Identify scope boundaries
-4. Generate M{X}.md
-
-**Out of Scope**:
-
-- Writing specifications
-- Implementing code
-- Creating verification protocols
-- Archiving milestones
-
-#### generate-spec
-
-**Role**: Transforms approved milestone documents into detailed implementation specifications.
-
-**Key Responsibilities**:
-
-- Read M{X}.md (Milestone)
-- Extract Functional Requirements
-- Generate Architecture Impact section
-- Create detailed specification document
-- Ensure verification protocol can be generated from spec
-
-**Artifacts**:
-
-- `milestones/M{X}/M{X}S{Y}.md` — Specification document
-
-**Process**:
-
-1. Read M{X}.md
-2. Define Functional Requirements (FR-1, FR-2, ...)
-3. Specify Architecture Impact
-4. Identify Edge Cases
-5. Generate M{X}S{Y}.md
-
-**Out of Scope**:
-
-- Implementing code
-- Writing verification protocols
-- Creating test plans
-- Modifying milestones
-
-#### implement-specification
-
-**Role**: Implements approved specifications using project architecture, conventions, and verification plans.
-
-**Key Responsibilities**:
-
-- Read M{X}S{Y}.md (Specification) and M{X}S{Y}V.md (Verification)
-- Analyze existing codebase with LSP
-- Create Todo list (one task per Functional Requirement)
-- Spawn parallel task subagents for localized changes
-- Execute verification commands
-- Summarize results
-
-**Artifacts**:
-
-- `milestones/M{X}/M{X}S{Y}C.md` — Completion report
-
-**Process**:
-
-1. Resolve artifacts (spec, verification, AGENTS.md)
-2. Read project context and conventions
-3. Analyze specification and architecture impact
-4. Inspect existing code via LSP
-5. Create Todo list (Foundation → Implementation → Verification)
-6. Orchestrate parallel implementation
-7. Verify with tests
-8. Generate completion report
-
-**Implementation Principles**:
-
-- **Before modifying code**: Read context, identify reusable components
-- **During implementation**: Preserve boundaries, minimal changes, extend existing
-- **When uncertain**: Ask clarification via `ask`
-
-**Out of Scope**:
-
-- Generating specifications or milestones
-- Writing verification protocols
-- Creating test plans
-- Archiving milestones
-- Running tests or evaluating results
-- Creating README.md, SUMMARY.md, .txt files in project root
-
-#### generate-verification
-
-**Role**: Transforms specifications into verification protocols defining correctness evaluation methods.
-
-**Key Responsibilities**:
-
-- Read M{X}S{Y}.md (Specification)
-- Identify Functional Requirements and Architecture Impact
-- Define success criteria for each requirement
-- Create testable assertions
-- Specify expected behavior for edge cases
-- Document failure scenarios
-
-**Artifacts**:
-
-- `milestones/M{X}/M{X}S{Y}V.md` — Verification Protocol
-
-**Process**:
-
-1. Read M{X}S{Y}.md
-2. Extract Functional Requirements
-3. For each requirement:
-   - Define success criteria
-   - Identify test cases
-   - Specify edge case coverage
-   - Document failure scenarios
-4. Generate M{X}S{Y}V.md
-
-**Out of Scope**:
-
-- Implementing code
-- Writing test scripts
-- Running tests
-- Creating test plans
-- Modifying specifications or milestones
-
-#### generate-tests
-
-**Role**: Translates verification protocols into executable use-case scripts and tests.
-
-**Key Responsibilities**:
-
-- Read M{X}S{Y}V.md (Verification Protocol)
-- Generate executable test scripts (Python pytest, JS, bash, etc.)
-- Save test plan documentation
-- Save executable scripts to tests/M{X}/ directory
-- Document expected coverage
-
-**Artifacts**:
-
-- `milestones/M{X}/M{X}S{Y}T{Z}.md` — Test Plan documentation
-- `tests/M{X}/` — Executable test scripts
-
-**Process**:
-
-1. Read Verification Protocol
-2. Read Implementation (from implement-specification phase)
-3. Generate executable test scripts
-4. Save test plan documentation using test_template.md
-5. Save executable scripts to tests/M{X}/ directory
-6. Stop (do not execute tests)
-
-**Out of Scope**:
-
-- Running tests
-- Modifying implementation code
-- Updating specifications
-- Creating README.md, SUMMARY.md, .txt files in project root
-
-#### evaluate-implementation
-
-**Role**: Executes tests, autonomously fixes minor bugs, and generates the Evaluation Report.
-
-**Key Responsibilities**:
-
-- Locate test scripts from generate-tests
-- Execute tests (offline, dry-run, or real execution)
-- Analyze traces and test results
-- Autonomously fix minor bugs (logical errors, typos)
-- Generate structured Evaluation Report
-- Handoff to review-implementation
-
-**Artifacts**:
-
-- `milestones/M{X}/M{X}S{Y}E.md` — Evaluation Report
-
-**Process**:
-
-1. Locate tests from generate-tests output
-2. Execute tests using bash
-3. Analyze stack traces and errors
-4. Auto-fix minor bugs using edit tool
-5. Re-run tests to verify fix
-6. Generate Evaluation Report
-
-**Autonomy Level**:
-
-- **Minor bugs only**: Logical errors, typos, missing basic connections
-- **Not allowed**: Major architectural changes, rewriting entire modules
-
-**Out of Scope**:
-
-- Rewriting entire test scripts (report structural issues)
-- Major architectural changes (log as "Remaining Failure")
-- Creating README.md, SUMMARY.md, .txt files in project root
-
-#### review-implementation
-
-**Role**: Evaluates completed implementation against approved specifications and verification protocols.
-
-**Key Responsibilities**:
-
-- Read implementation artifacts (spec, verification, completion)
-- Compare implementation against specification
-- Test verification coverage
-- Identify incomplete requirements and issues
-- Assess architecture compliance
-- Generate review report
-
-**Artifacts**:
-
-- `milestones/M{X}/M{X}S{Y}R.md` — Review Report
-
-**Process**:
-
-1. Read M{X}S{Y}.md, M{X}S{Y}V.md, M{X}S{Y}C.md
-2. Read implementation files
-3. Run git diff if available
-4. Create compliance matrix
-5. Generate review report
-6. Archive or keep in milestones/M{X}/
-
-## Infrastructure Skills
-
-The OMP AEF framework includes two key infrastructure skills that support framework operations and documentation.
-
-### 1. session-audit (v1.1.0)
-
-**Role**: Analyzes session-based framework improvements and generates comprehensive documentation for evolve-skills.
-
-**Key Responsibilities**:
-
-- Generates 5 output formats for each session (M{X}SA{Y}.md, SESSION_CHANGES.md, CHANGELOG_ENTRIES.md, MILESTONE_UPDATES.md, INGEST_ENTRIES.md)
-- Supports multiple session audits per milestone (SA1, SA2, SA3...)
-- Handles TEMP milestone structure for sessions without formal milestones
-- Provides comprehensive OMP AEF documentation updates
-- Generates ingestion entries for /docs/ingest/ workflow
-
-**Artifacts**:
-
-- Session Audit Documents
-- Change Logs
-- Changelog Entries
-- Milestone Updates
-- Ingestion Entries
-
-**Integration**:
-
-- Uses code-search for semantic analysis
-- Generates INGEST_ENTRIES.md for manage-roadmap processing
-- Recommends evolve-skills actions
-
-**Usage**:
-
-- Run at the end of every session
-- Generates automatic documentation
-- Maintains complete audit trail
-
-### 2. code-search (v1.0.0)
-
-**Role**: Provides semantic repository understanding for all framework operations.
-
-**Key Responsibilities**:
-
-- Enables semantic search across the codebase
-- Generates skeleton structure for codebase understanding
-- Provides tree-sitter-based AST analysis
-- Reduces token usage for large codebase navigation
-
-**Artifacts**:
-
-- Skeletons (docs/skeletons/OMP-AEF_skeleton.md)
-- Vector Database (code_index_OMP-AEF.db)
-- Search Results
-
-**Integration**:
-
-- Used by session-audit for semantic analysis
-- Used by evolve-skills for pattern matching
-- Used by all agents for codebase understanding
-
-**Usage**:
-
-- Use before reading full files
-- Prefer semantic search over exhaustive file reading
-- Use for pattern finding and codebase navigation
-
-**For detailed usage, patterns, and integration with framework skills, see:**
-
-- **[code-search/README.md](./skills/code-search/README.md)** — Complete infrastructure documentation
+This document is the canonical reference for agent roles, Spec-Driven Development (SDD) boundaries, and the mechanical safeguards that enforce process determinism across AEF projects.
 
 ---
 
-## Development Commands
+## 1. Core Architectural Pillars
 
-- **`scripts/release.sh`**: This script automates the release process of the framework components. It synchronizes verified development skills and templates to the consumer production root and uses `sed` to correct paths within documentation files.
-- **`code-search` skill commands**:
-  - `refresh_index --project <project_name>`: Updates the codebase's index for semantic analysis and search capabilities.
-  - `generate_skeletons --project <project_name> [--output <path>]`: Creates structural skeletons of the codebase.
-  - `search_code "<pattern>" [--limit <N>]`: Performs semantic searches across the codebase.
-- **Session Audit & Milestone Management**:
-  - `git status --short`: Used to identify modified files for session audit reports.
-  - Processing of `M{X}SA{Y}.md` files (Session Audit documents) is a key part of the workflow.
-  - `glob path="milestones/M{X}/*"`: Used to assess the status and artifacts within active development milestones.
-- **SDD Pipeline Orchestration**: The `manage-development` skill orchestrates the Spec-Driven Development (SDD) pipeline stages: Milestone → Specification → Verification → Test → Implementation → Evaluation → Review → Sync → Archive.
-- **General Script Execution**: Executable shell scripts (`.sh`) in `scripts/` automate tasks.
-- Configuration files like `.omp/config.yml` are important.
+The framework applies foundational software engineering principles directly to agent orchestration:
 
-## Terminology & Invocation Boundary (CRITICAL)
+- **One Transform at a Time (Single Responsibility):** Each agent performs exactly one specialized transformation with zero cross-cutting concerns.
+- **Deterministic Outputs (Pure Functions):** Agents must parse and read state before writing. Programmatic tool calls replace natural language reasoning where possible.
+- **Artifact Persistence (Immutable Event Sourcing):** Every step in the SDD lifecycle is serialized into structured, version-controlled Markdown artifacts in `milestones/M{X}/` rather than overwriting shared historical files.
+- **No Simulated Output:** Never produce simulated, hypothetical, or illustrative tool/terminal output — a blocked step is reported as blocked, never filled in.
 
-- **Tools** (`read`, `write`, `edit`, `bash`, `ask`, `glob`): These are the ONLY programmatic functions available in your execution environment. You invoke these directly.
-- **Skills** (`milestone`, `generate-spec`, `session-audit`, etc.): These are high-level human-invoked chat commands. They are NOT programmatic tools.
-- **The Anti-Hallucination Rule:** NEVER attempt to call a Skill as a tool function. Do not fabricate tool calls like `milestone(goal="...")`, `generate_spec()`, or `tool_code(tool_name="...")`.
-- **Pipeline Handoffs:** To advance the SDD pipeline, you must STOP your execution and output text instructing the human user to invoke the next skill (e.g., "Task complete. Please run `/generate-spec` to continue.")
+---
 
-## Code Conventions & Common Patterns
+## 2. Breaking the TDD "Catch-22" (The Interface Contract Mandate)
 
-- **Spec-Driven Development (SDD)**:
-  - **Three Pillars**: One Transform at a Time, Deterministic Outputs, Artifact Persistence.
-  - **Agent-Tool Boundary**: Strict separation between strategic agents and execution tools.
-  - **Deterministic Workflow**: Follows Milestone → Specification → Verification → Test → Implementation → Evaluation → Review → Sync → Archive.
-- **Testing & QA**:
-  - **Framework**: Undetermined - No standard configuration files, test files, or test-related commands found.
-  - **Conventions**:
-    - **Directory Structure**: A dedicated `tests/` directory is standard and recommended. The current `tests/` directory contains only a `.gitkeep` file.
-    - **Test File Naming**: Conventional naming (e.g., `test_*.py`, `*_test.py`, `*.test.ts`, `*.spec.ts`) is recommended.
-    - **Coverage Expectations**: Undetermined. A baseline of 80% is recommended once tests are implemented.
-    - **Test Execution**: Undetermined. Consider adding test execution scripts to `package.json`, a Makefile, or the `scripts/` directory.
-  - **Common Patterns**: Undetermined - No test files were identified.
+A critical failure mode occurs when a high-level, conceptual Milestone is translated into vague prose specifications. This forces downstream agents to generate tests that grep for English words or assume un-implemented APIs, violating the _Test Oracle Independence_ and _No Textual Specification Drift_ rules.
 
-## Important Files
+To break this loop, **Specifications must establish concrete, observable Interface Contracts**:
 
-- `scripts/release.sh`: Automates the release process.
-- `README.md` (root): Overview of OMP AEF, SDD, architecture, principles, and directory standards.
-- `.omp/config.yml`: Primary configuration file.
-- `docs/SPEC.md`: OMP System Specification (architecture, layers, interfaces, data models).
-- `AGENTS.md`: (Referenced but not found) Central overview of agent roles and interactions.
-- `docs/SKILLS.md`: Catalog of OMP AEF skills with example commands.
-- `INDEX.md`: Complete catalog of available skills.
-- `PLAYBOOK.md`: Operational workflows and procedures.
-- `FRAMEWORK.md`: Architecture patterns.
-- `skills/<skill_name>/SKILL.md`: Defines individual skill functionality.
-- `skills/<skill_name>/README.md`: Skill documentation entry point.
-- `templates/`: Contains documentation templates (e.g., `cycle_report_template.md`).
-- `milestones/M{X}/`: Artifacts for development milestones.
-- `milestones/TEMP/`: Temporary milestone artifacts.
-- `milestones/archive/`: Archived milestone artifacts.
-- `.gitignore`: Standard Git ignore file.
+1.  **Observable Boundaries:** `generate-spec` MUST translate prose milestone goals into explicit mechanical contracts—such as CLI binaries (e.g., `bin/omp-discover`), JSON schemas, config keys, or file path mappings.
+2.  **No Prose Grepping:** Requirements must be defined in terms of verifiable logic, exit codes, or data structures. Tests are strictly prohibited from scanning markdown files for prose descriptions.
+3.  **Synthetic Fixtures:** Tests must run against static, mock directory structures (e.g., `tests/fixtures/synthetic_python`) rather than the active running environment.
+4.  **TDD Post-Implementation Assertion:** Tests must assert the final successful execution of the interface contract. If the implementation is missing, the tool naturally exits with status `1` or `127` (Command Not Found). This natural failure is the verified `VALID_INITIAL_FAILURE` required to unblock the pre-implementation gate.
 
-## Runtime/Tooling Preferences
+---
 
-- **Runtime**: Implied to be Node.js or a compatible environment for running scripts and skills.
-- **Package Manager**: `package.json` suggests npm/yarn/pnpm, but no explicit commands were found.
-- **Tooling Constraints**: Use of OMP AEF skills and adherence to SDD principles.
-- **`code-search` Skill Awareness**: Skills that utilize `code-search` should be aware of its commands (`refresh_index`, `generate_skeletons`, `search_code`) and integrate them appropriately.
+## 3. The Mechanical Safeguards
+
+### A. The Uncertainty Marker (`#NEEDS-CLARIFICATION`)
+
+If an agent's confidence in a fact falls below _"I could paste the command that proves this,"_ it MUST emit the literal, grep-able marker `#NEEDS-CLARIFICATION: <missing fact>` and **HALT**. Guessing or assuming is strictly prohibited.
+
+### B. Zero-Trust Review
+
+The reviewer operates under the rule: _"Assume the prior report is wrong until proven otherwise."_ Every claim in the completion report must be independently verified using bash or read commands, and recorded in the _Live State Verification_ section of `REVIEW-{N}.md`.
+
+### C. Valid Evidence Lifecycle
+
+Never advance the SDD pipeline based solely on exit codes. The evaluator must run a mandatory validity check to classify each test:
+
+- **VALID_TEST:** The test correctly loaded, imported, or executed the intended subject. Only valid failures unblock the implementation phase.
+- **INVALID_TEST:** The test is malformed, self-scanning, or corrupted by pre-existing environment state. The pipeline must **STOP** immediately (Exit Code `2`) and generate an Invalidation Report.
+
+### D. Evidence-Based Escalation
+
+Reports claiming defects (tool, framework, environment, execution, runtime, filesystem) must satisfy an escalation contract by providing sufficient, verifiable evidence. This ensures escalation is a final investigative outcome, rather than an initial conclusion.
+
+**Escalation Contract Requirements:**
+
+- **Reproducibility:** Provide a minimal, repeatable example that reliably triggers the defect.
+- **Independence:** Demonstrate that the defect is not a side-effect of the current implementation or environment configuration.
+- **Elimination of Simpler Explanations:** Rule out obvious or simpler causes before escalating.
+
+**Review & Verification:**
+
+- Review processes MUST verify that all escalations meet these evidence requirements.
+- Unsupported escalation attempts WILL fail review.
+
+**Constraints:**
+
+- Language Agnostic: Rules apply universally across all development languages and environments.
+- Practicality: Requirements are designed to be feasible for solo developers.
+
+---
+
+## 4. Unified Agent Roles & Handoff Matrix
+
+| Layer         | Agent / Skill             | Primary Mandate                                          | Core Artifact                       | Next Handoff Target       |
+| :------------ | :------------------------ | :------------------------------------------------------- | :---------------------------------- | :------------------------ |
+| **Strategic** | `manage-roadmap`          | Align roadmap; handle ingestion folders with permission. | `ROADMAP.md`, `M{X}.md`             | `manage-development`      |
+| **Strategic** | `milestone`               | Elicit requirements interactively; define scope.         | `milestones/M{X}/M{X}.md`           | `generate-spec`           |
+| **Tactical**  | `manage-development`      | Orchestrate SDD pipeline; track state and repair limits. | `milestones/M{X}/M{X}C.md`          | Sequence-dependent        |
+| **Core Dev**  | `generate-spec`           | Translate milestones into concrete Interface Contracts.  | `milestones/M{X}/M{X}S{Y}.md`       | `generate-verification`   |
+| **Core Dev**  | `generate-verification`   | Translate specifications into testable assertions.       | `milestones/M{X}/M{X}S{Y}V.md`      | `generate-tests`          |
+| **Core Dev**  | `generate-tests`          | Generate executable scripts from verification contracts. | `milestones/M{X}/M{X}S{Y}T{Z}.md`   | `implement-specification` |
+| **Core Dev**  | `implement-specification` | Implement logic to satisfy the specification contracts.  | `milestones/M{X}/M{X}S{Y}C.md`      | `evaluate-implementation` |
+| **Core Dev**  | `evaluate-implementation` | Run tests, auto-fix minor bugs, classify failures.       | `milestones/M{X}/M{X}S{Y}E.md`      | `review-implementation`   |
+| **Core Dev**  | `review-implementation`   | Run zero-trust reality audits of the implementation.     | `milestones/M{X}/M{X}S{Y}R.md`      | `sync-documentation`      |
+| **Support**   | `session-audit`           | Capture session changes and recommend skill evolution.   | `M{X}SA{Y}.md`, `INGEST_ENTRIES.md` | `sync-documentation`      |
+| **Support**   | `sync-documentation`      | Integrate session changes into canonical documents.      | Updated canonical docs              | `evolve-skills`           |
+| **Support**   | `evolve-skills`           | Refine agent prompts based on empirical session errors.  | Updated `SKILL.md` files            | Human approval            |

@@ -1,5 +1,5 @@
 ---
-id: VER-M9S1V
+id: VER-001
 type: verification
 title: AEF Artifact-System Integration Verification Protocol
 milestone_id: M9

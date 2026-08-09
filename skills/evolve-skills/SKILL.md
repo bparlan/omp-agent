@@ -1,7 +1,8 @@
 ---
 name: evolve-skills
-version: 1.3.0
+version: 1.3.1
 description: Analyze recent project artifacts and Session Audit Reports (SA1, SA2, SA3...) to learn from mistakes, identify workflow inefficiencies, and automatically update/version our SDD SKILL.md files. Handles multiple session audits and TEMP milestones.
+description: Implement an approved specification using project architecture, conventions, and verification plan. Orchestrates implementation workflow with native understanding of LLM-as-Execution-Engine meta-engineering.
 tools: read, edit, write, glob, grep, bash
 user-invocable: true
 ---
@@ -11,15 +12,15 @@ user-invocable: true
 You are an AI systems engineer responsible for improving the prompt architecture of the OMP framework based on empirical evidence from the active milestone.
 
 #### Your Process
-
 1. **Analyze recent artifacts** — Use `glob` and `read` to scan only the active `milestones/` directory for recent Review Reports (`*R.md`), Completion Reports (`*C.md`), and Investigation Reports (`*I*.md`). Do not scan the `archive/` directory to save context limits.
-
-Check for Session Audit Reports (M{X}SA{Y}.md)
-   - Read all SA documents in chronological order
-   - Process multiple SAs cumulatively
-   - Use the most recent SA as primary context
-   - Track dependencies between SAs
-   - Identify which skills need updates based on "Recommended evolve-skills Actions"
+15:2. **Dynamic Internal Path Resolution**: When loading static framework assets (templates, contracts), implement a multi-tier path resolution check:
+16:  1. Local checkout search: `~/devcode/aef/agent/CONTRACTS/` and `~/devcode/aef/agent/templates/`.
+17:  2. Executing directory search: Resolve relative to the executing skill directory.
+18:  3. Fallback plugin search: `~/.omp/plugins/node_modules/omp-aef/skills/evolve-skills/CONTRACTS/` (or similar skill-specific path).
+19:  Prefer local dev paths. Do not crash on path resolution failure without attempting all tiers.
+20:3. **Identify failure patterns** — Look for recurring themes: missing tool permissions, hallucinated file paths, misunderstood instructions, or repetitive bugs caused by unclear LLM prompts.
+4.  **Restrict Scope**  — You are ONLY permitted to analyze and update the following Spec-Driven Development skills: archive-milestone, bootstrap-project, generate-spec, generate-verification, implement-specification, evaluate-tests, evaluate-implementation, investigate-issue, milestone, review-implementation, sync-documentation, hotfix-issue, manage-roadmap, manage-development, evolve-skills, and session-audit.
+22:5. **Draft improvements** — Formulate targeted prompt additions (e.g., negative guardrails in "Out of Scope", missing tool additions, clearer naming conventions) for the specific skills that failed.
 
 3. **Identify failure patterns** — Look for recurring themes: missing tool permissions, hallucinated file paths, misunderstood instructions, or repetitive bugs caused by unclear LLM prompts.
 
@@ -28,19 +29,39 @@ Check for Session Audit Reports (M{X}SA{Y}.md)
 5. **Draft improvements** — Formulate targeted prompt additions (e.g., negative guardrails in "Out of Scope", missing tool additions, clearer naming conventions) for the specific skills that failed.
 
 6. **Apply updates** — Use `edit` to update the targeted `~/devcode/aef/agent/skills/*/SKILL.md` files.
-
-7. **Bump version** — Find the `version: x.y.z` field in the frontmatter of the skill you are editing. Increment the patch version (e.g., `1.0.0` to `1.0.1`).
-
-8. **Document the evolution** — Append a log to `~/devcode/aef/agent/skills/evolve-skills/EVOLUTION.md`. Record the date, the skill updated, the old/new version, and the exact rationale derived from the artifacts. Do not place this in the project's `docs/` folder.
+- Load M{X}S{Y}V.md (Verification)
+31:- Load M{X}S{Y}V.md (Verification)
+- Load AGENTS.md for project conventions
+32:  If any required artifact is missing: Stop and report exactly which file cannot be found.
+33:
+#### Your Process
+34:
+1.  **Resolve artifacts** — Find spec and verification documents by identifier.
+35:    - Check the specification for the `#### User Approval` stamp. If it is missing, STOP immediately. Instruct the user to run the `approve-spec` skill.
+36:2.  **Read project context** — Load AGENTS.md and understand conventions (including HF01 Evidence First Contract).
+37:
+## **Dynamic Internal Path Resolution**: When loading static framework assets (templates, contracts), implement a multi-tier path resolution check:
+  1. Local checkout search: `~/devcode/aef/agent/CONTRACTS/` and `~/devcode/aef/agent/templates/`.
+  2. Executing directory search: Resolve relative to the executing skill directory.
+  3. Fallback plugin search: `~/.omp/plugins/node_modules/omp-aef/skills/implement-specification/CONTRACTS/` (or similar skill-specific path).
+  Prefer local dev paths. Do not crash on path resolution failure without attempting all tiers.
+4. **Analyze specification & Scope** — Identify Functional Requirements, Architecture Impact, and explicitly read the **Strict File Scope (Allowlist & Denylist)**.
 
 9. **Command: log-experience** — If the user asks to log an experience, append it to the 'Active Friction Points' section in `docs/EXPERIENCES.md` using the format:
    `- [Date] **Topic:** {topic} | **Issue:** {issue} | **Suggested Fix:** {fix}`
-
-10. **Command: analyze** — Read the 'Active Friction Points' from `docs/EXPERIENCES.md`. For each point:
-    - Analyze the relevant `SKILL.md` file
-    - Apply prompt fixes or new Out of Scope guardrails
-    - Bump the skill version
-    - Move the item to 'Applied Skill Updates' in `EXPERIENCES.md` documenting what you changed
+3. **Analyze specification & Scope** — Identify Functional Requirements, Architecture Impact, and explicitly read the **Strict File Scope (Allowlist & Denylist)**.
+38:4. **Inspect existing code** — Use `lsp` to find affected modules. **If `lsp` is unavailable, you MUST fallback to using `code-search`, `ast_grep`, or `grep`.** Remember that `SKILL.md` and `templates/` ARE your modules in meta-engineering tasks.
+39:5. **Create Todo list** — One task per Functional Requirement, grouped by module.
+40:6. **Validate Test Preconditions & Enforce Boundaries:** — Verify that the generated tests are valid:
+41:    - Locate the existing test files in `tests/M{X}/`.
+42:    - Execute the tests against the current (pre-implementation) codebase to verify the baseline.
+43:    - If ANY test fails due to a syntax error, malformed test plan table, or test integrity failure: STOP immediately. You are strictly forbidden from editing the tests to make them pass. Treat this as an INVALID_TEST and halt.
+44:    - _Note: Natural failures due to missing binaries or assertion failures (exit code 1 or 127) are healthy TDD VALID INITIAL FAILURES and represent a green light to implement your production code._
+45:
+7.  **Orchestrate implementation** — Execute localized changes using `edit` or `write`. If the specification requires updating the "generation logic" of other skills, you must directly edit their `SKILL.md` instructions and `templates/*.md` files.
+46:
+8.  **Verify implementation** — Execute verification commands and run tests.
+47:
 
 11. **Session Audit Integration — Multiple SAs and TEMP Milestones**
     
@@ -84,10 +105,19 @@ Check for Session Audit Reports (M{X}SA{Y}.md)
 
 #### Auto-Run After Session Audit
 
-After sync-documentation completes, evolve-skills automatically runs (shows changes, requires per-skill approval).
+#### Out of Scope
+85:#### Out of Scope
 
-**What it does**:
-1. Reads M{X}SA{Y}.md (Session Audit Report)
+##### Strict Test Isolation Guardrail (CRITICAL)
+86:
+- You are STRICTLY PROHIBITED from writing, editing, regenerating, or modifying any test scripts (e.g., `tests/M{X}/test_*.sh`, `test_*.py`) or test plan documents (e.g., `milestones/M{X}/M{X}S{Y}T{Z}.md`).
+87:- Your filesystem modification capabilities are mechanically locked to the "Allowlist" of the active specification. Test plan files and test scripts are NEVER on the implementation Allowlist and must be treated as strictly read-only.
+88:- If a test fails during your verification step because the test script is syntax-broken, contains NUL bytes, or the test plan markdown table is structurally invalid, you must NOT attempt to fix it. This is an INVALID_TEST upstream blocker. You MUST immediately halt execution, emit the #NEEDS-CLARIFICATION marker, and hand back control to the user.
+89:
+#### Edit Tool Usage
+90:
+##### Multi-line Block Edits (Use edit)
+91:
 2. Identifies skill improvements based on "Recommended evolve-skills Actions"
 3. Shows diffs for each SKILL.md file
 4. For each skill, asks user: "Apply changes to [skill-name]?" (yes/no)
@@ -184,14 +214,24 @@ status: "needs_improvement"
 - `needs_improvement` — Minor issues, no blocking problems
 - `degraded` — Significant issues, functional but problematic
 - `critical` — Major issues, requires immediate attention
+#### Evolution Principles
+217:#### Evolution Principles
+* **Evidence-based** — Every prompt change must be tied directly to a documented failure or inefficiency in a recent artifact.
+218:* **Negative Guardrails** — Prioritize adding explicit "Never do X" rules to the "Out of Scope" sections over adding complex positive instructions.
+219:* **Do Not Touch Core Tools** — Never modify non-SDD skills (like code-search, bash tools, etc.).
+220:* **Cumulative Processing** — Process multiple SAs in order, building on cumulative context.
+221:* **TEMP First** — Always process TEMP milestones before formal milestones.
+222:
+## Out of Scope (Negative Guardrails)
+225:## Out of Scope (Negative Guardrails)
 
-**Safety**:
-- Read-only, no changes to skills
-- Runs on-demand only, not continuous auto-run
-- Results documented in YAML files
-
-**Integration**:
-- Auto-run after evolve-skills successfully applies changes
+**Strict Milestone and Project Agnosticism:**
+227:- All instructions, prompt examples, schemas, and file path descriptions must be written in strictly agnostic terms.
+- You are strictly prohibited from hardcoding specific milestone numbers (e.g., 'M10') or sequence IDs (e.g., 'M10S4') inside the prompt instructions.
+228:- You must utilize the standard wildcard notation: `M{X}` for milestones, `S{Y}` for specifications, `T{Z}` for test plans, and `M{X}S{Y}` for active sequence identifiers. This ensures the AEF remains 100% portable and reusable across brownfield and greenfield projects.
+229:
+230:
+231:
 - Can be invoked manually: `evolve-skills audit`
 
 #### Command: audit

@@ -1,0 +1,1 @@
+- Agents must not invent metadata, IDs, verification criteria, fixtures, tests, technology assumptions, path assumptions, filenames, implementations, success conditions, APIs, or helper functions not present in the spec/verification/test artifacts they were given.

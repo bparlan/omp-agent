@@ -1,0 +1,4 @@
+# Ledger for synthetic_precondition_invalid fixture
+# Contains tests that should fail due to errors or premature passing
+script_that_passes_prematurely.sh,1
+script_with_syntax_error.sh,2

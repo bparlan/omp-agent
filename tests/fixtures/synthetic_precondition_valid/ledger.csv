@@ -1,0 +1,4 @@
+# Ledger for synthetic_precondition_valid fixture
+# Expected to fail naturally (VALID_INITIAL_FAILURE or FAIL)
+script_that_doesnt_exist.sh,127
+script_that_fails.sh,1

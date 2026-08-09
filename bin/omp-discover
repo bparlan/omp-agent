@@ -1,0 +1,155 @@
+#!/bin/bash
+# bin/omp-discover: Discovers project context without assuming technology, structure, or domain.
+# Implemented based on specification M10S1.
+
+set -euo pipefail
+
+# --- Configuration ---
+DEFAULT_ARTIFACT_ROOT="./milestones"
+DEFAULT_ACTIVE_SKILLS_PATH="./agent/skills"
+INVALID_PATH_EXIT_CODE=1
+SUCCESS_EXIT_CODE=0
+
+# --- Helper Functions ---
+
+# Function to detect project kind and capabilities based on directory contents
+detect_project_context() {
+    local target_dir="$1"
+    local project_slug
+    local project_kind="unknown"
+    local capabilities=()
+
+    # Debugging: print current working directory inside the function
+    echo "DEBUG: detect_project_context called with target_dir='$target_dir'. Current directory is: $(pwd)" >&2
+
+    # Check if target_dir is a valid directory
+    if [ ! -d "$target_dir" ]; then
+        echo "Error: Target directory '$target_dir' does not exist or is not a directory." >&2
+        exit $INVALID_PATH_EXIT_CODE
+    fi
+
+    # Determine project slug from the directory name
+    local dir_basename
+    dir_basename=$(basename "$target_dir")
+    project_slug=${dir_basename%/} # Remove trailing slash if present
+
+    # Heuristics for project kind and capabilities
+    if [ -f "$target_dir/setup.py" ] || [ -f "$target_dir/pyproject.toml" ] || [ -d "$target_dir/venv" ]; then
+        project_kind="python"
+        capabilities+=("python")
+    fi
+    if [ -f "$target_dir/package.json" ] || [ -d "$target_dir/node_modules" ]; then
+        if [ "$project_kind" == "unknown" ]; then
+            project_kind="javascript"
+        else
+            project_kind="hybrid"
+        fi
+        capabilities+=("javascript")
+    fi
+    if [ -f "$target_dir/Makefile" ] || [ -f "$target_dir/pom.xml" ] || [ -f "$target_dir/build.gradle" ]; then
+        if [ "$project_kind" == "unknown" ]; then
+            project_kind="build_system"
+        else
+            project_kind="hybrid"
+        fi
+        capabilities+=("build_system")
+    fi
+    if [ -d "$target_dir/docs" ] || [ -f "$target_dir/docs/conf.py" ]; then
+        if [ "$project_kind" == "unknown" ]; then
+            project_kind="documentation"
+        else
+            project_kind="hybrid"
+        fi
+        capabilities+=("documentation")
+    fi
+    if [ -f "$target_dir/index.html" ] || [ -f "$target_dir/index.htm" ]; then
+         if [ "$project_kind" == "unknown" ]; then
+            project_kind="static_site"
+        else
+            project_kind="hybrid"
+        fi
+        capabilities+=("static_site")
+    fi
+
+    if [ "$project_kind" == "unknown" ]; then
+        project_kind="generic"
+    fi
+
+    # Safely get unique capabilities
+    if [ ${#capabilities[@]} -gt 0 ]; then
+        capabilities=($(printf "%s\n" "${capabilities[@]}" | sort -u))
+    else
+        capabilities=() # Ensure it's an empty array if no capabilities were found
+    fi
+
+    # Construct JSON output using jq for robustness and schema adherence.
+    # Ensure jq is available on the execution environment.
+    local json_output
+    local capabilities_json
+
+    if [ ${#capabilities[@]} -gt 0 ]; then
+        # Convert bash array to JSON array using jq, handling quoting and escaping
+        capabilities_json=$(printf '%s\n' "${capabilities[@]}" | jq -R . | jq -s .)
+    else
+        capabilities_json="[]" # Explicitly set to an empty JSON array
+    fi
+
+    # Assemble the final JSON object
+    json_output=$(echo '{}' | jq --arg slug "$project_slug" \
+                                 --arg kind "$project_kind" \
+                                 --argjson caps "$capabilities_json" \
+                                 --arg art_root "$DEFAULT_ARTIFACT_ROOT" \
+                                 --arg active_skills "$DEFAULT_ACTIVE_SKILLS_PATH" \
+                                 '.project_slug = $slug | .project_kind = $kind | .capabilities = $caps | .artifact_root = $art_root | .active_skills_path = $active_skills')
+
+    echo -n "$json_output"
+
+    echo -n "$json_output"
+}
+
+# --- Argument Parsing ---
+TARGET_DIR=""
+
+while [[ $# -gt 0 ]]; do
+    key="$1"
+    case $key in
+        --path)
+        TARGET_DIR="$2"
+        shift # past argument
+        shift # past value
+        ;;
+        -h|--help)
+        echo "Usage: $(basename "$0") [--path <target_directory>]"
+        echo "Discovers project context without assuming technology, structure, or domain."
+        exit $SUCCESS_EXIT_CODE
+        ;;
+        *)
+        echo "Error: Unknown option '$1'" >&2
+        echo "Usage: $(basename "$0") [--path <target_directory>]" >&2
+        exit $INVALID_PATH_EXIT_CODE
+        ;;
+    esac
+done
+
+# --- Main Logic ---
+
+echo "DEBUG: Script execution directory is: $(pwd)" >&2
+
+# Check if target directory is provided and exists
+if [ -z "$TARGET_DIR" ]; then
+    # If no path is provided, profile the current directory
+    TARGET_DIR="."
+    echo "No path specified, profiling current directory: $(pwd)" >&2
+elif [ ! -d "$TARGET_DIR" ]; then
+    # Explicitly check directory existence here before passing to detect_project_context
+    echo "Error: Invalid path provided: '$TARGET_DIR' does not exist or is not a directory." >&2
+    exit $INVALID_PATH_EXIT_CODE
+fi
+
+# Perform detection and output JSON
+detect_project_context "$TARGET_DIR"
+echo "" # Newline after JSON output
+
+exit $SUCCESS_EXIT_CODE
+exit $SUCCESS_EXIT_CODE
+

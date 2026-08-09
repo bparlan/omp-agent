@@ -17,15 +17,28 @@ terminal-sessions/
 .DS_Store
 Thumbs.db
 
-
 # Node.js Dependencies
 node_modules/
 
-# Python Virtual Environments
+# Virtual environments everywhere
 venv/
+.venv/
 *.venv/
+**/.venv/
 env/
 *.env/
+
+# Python bytecode (covers all subdirectories)
+__pycache__/
+*.pyc
+*.pyo
+
+# Python package build artifacts
+*.egg-info/
+**/*.egg-info/
+
+# Python tool config
+pyrightconfig.json
 
 # Editor & IDE configuration
 .vscode/
@@ -36,6 +49,13 @@ env/
 *.temp
 *.swp
 *~
+
+# Machine-local config
+.mise.toml
+mise.toml
+.mise/
+.mise.tools.*
+.mise-jobs/
 
 # Development artifacts and temporary files
 local://*
@@ -53,3 +73,17 @@ filetree.json
 schema.json__pycache__/
 *.bak
 skills/evolve-skills/health/
+
+# Generated code-search databases
+code_index_*.db
+**/code_index_*.db
+
+# Large binary docs (store on releases / cloud, not git)
+docs/*.png
+docs/*.pptx
+
+# Test fixtures that are generated
+verification_fixture_*.md
+mock_ledger_*.md
+sample_spec.md
+sample_verification.md

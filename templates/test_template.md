@@ -5,7 +5,7 @@ title: Template Test Set
 milestone_id: M0
 status: draft
 derived_from: []
-template_version: 1.0.0
+template_version: 1.1.0
 ---
 
 ## Validity Metadata

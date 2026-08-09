@@ -1,0 +1,10 @@
+{
+  "tests": [
+    {
+      "name": "invalid_syntax_test_1",
+      "script": "invalid_syntax_test.py",
+      "expected_exit_code": 2,
+      "expected_behavior": "VALIDITY_FAILURE"
+    }
+  ]
+}

@@ -5,7 +5,7 @@ title: Template Specification
 milestone_id: M0
 status: draft
 derived_from: []
-template_version: 1.2.0
+template_version: 1.2.2
 ---
 
 ## Objective
@@ -93,6 +93,16 @@ If applicable.
 1.
 2.
 3.
+
+---
+
+## Introspection & Code-Search Evidence
+
+- **Workspace Search Queries:** Document the exact semantic search commands executed during the compilation of this specification:
+  - [ ] `search_code "<query_1>"` $\rightarrow$ Found: `path/to/file.ext`
+  - [ ] `search_code "<query_2>"` $\rightarrow$ Found: `path/to/file.ext`
+- **Inspected Signatures:** Document the existing interface contracts or helper functions analyzed before drafting:
+  - _E.g., Analysed JSON schema of `bin/omp-discover` to align `bin/omp-test` profiling._
 
 ---
 

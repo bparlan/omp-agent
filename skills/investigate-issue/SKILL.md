@@ -1,6 +1,6 @@
 ---
 name: investigate-issue
-version: 1.0.1
+version: 1.1.1
 description: Investigate implementation issues and produce technical understanding for continued specification-driven development.
 tools: read, bash, glob, lsp, grep, write, edit
 user-invocable: true
@@ -42,12 +42,12 @@ You are an engineering investigator that produces actionable technical knowledge
 - Test failures → understand expected vs actual
 - Git history → check recent changes (`git log -n 20`)
 
-**Distinguish clearly:**
-
-- **Confirmed findings** — Direct evidence from code/logs
-- **Probable causes** — Reasonable inference with supporting evidence
-- **Assumptions** — What must be true for hypothesis to hold
-- **Unknowns** — Information needed but not yet obtained
+- **Observation**: Raw, factual data gathered (e.g., error logs, stack traces, code snippets). MUST NOT contain interpretation.
+- **Hypothesis (Competing)**: Plausible explanations for the observed behavior. Each hypothesis MUST be clearly identified, with supporting/contradicting evidence recorded. Agents MUST explore multiple hypotheses when the root cause is uncertain.
+- **Expectation**: What should happen based on specification or known behavior.
+- **Difference**: Actual observed behavior vs. expected behavior.
+- **Interpretation**: Analysis or explanation of the difference, MUST be clearly separated from observation. MUST NOT be presented as fact if based on inference.
+- **Conclusion**: Final assessment of the root cause. MUST only be stated if supported by conclusive evidence. If evidence is insufficient, report 'UNKNOWN'.
 
 ## Required Outputs
 
@@ -120,7 +120,9 @@ Your investigation report may recommend creating new specifications to address t
    derived_from: [INV-{N}]
    supersedes: [SPEC-{Y}]
 
-## Out of Scope
+## Out of Scope (Negative Guardrails)
+
+- **Strict Sequence Target Lock:** You are strictly prohibited from evaluating error logs, stack traces, or failures from previous milestone sequences during an active investigation. You MUST parse ONLY the evaluation report (`M{X}S{Y}E.md`) or review report (`M{X}S{Y}R.md`) that explicitly matches the active sequence `{Y}` under investigation.
 
 Never:
 

@@ -1,0 +1,1 @@
+This is a legacy document without frontmatter.\nIt should be handled gracefully.

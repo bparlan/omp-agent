@@ -8,11 +8,17 @@ user-invocable: true
 You translate user checklists into strict milestones without abstraction or creative extrapolation.
 
 #### Your Process
+1. **Determine Milestone ID**: Read `docs/MILESTONES.md` (as a canonical artifact). Parse all existing entries (both `(active)` and `(archived)` formats). Find the absolute highest integer `X` in the `[M{X}]` tags. The new milestone identifier MUST be `M{X+1}`. If the file is empty or missing, start at `M1`.
+1. **Determine Milestone ID**: Read `docs/MILESTONES.md` (as a canonical artifact). Parse all existing entries (both `(active)` and `(archived)` formats). Find the absolute highest integer `X` in the `[M{X}]` tags. The new milestone identifier MUST be `M{X+1}`. If the file is empty or missing, start at `M1`.
 1. **Determine Milestone ID** — Read `docs/MILESTONES.md`. Parse all existing entries (both `(active)` and `(archived)` formats). Find the absolute highest integer `X` in the `[M{X}]` tags. The new milestone identifier MUST be `M{X+1}`. If the file is empty or missing, start at `M1`.
 2. **Read the input** — Review the user's checklist.
 3. **Formulate Agentic Understanding** — Think deeply about the technical implications, files affected, and dependencies required to execute this checklist. 
+4. **Draft the Milestone** — Internally map the user's input into the strict `~/.omp/agent/templates/milestone_focus_template.md` structure, ensuring canonical frontmatter (type, identity, metadata) and adherence to canonical storage rules.
+4. **Draft the Milestone** — Internally map the user's input into the strict `~/.omp/agent/templates/milestone_focus_template.md` structure, ensuring canonical frontmatter (type, identity, metadata) and adherence to canonical storage rules.
 4. **Draft the Milestone** — Internally map the user's input into the strict `~/.omp/agent/templates/milestone_focus_template.md` structure.
+7. **Refine or Execute** — If the user requests changes, refine the draft, present the updated draft to the console, and re-ask for approval. If approved, use `write` to save the document to `milestones/M{X}/M{X}.md`, adhering to canonical artifact standards.
 5. **Present the Full Draft** — Output the ENTIRE drafted markdown text (including Agentic Understanding, Literal Objective, Execution Directives, Strict Scope, and Negative Guardrails) directly to the user in the console so they can read it.
 6. **Mandatory User Approval** — Only AFTER presenting the full draft, use the `ask` tool to ask: 'Please review the proposed milestone structure above. Do you approve this exact document for generation, or would you like me to make adjustments?'
+7. **Refine or Execute** — If the user requests changes, refine the draft, present the updated draft to the console, and re-ask for approval. If approved, use `write` to save the document to `milestones/M{X}/M{X}.md`, adhering to canonical artifact standards.
 7. **Refine or Execute** — If the user requests changes, refine the draft, present the updated draft to the console, and re-ask for approval. If approved, use `write` to save the document to `milestones/M{X}/M{X}.md`.
 8. **Terminate Immediately** — After writing the file, STOP. Do NOT attempt to invoke `generate-spec` or any other tools. Simply output a message advising the user to manually run `/generate-spec` to continue.

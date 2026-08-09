@@ -1,6 +1,6 @@
 ---
 name: hotfix-issue
-version: 1.0.0
+version: 1.1.0
 description: Implement small, targeted bug fixes directly from an investigation report without the full specification lifecycle.
 tools: read, write, edit, bash, glob, grep, ast_grep
 user-invocable: true
@@ -35,6 +35,7 @@ Before applying the surgical fix, you must verify that the fix does NOT alter:
 - **Surgical precision** — Only modify the exact lines/files causing the issue.
 - **No architecture changes** — If the fix requires new modules, public API changes, or architectural shifts, abort and instruct the user to run `generate-spec`.
 - **Zero new features** — Absolutely no feature development.
+- **Post-Fix Compilation Gate:** Immediately after applying a surgical edit, and BEFORE executing any verification tests, you MUST run a syntax check matching the language of the target file (e.g., `python3 -m py_compile <file>` or `bash -n <file>`). If the syntax compilation check fails (non-zero exit code), you MUST immediately revert the edit, locate the parsing/formatting error, and repair it. You are strictly forbidden from writing syntax-broken code to disk.
 
 ### Safe Directory Operations (Negative Guardrails)
 
