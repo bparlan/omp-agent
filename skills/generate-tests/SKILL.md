@@ -45,6 +45,7 @@ Before commencing test generation, you MUST load and validate all canonical inpu
     \_ Prefer local dev paths. Do not crash on path resolution failure without attempting all tiers.
 
 If any preconditions fail, you MUST halt execution, emit the `#NEEDS-CLARIFICATION` marker, and hand control back to the user.
+5.  **Resolve Fixture Paths from Milestone** — Before generating test scripts, read the milestone's `## Integration Bindings` table. If the table lists fixture bindings (e.g., `tests/fixtures/synthetic_python/`), use those exact paths as test fixture directories. If no fixture bindings exist, fall back to scanning `tests/fixtures/` for available fixtures. Never create test fixtures at paths not declared or conventionally expected.
 
 ---
 
@@ -114,6 +115,15 @@ For each test generated, append a row matching this structure:
         # {Requirement IDs: FR-Y}
         # Test Type: IMPLEMENTATION_CHECK
         ```
+
+#### 4b. Test Sanitization Step (Automatic Pre-flight Cleanup)
+
+After all test scripts are written but before syntax validation, you MUST run the test sanitizer:
+
+`python3 bin/omp-sanitize-tests.py tests/M{X}/ milestones/M{X}/`
+
+This removes pre-flight binary existence traps from test scripts and prunes stale ledger rows
+referencing non-existent test files. Run this BEFORE syntax validation to ensure clean baseline.
 
 ---
 

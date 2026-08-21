@@ -1,0 +1,111 @@
+#!/usr/bin/env python3
+"""
+omp-verify-test-syntax — Mechanical test syntax/compilation validator.
+
+Validates that executable test files compile correctly using the appropriate
+language interpreter/compiler. Supports languages used in this repository.
+
+Exit codes:
+  0 = VALID (all tests compile)
+  1 = TEST_INVALID (one or more tests have syntax errors)
+  2 = TOOLING_FAILURE (missing interpreter/compiler)
+"""
+
+import sys
+import subprocess
+import os
+from pathlib import Path
+
+EXIT_VALID = 0
+EXIT_TEST_INVALID = 1
+EXIT_TOOLING_FAILURE = 2
+
+
+def check_bash_syntax(filepath: Path) -> tuple:
+    """Check bash syntax using `bash -n`. Returns (exit_code, error_msg)."""
+    try:
+        result = subprocess.run(
+            ["bash", "-n", str(filepath)],
+            capture_output=True, text=True, timeout=10
+        )
+        if result.returncode == 0:
+            return (EXIT_VALID, None)
+        else:
+            error = result.stderr.strip() or result.stdout.strip() or "Unknown bash syntax error"
+            return (EXIT_TEST_INVALID, error)
+    except FileNotFoundError:
+        return (EXIT_TOOLING_FAILURE, "bash interpreter not found")
+    except subprocess.TimeoutExpired:
+        return (EXIT_TOOLING_FAILURE, "bash syntax check timed out")
+
+
+def check_python_syntax(filepath: Path) -> tuple:
+    """Check Python syntax using `python3 -m py_compile`. Returns (exit_code, error_msg)."""
+    try:
+        result = subprocess.run(
+            ["python3", "-m", "py_compile", str(filepath)],
+            capture_output=True, text=True, timeout=10
+        )
+        if result.returncode == 0:
+            return (EXIT_VALID, None)
+        else:
+            error = result.stderr.strip() or result.stdout.strip() or "Unknown Python syntax error"
+            return (EXIT_TEST_INVALID, error)
+    except FileNotFoundError:
+        return (EXIT_TOOLING_FAILURE, "python3 interpreter not found")
+    except subprocess.TimeoutExpired:
+        return (EXIT_TOOLING_FAILURE, "python syntax check timed out")
+
+
+def validate_file(filepath: Path) -> tuple:
+    """Check syntax of a test file based on its extension. Returns (exit_code, error_msg)."""
+    if not filepath.exists():
+        return (EXIT_TOOLING_FAILURE, f"File not found: {filepath}")
+    
+    suffix = filepath.suffix.lower()
+    
+    if suffix == ".sh":
+        return check_bash_syntax(filepath)
+    elif suffix == ".py":
+        return check_python_syntax(filepath)
+    else:
+        # Unknown extension — skip
+        return (EXIT_VALID, None)
+
+
+def main():
+    if len(sys.argv) < 2:
+        print("Usage: python3 bin/omp-verify-test-syntax <test_file> [test_file2 ...]", file=sys.stderr)
+        print("Validates syntax of .sh and .py test files.", file=sys.stderr)
+        sys.exit(EXIT_TOOLING_FAILURE)
+    
+    all_valid = True
+    had_tooling_failure = False
+    
+    for filepath_str in sys.argv[1:]:
+        filepath = Path(filepath_str)
+        exit_code, error_msg = validate_file(filepath)
+        
+        suffix = filepath.suffix.lower()
+        if suffix not in (".sh", ".py"):
+            continue  # Skip unknown file types silently
+        
+        if exit_code == EXIT_VALID:
+            print(f"OK: {filepath} — syntax valid")
+        elif exit_code == EXIT_TEST_INVALID:
+            print(f"INVALID: {filepath} — {error_msg}", file=sys.stderr)
+            all_valid = False
+        elif exit_code == EXIT_TOOLING_FAILURE:
+            print(f"TOOLING_FAILURE: {filepath} — {error_msg}", file=sys.stderr)
+            had_tooling_failure = True
+    
+    if had_tooling_failure:
+        sys.exit(EXIT_TOOLING_FAILURE)
+    elif not all_valid:
+        sys.exit(EXIT_TEST_INVALID)
+    else:
+        sys.exit(EXIT_VALID)
+
+
+if __name__ == '__main__':
+    main()

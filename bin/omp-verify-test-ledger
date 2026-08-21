@@ -123,10 +123,8 @@ def main():
         sys.exit(1)
 
     # Core Validation Logic (FR-1, FR-2, FR-3, FR-4, FR-5)
-    # SPEC_FILE path is needed for validation of the spec contents (FR-4).
-    # It was defined in the test generation part, but should be available here.
-    # For now, let's define it in the main scope for simplicity.
-    SPEC_FILE = "milestones/M10/M10S4.md"
+    # SPEC_FILE: Derive from ledger path. Extract milestone and spec IDs.
+    SPEC_FILE = None  # Reserved for future FR-4 spec content validation
     
     validation_success = validate_ledger(args.ledger, args.verification, args.test_dir)
 

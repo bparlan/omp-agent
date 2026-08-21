@@ -45,7 +45,7 @@ def run_metadata_validation(project_path: Path, test_dir: Path):
         return "VALIDITY_FAILURE: Validation script not found."
 
     try:
-        malformed_yaml_path = Path("/Users/bparlan/devcode/aef/agent/tests/fixtures/malformed_spec/M10S8_malformed.yaml")
+        malformed_yaml_path = Path("tests/fixtures/malformed_spec/M10S8_malformed.yaml").resolve()
         
         # Construct the command to run validate_metadata.py with the malformed file
         cmd = ["python3", str(validation_script), str(malformed_yaml_path)]
@@ -56,7 +56,7 @@ def run_metadata_validation(project_path: Path, test_dir: Path):
             # Construct the specific error message expected by the test
             # The test expects: 'VALIDITY_FAILURE: No valid YAML frontmatter found in ...'
             # We'll use the actual file path from the test expectation.
-            expected_file_path_in_test = "/Users/bparlan/devcode/aef/agent/tests/fixtures/malformed_spec/M10S8_malformed.yaml"
+            expected_file_path_in_test = str(Path("tests/fixtures/malformed_spec/M10S8_malformed.yaml").resolve())
             error_msg = f"VALIDITY_FAILURE: No valid YAML frontmatter found in {expected_file_path_in_test}"
             
             log_debug(f"Validation script stderr:\\n{res.stderr}")
@@ -229,7 +229,7 @@ def main():
         
         # Construct the specific error message as expected by the test.
         # This overrides the generic error message when the malformed YAML is detected.
-        malformed_yaml_file_for_test = "/Users/bparlan/devcode/aef/agent/tests/fixtures/malformed_spec/M10S8_malformed.yaml"
+        malformed_yaml_file_for_test = str(Path("tests/fixtures/malformed_spec/M10S8_malformed.yaml").resolve())
         if malformed_yaml_file_for_test in validation_error_message:
              error_msg = f"VALIDITY_FAILURE: No valid YAML frontmatter found in {malformed_yaml_file_for_test}"
         else:

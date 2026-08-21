@@ -50,6 +50,7 @@ For milestone `M{X}` and specification `M{X}S{Y}`, read:
 2. `milestones/M{X}/M{X}S{Y}.md`
 3. `milestones/M{X}/M{X}S{Y}T*.md` if a test design already exists
 4. Relevant prior verification artifacts only when the specification explicitly derives from them.
+5. **Read Milestone Verification Strategy** — Read the milestone's `## Verification Strategy` section. If present, this section contains method constraints (e.g., `FR-1: SCRIPT_EXECUTION`). For each FR that has a strategy hint, you MUST use the specified method. If the strategy says SCRIPT_EXECUTION but you would assign DOCUMENT_CHECK, you MUST follow the strategy or emit #NEEDS-CLARIFICATION. If the strategy section is absent, use default method selection based on requirement type.
 
 Do NOT assume that filenames alone establish semantic identity.
 If the canonical specification has been renamed, moved, or stored under a resource suffix such as: `M10S1_resource.md`, then treat the frontmatter `id:` as authoritative.

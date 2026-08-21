@@ -1,0 +1,206 @@
+#!/usr/bin/env python3
+"""
+omp-verify-milestone-structure — Milestone structural completeness validator.
+
+Verifies that a canonical milestone artifact contains the required structural
+sections defined by the milestone contract (template_version >= 2.0.0).
+
+Exit codes:
+  0 = VALID
+  1 = INVALID_STRUCTURE (missing required section)
+  2 = INVALID_METADATA (frontmatter issues)
+"""
+
+import sys
+import re
+import os
+from pathlib import Path
+
+REQUIRED_SECTIONS = [
+    "Milestone Contract",
+    "Goal",
+    "Spec Decomposition Plan",
+    "Scope",
+    "Out of Scope",
+    "Success Criteria",
+    "Integration Bindings",
+    "Risks",
+]
+
+EXIT_VALID = 0
+EXIT_INVALID_STRUCTURE = 1
+EXIT_INVALID_METADATA = 2
+
+
+def extract_frontmatter_basic(filepath: str) -> dict:
+    """Extract YAML frontmatter from a markdown file (lightweight, no dependency)."""
+    try:
+        with open(filepath, 'r', encoding='utf-8') as f:
+            content = f.read()
+    except (IOError, OSError):
+        return None
+
+    match = re.match(r"^---\s*\n(.*?)\n---", content, re.DOTALL)
+    if not match:
+        return None
+
+    frontmatter_text = match.group(1)
+    try:
+        import yaml
+        data = yaml.safe_load(frontmatter_text)
+    except Exception:
+        return None
+
+    if not isinstance(data, dict):
+        return None
+    return data
+
+
+def check_section_exists(content: str, section_name: str) -> bool:
+    """Check that a ## section header exists in the markdown content."""
+    pattern = r'^##\s+' + re.escape(section_name) + r'\s*$'
+    return bool(re.search(pattern, content, re.MULTILINE))
+
+
+def has_nonempty_scope(content: str) -> bool:
+    """Check that Scope section has at least one bullet item beyond placeholder dots."""
+    # Find the Scope section content
+    match = re.search(r'^##\s+Scope\s*$(.*?)(?:^##\s|\Z)', content, re.MULTILINE | re.DOTALL)
+    if not match:
+        return False
+    scope_content = match.group(1)
+    # Count non-placeholder bullet items (not just "...")
+    bullets = re.findall(r'^\s*-\s+(?!\.\.\.)(.+)', scope_content, re.MULTILINE)
+    return len(bullets) >= 1
+
+
+def has_spec_decomposition_plan(content: str) -> bool:
+    """Check that Spec Decomposition Plan has at least one spec entry."""
+    match = re.search(r'^##\s+Spec Decomposition Plan\s*$(.*?)(?:^##\s|\Z)', content, re.MULTILINE | re.DOTALL)
+    if not match:
+        return False
+    plan_content = match.group(1)
+    # Count spec entries — matches both M{X}S1 (template) and M10S1 (concrete)
+    specs = re.findall(r'^\s*-\s+\S+S\d+\s+—', plan_content, re.MULTILINE)
+    return len(specs) >= 1
+def count_scope_deliverables(content: str) -> int:
+    """Count the number of concrete deliverables in Scope section."""
+    match = re.search(r'^##\s+Scope\s*$(.*?)(?:^##\s|\Z)', content, re.MULTILINE | re.DOTALL)
+    if not match:
+        return 0
+    scope_content = match.group(1)
+    bullets = re.findall(r'^\s*-\s+(?!\.\.\.)(.+)', scope_content, re.MULTILINE)
+    return len(bullets)
+
+
+def has_integration_bindings_table(content: str) -> bool:
+    """Check that Integration Bindings has a pipe table."""
+    match = re.search(r'^##\s+Integration Bindings\s*$(.*?)(?:^##\s|\Z)', content, re.MULTILINE | re.DOTALL)
+    if not match:
+        return False
+    bindings_content = match.group(1)
+    # Check for pipe table with header
+    return bool(re.search(r'\|\s*Binding Type', bindings_content, re.MULTILINE))
+
+
+def validate_milestone(filepath: str) -> int:
+    """Validate milestone structural completeness. Returns exit code."""
+    if not os.path.exists(filepath):
+        print(f"VALIDITY_FAILURE: File not found: {filepath}", file=sys.stderr)
+        return EXIT_INVALID_METADATA
+
+    try:
+        with open(filepath, 'r', encoding='utf-8') as f:
+            content = f.read()
+    except (IOError, OSError) as e:
+        print(f"VALIDITY_FAILURE: Cannot read {filepath}: {e}", file=sys.stderr)
+        return EXIT_INVALID_METADATA
+
+    # 1. Check frontmatter
+    metadata = extract_frontmatter_basic(filepath)
+    if metadata is None:
+        print(f"INVALID_METADATA: {filepath} has no valid YAML frontmatter", file=sys.stderr)
+        return EXIT_INVALID_METADATA
+
+    if metadata.get('type') != 'milestone':
+        print(f"INVALID_METADATA: {filepath} type is '{metadata.get('type', 'MISSING')}', expected 'milestone'", file=sys.stderr)
+        return EXIT_INVALID_METADATA
+
+    # 2. Check template_version — if < 2.0.0, it's a pre-contract milestone, skip structural checks
+    template_ver = str(metadata.get('template_version', ''))
+    try:
+        ver_parts = template_ver.split('.')
+        major = int(ver_parts[0]) if ver_parts else 0
+    except (ValueError, IndexError):
+        major = 0
+
+    if major < 2:
+        # Pre-contract milestone: skip structural validation, it's legacy
+        print(f"SKIP: {filepath} uses template_version {template_ver} (pre-contract, skipping structural checks)")
+        return EXIT_VALID
+    # 3. Check each required section exists
+    missing = []
+    for section in REQUIRED_SECTIONS:
+        if not check_section_exists(content, section):
+            missing.append(section)
+
+    if missing:
+        print(f"MISSING_REQUIRED_SECTION: {filepath} missing: {', '.join(missing)}", file=sys.stderr)
+        return EXIT_INVALID_STRUCTURE
+
+    # 4. Spec Decomposition Plan: must have at least one spec entry
+    if not has_spec_decomposition_plan(content):
+        print(f"INVALID_STRUCTURE: {filepath} Spec Decomposition Plan has no spec entries", file=sys.stderr)
+        return EXIT_INVALID_STRUCTURE
+
+    # 5. Scope: must have at least one non-placeholder item
+    if not has_nonempty_scope(content):
+        print(f"INVALID_STRUCTURE: {filepath} Scope has no concrete deliverables", file=sys.stderr)
+        return EXIT_INVALID_STRUCTURE
+
+    # 6. If scope has more than 1 deliverable, Spec Decomposition Plan must exist (already checked above)
+    #    Additionally, the plan should have at least as many specs as deliverables
+    deliverable_count = count_scope_deliverables(content)
+    match = re.search(r'^##\s+Spec Decomposition Plan\s*$(.*?)(?:^##\s|\Z)', content, re.MULTILINE | re.DOTALL)
+    spec_count = 0
+    if match:
+        plan_content = match.group(1)
+        spec_count = len(re.findall(r'^\s*-\s+M\w+S\d+\s+—', plan_content, re.MULTILINE))
+
+    if deliverable_count > 1 and spec_count < 1:
+        print(f"INVALID_STRUCTURE: {filepath} has {deliverable_count} scope deliverables but no spec decomposition", file=sys.stderr)
+        return EXIT_INVALID_STRUCTURE
+
+    # 7. Integration Bindings should have a pipe table if any content
+    #    (if bindings section is empty template, that's acceptable)
+    if not has_integration_bindings_table(content):
+        print(f"NOTE: {filepath} Integration Bindings section lacks pipe table format", file=sys.stderr)
+
+    # 8. Check legacy_boundaries in frontmatter
+    boundaries = metadata.get('legacy_boundaries')
+    if boundaries is None:
+        print(f"NOTE: {filepath} has no legacy_boundaries (using defaults: M1-M9)", file=sys.stderr)
+    elif not isinstance(boundaries, list):
+        print(f"INVALID_METADATA: {filepath} legacy_boundaries must be a list", file=sys.stderr)
+        return EXIT_INVALID_METADATA
+
+    print(f"VALID: {filepath} — milestone structure complete")
+    return EXIT_VALID
+
+
+def main():
+    if len(sys.argv) < 2:
+        print("Usage: python3 bin/omp-verify-milestone-structure <milestone.md> [milestone2.md ...]", file=sys.stderr)
+        sys.exit(EXIT_INVALID_METADATA)
+
+    all_valid = True
+    for filepath in sys.argv[1:]:
+        result = validate_milestone(filepath)
+        if result != EXIT_VALID:
+            all_valid = False
+
+    sys.exit(0 if all_valid else 1)
+
+
+if __name__ == '__main__':
+    main()

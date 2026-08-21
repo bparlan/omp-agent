@@ -24,7 +24,8 @@ class MetadataSchemaValidator:
         "related_artifacts",
         "created_at",
         "updated_at",
-        "template_version"
+        "template_version",
+        "legacy_boundaries"
     ]
 
     # Valid type values
@@ -299,6 +300,75 @@ class MetadataSchemaValidator:
         else:
             print("  ✗ Some optional fields tests failed")
 
+        return all_passed
+
+    def test_legacy_boundaries_validation(self):
+        """Test that legacy_boundaries are accepted as an optional field."""
+        print("\n[TEST] Legacy Boundaries Validation")
+        
+        test_cases = [
+            {
+                "name": "Valid milestone with empty legacy_boundaries",
+                "metadata": {
+                    "id": "M11",
+                    "type": "milestone",
+                    "title": "Test Milestone",
+                    "milestone_id": "M11",
+                    "status": "draft",
+                    "legacy_boundaries": []
+                },
+                "should_be_valid": True,
+                "should_have_warnings": False
+            },
+            {
+                "name": "Valid milestone with populated legacy_boundaries",
+                "metadata": {
+                    "id": "M11",
+                    "type": "milestone",
+                    "title": "Test Milestone",
+                    "milestone_id": "M11",
+                    "status": "draft",
+                    "legacy_boundaries": ["M1", "M2", "M3", "M4", "M5", "M6", "M7", "M8", "M9"]
+                },
+                "should_be_valid": True,
+                "should_have_warnings": False
+            },
+            {
+                "name": "Non-milestone artifact without legacy_boundaries (should not matter)",
+                "metadata": {
+                    "id": "SPEC-001",
+                    "type": "specification",
+                    "title": "Test Spec",
+                    "milestone_id": "M11",
+                    "status": "draft"
+                },
+                "should_be_valid": True,
+                "should_have_warnings": False
+            }
+        ]
+        
+        all_passed = True
+        for test_case in test_cases:
+            print(f"  - {test_case['name']}")
+            result = self.validate_metadata(test_case['metadata'], required_only=False)
+            if test_case['should_be_valid']:
+                if result['valid']:
+                    print("    ✓ PASS")
+                else:
+                    print(f"    ✗ FAIL: Should be valid but failed: {result['errors']}")
+                    all_passed = False
+            else:
+                if not result['valid']:
+                    print("    ✓ PASS (correctly rejected)")
+                else:
+                    print("    ✗ FAIL: Should be invalid but passed")
+                    all_passed = False
+        
+        if all_passed:
+            print("  ✓ All legacy_boundaries tests passed")
+        else:
+            print("  ✗ Some legacy_boundaries tests failed")
+        
         return all_passed
 
     def test_lineage_relationships(self):
@@ -595,6 +665,7 @@ if __name__ == "__main__":
 
     all_passed = validator.test_required_fields() and all_passed
     all_passed = validator.test_optional_fields() and all_passed
+    all_passed = validator.test_legacy_boundaries_validation() and all_passed
     all_passed = validator.test_lineage_relationships() and all_passed
     all_passed = validator.test_invalid_type_detection() and all_passed
     all_passed = validator.test_canonical_id_format() and all_passed

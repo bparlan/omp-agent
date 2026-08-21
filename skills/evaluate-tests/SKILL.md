@@ -19,6 +19,7 @@ You are NOT an implementation agent. You MUST NOT modify, write, or create any p
 Before executing any baseline test scripts, you MUST perform these structural checks:
 
 1.  **Validate Metadata:** Run `python3 validate_metadata.py` against the specification (`milestones/M{X}/M{X}S{Y}.md`) and verification protocol (`milestones/M{X}/M{X}S{Y}V.md`) to ensure frontmatter compliance.
+    - The milestone's `legacy_boundaries` frontmatter field determines which milestone directories are pre-canonical. Files in legacy directories are exempt from strict frontmatter validation.
 2.  **Isolate Active Tests (The Ledger Rule):**
     - You are STRICTLY PROHIBITED from running all files inside the `tests/M{X}/` folder blindly. This prevents legacy or unassociated tests from polluting this sequence's baseline run.
     - You MUST read the active sequence's **Test Plan Ledger (`milestones/M{X}/M{X}S{Y}T{Z}.md`)**.

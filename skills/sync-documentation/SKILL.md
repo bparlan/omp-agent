@@ -1,6 +1,5 @@
 ---
 name: sync-documentation
-sync-documentation
 version: 1.2.1
 description: Maintain long-lived project documentation by distilling completed engineering work into canonical project documents, including /docs/ingest/ file processing with permission + context workflow.
 tools: read, write, edit, bash, glob, grep

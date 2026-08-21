@@ -2,7 +2,6 @@
 name: evolve-skills
 version: 1.3.1
 description: Analyze recent project artifacts and Session Audit Reports (SA1, SA2, SA3...) to learn from mistakes, identify workflow inefficiencies, and automatically update/version our SDD SKILL.md files. Handles multiple session audits and TEMP milestones.
-description: Implement an approved specification using project architecture, conventions, and verification plan. Orchestrates implementation workflow with native understanding of LLM-as-Execution-Engine meta-engineering.
 tools: read, edit, write, glob, grep, bash
 user-invocable: true
 ---

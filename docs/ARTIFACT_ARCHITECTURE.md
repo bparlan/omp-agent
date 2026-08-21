@@ -58,6 +58,15 @@ Every artifact must include YAML frontmatter with the following six fields:
 5. `status` — Lifecycle state (`draft`, `active`, `completed`, `superseded`)
 6. `derived_from` — List of source artifact IDs (lineage)
 
+### Milestone-Specific Optional Fields
+
+Milestone artifacts (`type: milestone`) accept an additional optional field:
+
+1. `legacy_boundaries` — List of milestone IDs that use the pre-canonical artifact format (no YAML frontmatter).
+   - Example: `legacy_boundaries: ["M1", "M2", "M3", "M4", "M5", "M6", "M7", "M8", "M9"]`
+   - When present, `validate_metadata.py` treats files in those milestone directories as legacy-compatible, exempt from strict frontmatter validation.
+   - When absent, the hardcoded default legacy boundaries apply (M1-M9).
+
 ## 3. Artifact Identity and Naming
 
 Artifact identity is separated from milestone identity. Identifiers are stable and unique within their defined namespace. Semantic qualifiers (e.g., `-CORRECTED`, `-v2`, `-FINAL`) are prohibited in artifact IDs.

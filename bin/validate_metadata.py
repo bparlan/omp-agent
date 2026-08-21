@@ -3,10 +3,14 @@
 # {Requirement IDs: FR-2, FR-3.1, FR-3.2, FR-3.3, FR-3.4, FR-5}
 
 import sys
-import yaml
 import re
 import os
 from pathlib import Path
+from _frontmatter import extract_frontmatter
+
+# Default legacy milestone boundaries (pre-canonical milestones without frontmatter)
+LEGACY_BOUNDARIES_DEFAULTS = ["m1", "m2", "m3", "m4", "m5", "m6", "m7", "m8", "m9"]
+
 
 def get_active_milestone_id() -> str:
     """Dynamically determine the active milestone ID by scanning milestones/ directory."""
@@ -24,11 +28,63 @@ def get_active_milestone_id() -> str:
         pass
     return active_id
 
+
+def is_legacy_milestone(normalized_path: str) -> bool:
+    """Check if a milestone path falls under default legacy boundaries."""
+    m = re.search(r"/milestones/(m\d+)/", normalized_path)
+    if not m:
+        return False
+    milestone_dir = m.group(1)
+    return milestone_dir in LEGACY_BOUNDARIES_DEFAULTS
+
+
+def check_template_version_compatibility(data: dict, filepath: str) -> list:
+    """Check template_version compatibility for milestone lifecycle artifacts.
+
+    Returns list of warning messages.
+    Compatible versions: same major.minor, patch may differ.
+    """
+    warnings = []
+    artifact_type = data.get('type', '')
+    artifact_ver = str(data.get('template_version', ''))
+
+    if not artifact_ver:
+        return warnings
+
+    if artifact_type == 'milestone':
+        try:
+            major = int(artifact_ver.split('.')[0])
+            if major < 2:
+                warnings.append(f"COMPATIBILITY: {filepath} uses template_version {artifact_ver} (pre-contract, consider upgrading to 2.0.0)")
+        except (ValueError, IndexError):
+            pass
+
+    elif artifact_type == 'specification':
+        try:
+            parts = artifact_ver.split('.')
+            major, minor = int(parts[0]), int(parts[1])
+            if major != 1 or minor != 2:
+                warnings.append(f"COMPATIBILITY: {filepath} template_version {artifact_ver} differs from specification_template.md (1.2.x)")
+        except (ValueError, IndexError):
+            pass
+
+    elif artifact_type == 'verification':
+        try:
+            parts = artifact_ver.split('.')
+            major, minor = int(parts[0]), int(parts[1])
+            if major != 1 or minor != 1:
+                warnings.append(f"COMPATIBILITY: {filepath} template_version {artifact_ver} differs from verification_template.md (1.1.x)")
+        except (ValueError, IndexError):
+            pass
+
+    return warnings
+
+
 def validate_file(filepath: str) -> bool:
     try:
         normalized_path = filepath.replace("\\", "/").lower()
-        
-        # Step 1: Detect and gracefully skip Skill files and general non-lifecycle docs
+
+        # Detect and gracefully skip Skill files and general non-lifecycle docs
         if "skills/" in normalized_path or normalized_path.endswith("skill.md") or "agent/skills/" in normalized_path:
             print(f"Metadata SKIP: {filepath} is a Skill definition (validated by skills-auditor).")
             return True
@@ -37,115 +93,84 @@ def validate_file(filepath: str) -> bool:
             print(f"Error: File not found at '{filepath}'.")
             return False
 
-        with open(filepath, 'r', encoding='utf-8') as f:
-            content = f.read()
-        
-        # Strip UTF-8 BOM if present (BOM handling from EXPERIENCES.md)
-        if content.startswith('\ufeff'):
-            content = content.lstrip('\ufeff')
-            
-        # Normalize line endings to Unix style (\n) to prevent carriage return issues
-        content = content.replace('\r\n', '\n')
-        
-        # Strip leading whitespace/newlines to ensure we start directly at the frontmatter block
-        content = content.lstrip()
-        
-        # Manual Line-Splitting Frontmatter Extractor (100% regex-free & double-escaping immune)
-        lines = content.split('\n')
-        if not lines or lines[0].strip() != '---':
-            # Option 2 Boundary Check: Differentiate legacy milestones from canonical active ones
+        data = extract_frontmatter(filepath)
+
+        if data is None:
+            # No valid frontmatter found — check legacy vs active milestone
             if "milestones/" in normalized_path:
+                if is_legacy_milestone(normalized_path):
+                    print(f"Metadata SKIP (Legacy compatibility): {filepath} is a legacy milestone document.")
+                    return True
                 active_ms = get_active_milestone_id().lower()
-                # If the file resides in an older, legacy milestone directory (M1-M9), skip it gracefully
                 if f"milestones/{active_ms}/" not in normalized_path:
                     print(f"Metadata SKIP (Legacy compatibility): {filepath} is a legacy milestone document.")
                     return True
                 else:
-                    # Newly generated canonical artifacts under active development MUST have valid frontmatter
                     print(f"Error: No valid YAML frontmatter found in active milestone file {filepath}. Must be enclosed in '---'.")
                     return False
             else:
-                # Non-milestone general documentation files are skipped gracefully
                 print(f"Metadata SKIP: {filepath} is a general document.")
                 return True
-                
-        # Find closing '---' delimiter
-        end_idx = -1
-        for i in range(1, len(lines)):
-            if lines[i].strip() == '---':
-                end_idx = i
-                break
-                
-        if end_idx == -1:
-            print(f"Error: No valid YAML frontmatter found in active milestone file {filepath}. Must be enclosed in '---'.")
-            return False
-            
-        frontmatter_text = '\n'.join(lines[1:end_idx])
-        
-        try:
-            # Parse YAML frontmatter safely
-            data = yaml.safe_load(frontmatter_text)
-        except yaml.YAMLError as ye:
-            print(f"Error parsing YAML in {filepath}: {ye}")
-            return False
-            
-        if not data:
-            print(f"Error: Frontmatter in {filepath} is empty.")
-            return False
-            
-        # Step 2: Gracefully skip Skill configurations or custom templates that aren't lifecycle artifacts
+
+        # Gracefully skip Skill configurations or custom templates that aren't lifecycle artifacts
         if 'name' in data and 'id' not in data:
             print(f"Metadata SKIP: {filepath} contains a Skill signature (name: '{data.get('name')}').")
             return True
         if data.get('type') == 'skill':
             print(f"Metadata SKIP: {filepath} is classified as type: skill.")
             return True
-            
+
         # Required Canonical Fields validation for standard lifecycle artifacts
         required_fields = ['id', 'type', 'milestone_id']
         for field in required_fields:
             if field not in data:
                 print(f"Error: Missing required field '{field}' in {filepath} frontmatter.")
                 return False
-                
+
         # Validate Identity Structure
         id_val = data['id']
         if not isinstance(id_val, str) or not id_val.strip():
             print(f"Error: 'id' must be a non-empty string in {filepath}.")
             return False
-            
+
         # Validate ID Format: Supports legacy (SPEC-001) and canonical M10 alphanumeric (SPEC-M10S4)
         if not re.match(r'^[A-Z]+-[A-Z0-9]+$', id_val):
             print(f"Error: Invalid ID format '{id_val}' in {filepath}. Expected e.g. SPEC-001 or SPEC-M10S4.")
             return False
-            
-        # Reject semantic qualifiers in IDs (M10S2 and review rules)
+
+        # Reject semantic qualifiers in IDs
         if any(qual in id_val.upper() for qual in ['-CORRECTED', '-FINAL', '-V2', '-V3', '-FIXED', '-REVISED']):
             print(f"Error: 'id' '{id_val}' contains prohibited semantic qualifiers or version tags.")
             return False
-            
+
         # Validate Semantic Types
         valid_types = ['specification', 'verification', 'test_set', 'completion', 'evaluation', 'review', 'milestone']
         if data['type'] not in valid_types:
             print(f"Error: 'type' '{data['type']}' is invalid in {filepath}. Must be one of {valid_types}.")
             return False
-            
+
         if not isinstance(data['milestone_id'], str) or not data['milestone_id'].strip():
             print(f"Error: 'milestone_id' must be a non-empty string in {filepath}.")
             return False
-            
+
         # derived_from is optional but must be a list if present
         if 'derived_from' in data:
             if not isinstance(data['derived_from'], list):
                 print(f"Error: 'derived_from' must be a list in {filepath}.")
                 return False
-                
+
+        # Check template version compatibility
+        compat_warnings = check_template_version_compatibility(data, filepath)
+        for w in compat_warnings:
+            print(w)
+
         print(f"Metadata OK: {filepath} ({data['id']} - {data['type']})")
         return True
-        
+
     except Exception as e:
-        print(f"Exception validating {{filepath}}: {{e}}")
+        print(f"Exception validating {filepath}: {e}")
         return False
+
 
 def main():
     import os
@@ -153,24 +178,24 @@ def main():
     print(f"Absolute path of validate_metadata.py: {os.path.abspath(__file__)}")
 
     raw_args = sys.argv[1:]
-    
-    # Filter out common CLI flags starting with '--' (e.g. --spec, --verification)
-    # to support both positional arguments and flag-based validation sweeps.
+
+    # Filter out common CLI flags starting with '--'
     filepaths = [arg for arg in raw_args if not arg.startswith('--')]
-    
+
     if not filepaths:
         print("Usage: python3 validate_metadata.py [--spec] <file1> [--verification] [file2 ...]")
         sys.exit(1)
-        
+
     success = True
     for filepath in filepaths:
         if not validate_file(filepath):
             success = False
-            
+
     if not success:
         sys.exit(1)
     else:
         sys.exit(0)
+
 
 if __name__ == '__main__':
     main()
