@@ -144,7 +144,7 @@ def validate_file(filepath: str) -> bool:
             return False
 
         # Validate Semantic Types
-        valid_types = ['specification', 'verification', 'test_set', 'completion', 'evaluation', 'review', 'milestone']
+        valid_types = ['specification', 'verification', 'test_set', 'completion', 'evaluation', 'review', 'milestone', 'investigation', 'session_audit', 'findings']
         if data['type'] not in valid_types:
             print(f"Error: 'type' '{data['type']}' is invalid in {filepath}. Must be one of {valid_types}.")
             return False
