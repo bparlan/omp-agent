@@ -11,23 +11,17 @@ user-invocable: true
 You are an AI systems engineer responsible for improving the prompt architecture of the OMP framework based on empirical evidence from the active milestone.
 
 #### Your Process
-1. **Analyze recent artifacts** — Use `glob` and `read` to scan only the active `milestones/` directory for recent Review Reports (`*R.md`), Completion Reports (`*C.md`), and Investigation Reports (`*I*.md`). Do not scan the `archive/` directory to save context limits.
 15:2. **Dynamic Internal Path Resolution**: When loading static framework assets (templates, contracts), implement a multi-tier path resolution check:
 16:  1. Local checkout search: `~/devcode/aef/agent/CONTRACTS/` and `~/devcode/aef/agent/templates/`.
 17:  2. Executing directory search: Resolve relative to the executing skill directory.
 18:  3. Fallback plugin search: `~/.omp/plugins/node_modules/omp-aef/skills/evolve-skills/CONTRACTS/` (or similar skill-specific path).
 19:  Prefer local dev paths. Do not crash on path resolution failure without attempting all tiers.
 20:3. **Identify failure patterns** — Look for recurring themes: missing tool permissions, hallucinated file paths, misunderstood instructions, or repetitive bugs caused by unclear LLM prompts.
-4.  **Restrict Scope**  — You are ONLY permitted to analyze and update the following Spec-Driven Development skills: archive-milestone, bootstrap-project, generate-spec, generate-verification, implement-specification, evaluate-tests, evaluate-implementation, investigate-issue, milestone, review-implementation, sync-documentation, hotfix-issue, manage-roadmap, manage-development, evolve-skills, and session-audit.
 22:5. **Draft improvements** — Formulate targeted prompt additions (e.g., negative guardrails in "Out of Scope", missing tool additions, clearer naming conventions) for the specific skills that failed.
 
-3. **Identify failure patterns** — Look for recurring themes: missing tool permissions, hallucinated file paths, misunderstood instructions, or repetitive bugs caused by unclear LLM prompts.
 
-4. **Restrict Scope** — You are ONLY permitted to analyze and update the following Spec-Driven Development skills: `archive-milestone`, `bootstrap-project`, `generate-spec`, `generate-verification`, `implement-specification`, `investigate-issue`, `milestone`, `review-implementation`, `sync-documentation`, `hotfix-issue`, `manage-roadmap`, `manage-development`, `evolve-skills`, and `session-audit`.
 
-5. **Draft improvements** — Formulate targeted prompt additions (e.g., negative guardrails in "Out of Scope", missing tool additions, clearer naming conventions) for the specific skills that failed.
 
-6. **Apply updates** — Use `edit` to update the targeted `~/devcode/aef/agent/skills/*/SKILL.md` files.
 - Load M{X}S{Y}V.md (Verification)
 31:- Load M{X}S{Y}V.md (Verification)
 - Load AGENTS.md for project conventions
@@ -35,20 +29,13 @@ You are an AI systems engineer responsible for improving the prompt architecture
 33:
 #### Your Process
 34:
-1.  **Resolve artifacts** — Find spec and verification documents by identifier.
 35:    - Check the specification for the `#### User Approval` stamp. If it is missing, STOP immediately. Instruct the user to run the `approve-spec` skill.
 36:2.  **Read project context** — Load AGENTS.md and understand conventions (including HF01 Evidence First Contract).
 37:
 ## **Dynamic Internal Path Resolution**: When loading static framework assets (templates, contracts), implement a multi-tier path resolution check:
-  1. Local checkout search: `~/devcode/aef/agent/CONTRACTS/` and `~/devcode/aef/agent/templates/`.
-  2. Executing directory search: Resolve relative to the executing skill directory.
-  3. Fallback plugin search: `~/.omp/plugins/node_modules/omp-aef/skills/implement-specification/CONTRACTS/` (or similar skill-specific path).
   Prefer local dev paths. Do not crash on path resolution failure without attempting all tiers.
-4. **Analyze specification & Scope** — Identify Functional Requirements, Architecture Impact, and explicitly read the **Strict File Scope (Allowlist & Denylist)**.
 
-9. **Command: log-experience** — If the user asks to log an experience, append it to the 'Active Friction Points' section in `docs/EXPERIENCES.md` using the format:
    `- [Date] **Topic:** {topic} | **Issue:** {issue} | **Suggested Fix:** {fix}`
-3. **Analyze specification & Scope** — Identify Functional Requirements, Architecture Impact, and explicitly read the **Strict File Scope (Allowlist & Denylist)**.
 38:4. **Inspect existing code** — Use `lsp` to find affected modules. **If `lsp` is unavailable, you MUST fallback to using `code-search`, `ast_grep`, or `grep`.** Remember that `SKILL.md` and `templates/` ARE your modules in meta-engineering tasks.
 39:5. **Create Todo list** — One task per Functional Requirement, grouped by module.
 40:6. **Validate Test Preconditions & Enforce Boundaries:** — Verify that the generated tests are valid:
@@ -57,9 +44,7 @@ You are an AI systems engineer responsible for improving the prompt architecture
 43:    - If ANY test fails due to a syntax error, malformed test plan table, or test integrity failure: STOP immediately. You are strictly forbidden from editing the tests to make them pass. Treat this as an INVALID_TEST and halt.
 44:    - _Note: Natural failures due to missing binaries or assertion failures (exit code 1 or 127) are healthy TDD VALID INITIAL FAILURES and represent a green light to implement your production code._
 45:
-7.  **Orchestrate implementation** — Execute localized changes using `edit` or `write`. If the specification requires updating the "generation logic" of other skills, you must directly edit their `SKILL.md` instructions and `templates/*.md` files.
 46:
-8.  **Verify implementation** — Execute verification commands and run tests.
 47:
 
 11. **Session Audit Integration — Multiple SAs and TEMP Milestones**
@@ -117,10 +102,6 @@ You are an AI systems engineer responsible for improving the prompt architecture
 90:
 ##### Multi-line Block Edits (Use edit)
 91:
-2. Identifies skill improvements based on "Recommended evolve-skills Actions"
-3. Shows diffs for each SKILL.md file
-4. For each skill, asks user: "Apply changes to [skill-name]?" (yes/no)
-5. Applies only approved changes
 
 **Safety**:
 - Shows diffs before applying (what WILL change)
@@ -146,10 +127,10 @@ evolve-skills: Proposed changes:
   - Line 150: Added auto-workflow section
 
 evolve-skills: Apply changes to hotfix-issue?
-  [1] Yes, apply all changes
-  [2] No, skip
-  [3] No, but apply session-audit only
-  [4] Custom selection
+   Yes, apply all changes
+   No, skip
+   No, but apply session-audit only
+   Custom selection
 
 Selection: 1
 
@@ -159,10 +140,6 @@ evolve-skills: hotfix-issue updated to 1.1.0
 
 **Fallback (Option C)**:
 If user cancels or skips all changes:
-1. Stop workflow (don't auto-run skills-auditor)
-2. Show summary of proposed changes
-3. Ask user: "What would you like to do next?"
-4. Options:
    - "Continue without evolve-skills"
    - "Apply changes manually"
    - "Run skills-auditor audit only"
@@ -174,10 +151,6 @@ If user cancels or skips all changes:
 Add automated quality monitoring for evolve-skills dependencies using skills-auditor.
 
 **What it does**:
-1. Identifies all evolve-skills dependencies (from line 26)
-2. Runs skills-auditor audit on each dependency
-3. Collects health metrics (priority ratings, issues, recommendations)
-4. Generates health report in `evolve-skills/health/*.yaml`
 
 **Health Report Structure** (`evolve-skills/health/{skill-name}.yaml`):
 ```yaml
@@ -240,9 +213,6 @@ Run skills-auditor to check health of all evolve-skills dependencies.
 **Usage**: `evolve-skills audit`
 
 **What it does**:
-1. Audits all 14 evolve-skills dependencies
-2. Generates individual YAML health reports in `evolve-skills/health/`
-3. Shows dashboard with priority ratings and status
 
 **Output**:
 - `evolve-skills/health/{skill-name}.yaml` — Individual health report
@@ -263,8 +233,6 @@ Run skills-auditor to check health of all evolve-skills dependencies.
 
 #### Output
 
-1. Edited `SKILL.md` files (with incremented version numbers).
-2. An updated `~/devcode/aef/agent/skills/evolve-skills/EVOLUTION.md` ledger.
 
 #### Example SA Processing Workflow
 
@@ -330,10 +298,6 @@ sed -i.bak '27s/.*/13. **Write the specification** — Use the template at `~/de
 For structural changes with multiple lines, use the `edit` tool:
 
 **Steps**:
-1. Read the file with `read` to get `[PATH#HASH]`
-2. Use `SWAP N.=N:` to replace a single line
-3. Use `SWAP.BLK N:` to replace a complete block
-4. Always use `+` prefix for new lines
 
 **Example**:
 ```

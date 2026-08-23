@@ -12,7 +12,6 @@ user-invocable: true
 
 After session-audit completes, sync-documentation automatically runs (shows changes, asks for approval).
 
-1. Reads M{X}SA{Y}.md (Session Audit Report)
 15:2. **Dynamic Internal Path Resolution**: When loading static framework assets (templates, contracts), implement a multi-tier path resolution check:
 16:  1. Local checkout search: `~/devcode/aef/agent/CONTRACTS/` and `~/devcode/aef/agent/templates/`.
 17:  2. Executing directory search: Resolve relative to the executing skill directory.
@@ -22,7 +21,6 @@ After session-audit completes, sync-documentation automatically runs (shows chan
 21:3. Shows diffs for each file changed
 22:4. Asks user: "Apply these changes?" (yes/no)
 
-    5.1. **Workspace Awareness**: Distinguish between AEF framework documentation and project documentation.
 25:    5.2. **Project Convention Adherence**: Respect project conventions and architecture, especially for application projects.
 - Shows diffs before applying (what WILL change)
 27:- Shows diffs before applying (what WILL change)
@@ -49,14 +47,14 @@ sync-documentation: Proposed changes:
 sync-documentation: Apply these changes?
 43:
 sync-documentation: Apply these changes?
-  [1] Yes, apply all changes
-46:  [1] Yes, apply all changes
-  [2] No, skip
-47:  [2] No, skip
-  [3] No, but apply skills.md only
-48:  [3] No, but apply skills.md only
-  [4] Custom selection
-49:  [4] Custom selection
+   Yes, apply all changes
+46:   Yes, apply all changes
+   No, skip
+47:   No, skip
+   No, but apply skills.md only
+48:   No, but apply skills.md only
+   Custom selection
+49:   Custom selection
 Selection: 1
 50:Selection: 1
 ```
@@ -72,10 +70,10 @@ sync-documentation: Reading M2SA3.md...
       - Line 120: Added "Every Session Workflow" section
     - Reconciled artifact references using canonical resolution.
 sync-documentation: Apply these changes?
-  [1] Yes, apply all changes
-  [2] No, skip
-  [3] No, but apply skills.md only
-  [4] Custom selection
+   Yes, apply all changes
+   No, skip
+   No, but apply skills.md only
+   Custom selection
 Selection: 1
 ```
 
@@ -84,7 +82,6 @@ Selection: 1
 
 This skill auto-runs after session-audit completes. It:
 75:
-1. Reads M{X}SA{Y}.md (Session Audit Report)
 76:2. Identifies documentation changes
 77:3. Shows diffs for each file changed
 78:4. Asks user: "Apply these changes?" (yes/no)
@@ -111,10 +108,10 @@ sync-documentation: Proposed changes:
   - Line 120: Added "Every Session Workflow" section
 
 sync-documentation: Apply these changes?
-  [1] Yes, apply all changes
-  [2] No, skip
-  [3] No, but apply skills.md only
-  [4] Custom selection
+   Yes, apply all changes
+   No, skip
+   No, but apply skills.md only
+   Custom selection
 
 Selection: 1
 ```

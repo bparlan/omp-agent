@@ -43,15 +43,6 @@ To prevent context leakage, false-passes, or premature implementation, the devel
 ```
 
 ##### SDD State Transition Invariants:
-1.  **`milestone`** $\rightarrow$ Creates `M{X}.md` [State: `PLANNING_READY`]
-2.  **`generate-spec`** $\rightarrow$ Translates milestone to specification `M{X}S{Y}.md` [State: `SPEC_GENERATED`]
-3.  **`generate-verification`** $\rightarrow$ Translates specification to verification protocol `M{X}S{Y}V.md` [State: `VERIFICATION_GENERATED`]
-4.  **`generate-tests`** $\rightarrow$ Translates verification protocol into executable tests under `tests/M{X}/` and initializes the test plan ledger `M{X}S{Y}T{Z}.md` [State: `TESTS_GENERATED`]
-5.  **`evaluate-tests` (Phase 1 Baseline)** $\rightarrow$ Executes generated tests against the blank/empty codebase. Validates that all static checks pass (0) and all functional/logic checks fail naturally (127/1). Generates `M{X}S{Y}TE.md` [State: `TESTS_VERIFIED`]
-6.  **`approve-spec` (Approval Gate)** $\rightarrow$ Presents the Test Evaluation Report (`M{X}S{Y}TE.md`) to the user. User signs the YAML frontmatter approval stamp [State: `APPROVED_FOR_IMPLEMENTATION`]
-7.  **`implement-specification`** $\rightarrow$ Code is built against the approved specification and tests, generating completion report `M{X}S{Y}C.md` [State: `IMPLEMENTING`]
-8.  **`evaluate-implementation` (Phase 2 Optimizer)** $\rightarrow$ Runs tests against implementation, triggers the Post-Implementation Optimizer Loop (auto-fixing typos, imports, or basic logic slips), and generates `M{X}S{Y}E.md` [State: `EVALUATED_OK`]
-9.  **`review-implementation`** $\rightarrow$ Compares spec vs implemented reality, generates review report `M{X}S{Y}R.md` [State: `REVIEWED_OK`]
 10. **`sync-documentation`** $\rightarrow$ Integrates review changes into roadmap, changelogs, and indices [State: `SYNCED`]
 11. **`archive-milestone`** $\rightarrow$ Cleans up working folders and moves milestone documents to milestones/archive/ [State: `ARCHIVED`]
 
@@ -59,8 +50,6 @@ To prevent context leakage, false-passes, or premature implementation, the devel
 
 #### 2. Your Process: Tactical Orchestration & Handoffs
 
-1.  **Assess Workspace State:** Use `glob` to scan the milestones directory `milestones/M{X}/` of the active sequence.
-2.  **Determine Current Pipeline Stage:** Call `validate_artifact_state()` on existing artifacts to identify the exact state and select the next required skill:
     *   No `M{X}.md` exists $\rightarrow$ Invoke `milestone` to create the milestone.
     *   Only `M{X}.md` exists $\rightarrow$ Invoke `generate-spec` to generate the specification.
     *   Only `M{X}S{Y}.md` exists (no verification) $\rightarrow$ Invoke `generate-verification`.
@@ -72,7 +61,6 @@ To prevent context leakage, false-passes, or premature implementation, the devel
     *   `M{X}S{Y}E.md` exists but no `M{X}S{Y}R.md` exists $\rightarrow$ Invoke `review-implementation` to audit compliance.
     *   `M{X}S{Y}R.md` exists but canonical docs are out of sync $\rightarrow$ Invoke `sync-documentation`.
     *   All specifications for milestone complete $\rightarrow$ Invoke `archive-milestone` to consolidate workspace.
-3.  **Handoff Hails:** Output the plain-text handoff message instructing the user which command to invoke next. Do NOT call the next skill programmatically.
 
 ---
 

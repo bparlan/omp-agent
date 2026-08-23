@@ -18,14 +18,11 @@ You are NOT an implementation agent. You MUST NOT modify, write, or create any p
 
 Before executing any baseline test scripts, you MUST perform these structural checks:
 
-1.  **Validate Metadata:** Run `python3 validate_metadata.py` against the specification (`milestones/M{X}/M{X}S{Y}.md`) and verification protocol (`milestones/M{X}/M{X}S{Y}V.md`) to ensure frontmatter compliance.
     - The milestone's `legacy_boundaries` frontmatter field determines which milestone directories are pre-canonical. Files in legacy directories are exempt from strict frontmatter validation.
-2.  **Isolate Active Tests (The Ledger Rule):**
     - You are STRICTLY PROHIBITED from running all files inside the `tests/M{X}/` folder blindly. This prevents legacy or unassociated tests from polluting this sequence's baseline run.
     - You MUST read the active sequence's **Test Plan Ledger (`milestones/M{X}/M{X}S{Y}T{Z}.md`)**.
     - Parse the Markdown traceability table and extract the list of test file paths under the **"Test File"** column (e.g., `tests/M10/test_m10s10_git_cli.sh`).
     - **ONLY execute the test scripts explicitly listed in that active ledger.** Treat any other test files in the folder as unassociated background files and skip them entirely.
-3.  **Inspect Interpreters:**
     - For `.sh` files, you MUST execute them using `bash` (e.g., `bash tests/M{X}/test_*.sh`).
     - For `.py` files, you MUST execute them using `python3` or `pytest`.
     - Never attempt to run a Bash script using the Python interpreter or vice versa.
@@ -44,16 +41,11 @@ Before executing any baseline test scripts, you MUST perform these structural ch
 
 #### 2. Your Process: Pre-Implementation Baseline Verification
 
-1.  **Resolve Test Paths:** Parse the active test plan ledger to construct the active execution array of files present on disk.
-2.  **Verify File Integrity:** Inspect each test file on disk before running:
     - Ensure the script contains **zero literal NUL bytes (`0x00`)**.
     - Ensure the script has a valid shebang line on line 1 (e.g., `#!/bin/bash` or `#!/usr/bin/env python3`).
     - Ensure there are **no pre-flight binary existence traps** (e.g., checking if `bin/omp-test` exists on disk). If a trap is present, classify the test as `INVALID_TEST` immediately.
-3.  **Execute Tests:** Run each isolated test script against the un-implemented codebase and capture the exit code and outputs.
-4.  **Classify and Validate Results:** For each executed test, run a validity check and apply the TDD baseline expectations:
     - **Specification/Environment Checks (`SPECIFICATION_CHECK` or `ENVIRONMENT_CHECK`):** These tests verify static schemas, documentation metadata, or system dependencies. Because these elements exist before coding starts, these tests **MUST pass immediately with Exit Code 0**.
     - **Implementation Checks (`IMPLEMENTATION_CHECK` or `INTEGRATION_CHECK`):** These tests verify active CLI executables or API code logic. Because the binary/logic does not exist yet, these tests **MUST fail naturally with Exit Code 127 (Command Not Found) or Exit Code 1 (Assertion Failed)**. This natural failure is the correct, expected **`VALID_INITIAL_FAILURE`**.
-5.  **Detect TDD False-Pass Leaks vs. Brownfield Passes (CRITICAL):**
     *   If an `IMPLEMENTATION_CHECK` or `INTEGRATION_CHECK` exits with Code `0` (Success) on the initial run, you MUST check if the target implementation (the executable binary, class, or module under test) is already physically present on disk.
     *   **The Brownfield Exception:** If the target implementation is present, functional, and contains non-trivial logic, this is a healthy **`VALID_BROWNFIELD_PASS`** (indicating that the code is already compliant). Do NOT classify this as a leak or an `INVALID_TEST`.
     *   **The TDD Leak:** If and only if the test passes (Code 0) against a completely non-existent or blank subject (or due to circular mocking/prose grepping), classify the test as an `INVALID_TEST` (TDD False-Pass Leak) and halt the pipeline with Exit Code 2.
@@ -72,10 +64,6 @@ On any baseline execution error, classify the failure exactly:
 
 If any test is classified as `INVALID_TEST`, or if any static `SPECIFICATION_CHECK` fails, the pre-implementation gate is **LOCKED**. You MUST:
 
-1.  Halt execution immediately.
-2.  Do NOT proceed to the implementation phase.
-3.  Generate the Test Evaluation Report with **`EXIT_CODE=2`**.
-4.  Emit the grep-able uncertainty marker: **`#NEEDS-CLARIFICATION: Invalid test suite or TDD leak detected in <path>`** and hand control back to the user.
 
 ---
 

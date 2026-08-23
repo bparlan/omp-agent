@@ -17,13 +17,10 @@ This skill is specialized strictly for the **post-implementation phase** (after 
 #### 1. Preconditions & Schema Integrity (The Ledger Rule)
 
 Before executing any test scripts, you MUST perform these structural checks:
-1.  **Validate Metadata:** Run `python3 validate_metadata.py` against the specification (`milestones/M{X}/M{X}S{Y}.md`) and verification protocol (`milestones/M{X}/M{X}S{Y}V.md`) to verify canonical compliance.
-2.  **Isolate Active Tests (The Ledger Rule):**
     *   You are STRICTLY PROHIBITED from executing all files inside the `tests/M{X}/` folder blindly. This prevents legacy or unassociated tests from polluting this execution run.
     *   You MUST read the active sequence's **Test Plan Ledger (`milestones/M{X}/M{X}S{Y}T{Z}.md`)**.
     *   Parse the Markdown traceability table and extract the list of test file paths under the **"Test File"** column (e.g., `tests/M10/test_m10s10_git_cli.sh`).
     *   **ONLY execute the test scripts explicitly listed in that active ledger.** Treat any other test files in the folder as unassociated background files and skip them entirely.
-3.  **Inspect Interpreters:**
     *   For `.sh` files, execute them using `bash`.
     *   For `.py` files, execute them using `python3` or `pytest`.
     *   Never attempt to run a Bash script using the Python interpreter or vice versa.
@@ -32,13 +29,9 @@ Before executing any test scripts, you MUST perform these structural checks:
 
 #### 2. Your Process: The Post-Implementation Optimizer Loop
 
-1.  **Resolve Test Paths:** Parse the active test plan ledger to construct your target execution array of scripts present on disk.
-2.  **Execute Tests:** Execute the targeted test files using the correct interpreter and capture their exit codes, stdout, and stderr.
-3.  **Validate Failures (Evidence Attribution):** Before interpreting any failing test run, you MUST run a validity check. For each failing test, answer: *"Is this test failure attributable to a defect in the implementation under test?"* and assign a verdict:
     *   `VALID_TEST`: The test successfully exercised its subject, and the failure is due to a bug or omission in the production code. Proceed to the Optimizer Loop.
     *   `INVALID_TEST`: The test failed due to a syntax crash, spacing mismatch, bad shebang, or defective test logic. **STOP immediately.** You are strictly prohibited from modifying implementation code to make an invalid test pass.
     *   `ENVIRONMENT_FAILURE`: The test failed due to missing system utilities in the sandbox path.
-4.  **The Optimizer Loop (Auto-Fixing Valid Failures):**
     *   For any test failure classified as a `VALID_TEST`, read the traceback or error log.
     *   If the issue is a **minor implementation bug** (e.g., a logic slip, a typo, a missing import, or a spacing misalignment), use your `edit` tool to correct the production code files in `bin/` or `src/`.
     *   *Constraint:* You are strictly forbidden from modifying test scripts (`tests/M{X}/`) or specifications (`milestones/M{X}/`) to force a passing run.

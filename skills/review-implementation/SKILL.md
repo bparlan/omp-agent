@@ -16,30 +16,18 @@ Assume the prior report is wrong until proven otherwise. Verify every claim agai
 
 ## Your Process
 
-1. **Read the artifacts** — Load the specification (`M{X}S{Y}.md`), verification protocol (`M{X}S{Y}V.md`), completion report (`M{X}S{Y}C.md`), milestone contract (`M{X}.md`), and the modified implementation files.
-2. **Dynamic Internal Path Resolution** — When loading static framework assets (templates, contracts), implement a multi-tier path resolution check:
-   1. Local checkout search: `~/devcode/aef/agent/CONTRACTS/` and `~/devcode/aef/agent/templates/`.
-   2. Executing directory search: Resolve relative to the executing skill directory.
-   3. Fallback plugin search: `~/.omp/plugins/node_modules/omp-aef/skills/review-implementation/CONTRACTS/`.
-3. **Read project context** — Load AGENTS.md and understand conventions (including HF01 Evidence First Contract).
-4. **Validate milestone contract compliance** — Verify that implementation stays within the milestone's declared scope, out-of-scope boundaries, and integration binding constraints. If the milestone has a Spec Decomposition Plan, verify that the implementation covers only the declared specifications.
-5. **Audit against specification** — Create compliance matrix showing what was implemented vs what was specified.
 
 ### Step 5b: Metadata & Identity Compliance Audit (CRITICAL)
 
 Execute a mechanical audit of all generated milestone files:
 
 - Verify that every artifact contains a valid YAML frontmatter block.
-- Run `python3 validate_metadata.py` on each file.
+- Run `python3 ~/devcode/aef/agent/bin/validate_metadata.py` on each file.
 - Check the `id` field of every new specification, verification, and test set.
   - You MUST reject the implementation if any artifact ID contains semantic qualifiers (such as `-CORRECTED`, `-FINAL`, or `-V2`).
   - Changes in scope must be represented as a new clean sequential ID (e.g., `SPEC-002`) with the relationship documented in the `supersedes` metadata field.
 - Check the milestone's `legacy_boundaries` frontmatter field. If present, verify that artifacts in those legacy milestone directories are handled as legacy (no frontmatter enforcement).
 
-6. **Test verification coverage** — Compare actual tests against verification protocol.
-7. **Test validity analysis** — Answer: Were the tests themselves valid evidence of correctness? Distinguish "test is wrong" from "implementation is wrong" in findings. If any tests were classified INVALID, recommend test repair before re-evaluation.
-8. **Find incomplete requirements** — Identify spec requirements not fully realized.
-9. **Identify issues** — Document problems found in the implementation.
 10. **Assess architecture compliance** — Check adherence to architectural constraints.
 11. **Check edge cases** — Verify handling of boundary conditions.
 12. **Identify technical debt** — Note shortcuts, TODOs, maintainability gaps.

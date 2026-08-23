@@ -46,11 +46,6 @@ The `bin/lint-verification-contract.sh` script MUST be executed against the gene
 Determine the target specification explicitly.
 For milestone `M{X}` and specification `M{X}S{Y}`, read:
 
-1. `milestones/M{X}/M{X}.md`
-2. `milestones/M{X}/M{X}S{Y}.md`
-3. `milestones/M{X}/M{X}S{Y}T*.md` if a test design already exists
-4. Relevant prior verification artifacts only when the specification explicitly derives from them.
-5. **Read Milestone Verification Strategy** — Read the milestone's `## Verification Strategy` section. If present, this section contains method constraints (e.g., `FR-1: SCRIPT_EXECUTION`). For each FR that has a strategy hint, you MUST use the specified method. If the strategy says SCRIPT_EXECUTION but you would assign DOCUMENT_CHECK, you MUST follow the strategy or emit #NEEDS-CLARIFICATION. If the strategy section is absent, use default method selection based on requirement type.
 
 Do NOT assume that filenames alone establish semantic identity.
 If the canonical specification has been renamed, moved, or stored under a resource suffix such as: `M10S1_resource.md`, then treat the frontmatter `id:` as authoritative.
@@ -85,10 +80,6 @@ Before proceeding, verify:
 
 Every functional requirement MUST have a stable source ID (e.g., `FR-1`, `FR-2`) from the specification. The verification artifact MUST trace each verification item back to its source requirement ID. If the specification has no requirement IDs:
 
-1. Assign temporary local IDs in the verification artifact, clearly marking them as derived.
-2. Preserve the exact source wording from the specification.
-3. Do not silently rewrite the specification.
-4. Ensure generated tests reference their source requirement IDs.
 
 The verification artifact MUST itself contain valid YAML frontmatter, including:
 
@@ -185,11 +176,6 @@ A specification completeness check MUST NOT be presented as proof that the imple
 For every executable verification item, assess:
 A valid initial failure requires:
 
-1. the test can execute before implementation;
-2. the test exercises the intended subject;
-3. failure indicates missing implementation rather than missing specification;
-4. the test does not merely inspect the verification document;
-5. the test does not fail because the environment is missing an unrelated dependency.
 
 ---
 
@@ -258,8 +244,6 @@ The verification document MUST be the canonical source consumed by `generate-tes
 
 ##### Mechanical Writing Postcondition (CRITICAL)
 
-1. You MUST physically execute the file-writing tool to save the generated verification protocol text to the designated filesystem path (`milestones/M{X}/M{X}S{Y}V.md`) BEFORE concluding your execution turn.
-2. Immediately after writing, you MUST run the validator `python3 validate_metadata.py milestones/M{X}/M{X}S{Y}V.md` using the bash tool. If metadata validation fails, you MUST delete the file, fix the frontmatter generator rules, and regenerate until it passes.
 
 ---
 

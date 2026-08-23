@@ -1,5 +1,5 @@
 ---
-id: M{X}
+id: MILESTONE-M{X}
 type: milestone
 title: Milestone Title
 milestone_id: M0

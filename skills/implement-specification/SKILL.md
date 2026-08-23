@@ -47,9 +47,6 @@ Given milestone `M{X}` and specification sequence `S{Y}`:
 
 When loading static framework assets (templates, contracts), implement a multi-tier path resolution check:
 
-1.  **Local checkout search:** Check `~/devcode/aef/agent/CONTRACTS/` and `~/devcode/aef/agent/templates/`.
-2.  **Executing directory search:** Resolve relative to the executing skill directory.
-3.  **Fallback plugin search:** Check `~/.omp/plugins/node_modules/omp-aef/skills/implement-specification/CONTRACTS/` (or similar skill-specific path).
 
 - Prefer local dev paths. Do not crash on path resolution failure without attempting all tiers.
 
@@ -66,21 +63,12 @@ When loading static framework assets (templates, contracts), implement a multi-t
 
 #### 6. Your Process (The Spec-to-Code Loop)
 
-1.  **Resolve Artifacts:** Load and inspect the target Specification, Verification Protocol, and conventions documents.
-2.  **Verify User Approval:** Inspect the bottom of `M{X}S{Y}.md` for the explicit user approval stamp. Halt if missing.
-3.  **Analyze Scope & Allowlist:** Identify Functional Requirements, Non-Functional Requirements, and the `Strict File Scope (Allowlist & Denylist)` boundaries.
-4.  **Inspect Existing Codebase:** Use `lsp` to analyze affected modules. If `lsp` is unavailable, fallback to using `code-search`, `ast_grep`, or standard `grep`.
-5.  **Create Structured Todo List:** Formulate a step-by-step task list grouped by target module, matching every Functional Requirement.
-6.  **Validate test preconditions**  — Verify that the generated tests are valid:
     *  Locate existing test files in tests/M{X}/.
     *  Execute the tests against the current (pre-implementation) codebase.
     *  If ANY test is classified as an  **invalid test defect**  (syntax error, self-scanning, or real TDD leak), STOP and report it. Do NOT begin implementation.
     *   *Note on Expected Baseline States:* 
         *   If the implementation is missing, tests must fail with exit code 1 or 127 (**`VALID_INITIAL_FAILURE`**).
         *   If the implementation is already present and functional on disk, tests may pass with exit code 0 (**`VALID_BROWNFIELD_PASS`**). Both of these are healthy baseline states that grant the green light to proceed.
-7.0. Orchestrate Implementation: Execute localized edits on files listed exclusively in the specification's Allowlist. If implementing framework self-evolution tasks, you are permitted to edit targeted `SKILL.md` and template files.
-8.0. Formulate Competing Hypotheses: When unexpected behavior occurs, analyze by forming and exploring multiple plausible hypotheses. Record evidence for and against each hypothesis before drawing conclusions.
-9.0. Verify Implementation: Execute the verification test commands as specified in the verification protocol's \"Automated Validation\" section and assert successful outcomes (Exit Code 0).
 10.0. Adhere to the Evidence First Contract: Clearly separate Observation, Expectation, Difference, Interpretation, and Conclusion. Observed facts must contain zero interpretation, and interpretation must not be presented as fact.
 11.0. Generate Completion Report: Write the completion report to `milestones/M{X}/M{X}S{Y}C.md` using the template at `templates/completion_template.md`. Ensure correct sequential `COMP-{N}` frontmatter formatting.
 _ Locate the existing test files in `tests/M{X}/`.

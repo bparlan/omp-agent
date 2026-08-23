@@ -37,22 +37,13 @@ Every specification document you generate MUST begin with a valid YAML frontmatt
 
 #### 2. Your Process
 
-1.  **Read the Milestone** — Load `M{X}.md` from the `milestones/M{X}/` directory.
-2.  **Read Milestone Integration Bindings** — Read the milestone's `## Integration Bindings` table. This is the **sole, authoritative source of truth** for dependencies (binaries, fixtures, interfaces, and environment variables).
     - **Prohibition**: You are strictly forbidden from scanning the `bin/` directory, analyzing existing binaries, or asking the user about toolchain naming conventions or exit code patterns. All required properties must be derived strictly from the Milestone.
-3.  **Specification Generation Template** — Read `templates/specification_template.md`. Strip any visual dividers (like `-----------------------------------------`) from the top of the file before appending your generated frontmatter.
-4.  **Strict Section Anchoring Rule** — You are strictly prohibited from copying functional requirements from other specification blocks. Derive your objective, functional requirements, and architecture allowlist _only_ from the text bounded by that specific section of the milestone (e.g. "M{X}S{Y}" or "Specification {Y}").
-5.  **Check Followup Context** — If prior specifications exist, read the most recent one to understand the current implementation state, what has been completed, and what remaining gaps need to be specified in the active sequence.
-6.  **Follow Spec Decomposition Plan** — Read the milestone's `## Spec Decomposition Plan` section. The milestone declares exactly N specifications. If you are generating the last specification in the plan, ensure all remaining scope is covered. If the plan lists N specs but existing artifacts already cover N specs, halt — no additional specs are permitted beyond the plan.
-7.  **Generate Artifact Metadata** — Programmatically determine the canonical identifier for this specification artifact (e.g., `SPEC-M1S1`) based on the milestone ID and sequence. Construct the YAML frontmatter enclosed strictly in `---` lines. Prohibit semantic qualifiers in IDs (e.g., `-CORRECTED`, `-FINAL`, or `-V2`).
-8.  **Derive Functional Requirements (FRs) with Semantic IDs** — Define what the system must do, deriving requirements from the milestone scope.
     - **Semantic FR IDs**: You MUST assign stable, machine-readable, descriptive semantic identifiers to each functional requirement (e.g., `FR-CONFIG_LOAD`, `FR-PROVIDER_INIT`, `FR-WALLET_DERIVE`, `FR-MASK_SENSITIVE_DATA`) rather than sequential numbers (e.g., `FR-1`, `FR-2`) or omitting IDs entirely. This guarantees downstream traceability while preserving semantic neutrality and requirement independence.
     - **Interface Contract Mandate**: Every functional requirement MUST define an observable boundary. You MUST specify either:
       - **CLI Executable Contract**: (e.g., `node m1-s1.js --rpc "$BASE_RPC_URL"`) with its exact flags, arguments, and expected exit codes.
       - **Structured Schema Contract**: (e.g., YAML frontmatter keys or a JSON output dictionary) with explicit, non-negotiable keys and types.
       - **Filesystem State Contract**: (e.g., specific file creation, path resolution, or directory structures).
     - **Observable Behavior Rule**: Requirements MUST be defined in terms of verifiable logic, structured data, UI components, file existence, or API responses. You MUST NOT define requirements based on exact prose wording (e.g., checking for the phrase "success" in logs).
-9.  **Identify Architecture Impact (Implementation Readiness)** — Analyze the architecture impact and populate the following sections:
     - **Strict File Scope Allowlist**: Populate with the expected physical code targets (e.g., `src/provider.ts`, `config.json`) that the implementation agent will need to write or modify. Failing to include code targets in the Allowlist is a critical failure that blocks the implementation pipeline.
     - **Strict File Scope Denylist**: List files that MUST NOT be touched.
     - **Affected Modules & Public Interfaces**: You MUST detail public module exports, function signatures, class interfaces, custom error classes, and parameter types (e.g., `loadConfig(): Promise<Config>`). Defining these boundary contracts is essential to ensure **Implementation Readiness** so downstream coder and test-generation agents do not have to invent or guess design decisions.
@@ -76,9 +67,6 @@ Every specification document you generate MUST begin with a valid YAML frontmatt
 
 ##### Mechanical Writing Postcondition (CRITICAL)
 
-1. You MUST physically execute the file-writing tool to save the generated specification text to the designated filesystem path (`milestones/M{X}/M{X}S{Y}.md`) BEFORE concluding your execution turn.
-2. Immediately before handoff, you MUST run a validation command to print the physical file's first 10 lines (including the YAML frontmatter) from standard disk to verify that the file was successfully written and is not empty.
-3. **Compile-time Placeholder Check**: Search the final generated buffer for any occurrence of the words `placeholder`, `TODO`, `FIXME`, or `to be defined`. If found, you MUST delete the file, halt execution, emit `#NEEDS-CLARIFICATION: Incomplete specification contains placeholder markers`, and request user intervention.
 
 ---
 

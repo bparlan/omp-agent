@@ -2,7 +2,7 @@
 name: milestone
 version: 2.6.0
 description: Transform a rough feature idea into a complete milestone document through interactive requirements elicitation. Ensures strict, observable scope boundaries.
-tools: read, write, ask, edit, glob, bash
+- tools: read, write, ask, edit, glob, bash, generate_skeletons
 user-invocable: true
 ---
 
@@ -40,10 +40,12 @@ Once finalized, the milestone represents the agreed requirements contract. Downs
 `milestone <command> [options]`
 
 1. **Determine Milestone ID** — Use the AEF runtime's milestone registry mechanism or discover project-specific registry evidence to parse all existing entries. Find the absolute highest integer `X` in the `[M{X}]` tags. The new identifier MUST be `M{X+1}`. If empty, start at `M1`.
-2. **Execute Project Introspection:** Before writing a single word of the milestone, you MUST perform a semantic inspection of available project evidence to ground your requirements in the actual state of the project.
-   - Inspect available project structure and interfaces to ground requirements.
-   - Identify possible "Integration Bindings", locate those files and use `read` to analyze their inputs, outputs, and JSON/YAML schemas.
-   - Reuse and consume pre-existing capabilities, interfaces, or artifacts rather than inventing parallel, overlapping, or duplicated components.
+- **Execute Project Introspection:** Before writing a single word of the milestone, you MUST perform a semantic inspection of available project evidence to ground your requirements in the actual state of the project.
+  - Run `generate_skeletons` to extract codebase structure via tree-sitter.
+  - Inspect available project structure and interfaces to ground requirements.
+  - Identify possible "Integration Bindings", locate those files and use `read` to analyze their inputs, outputs, and JSON/YAML schemas.
+  - Reuse and consume pre-existing capabilities, interfaces, or artifacts rather than inventing parallel, overlapping, or duplicated components.
+
 
 3. **Create**:
    - Initializes a new project milestone using the AEF framework's canonical resolution to determine the correct artifact path, following the standard artifact creation process.

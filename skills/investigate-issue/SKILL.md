@@ -15,23 +15,14 @@ You are an engineering investigator that produces actionable technical knowledge
 
 ## Your Process
 
-1. **Reproduce the failure** — Before any edits or source inspection, reproduce the exact failure. Run the failing command, test, or scenario in the exact context where it failed.
 
-2. **Capture evidence** — Record: exact command, working directory, exit code, stderr, full traceback, and relevant file diff. This is the raw material for all diagnosis.
 
-3. **Do not infer from source alone** — Source inspection comes after failure capture. Do not form conclusions from reading code without first observing runtime behavior.
 
-4. **Inspect filesystem state** — Only after capturing the failing command, examine filesystem state: file contents, timestamps, expected artifacts, generated state.
 
-5. **Classify the failure** — Choose exactly one category from the Failure Classification Taxonomy below.
 
-6. **Compare against historical failures** — Use `glob` to find all `*I*.md` investigation reports in `milestones/`. Cross-reference by failure class. Check if this failure matches a known pattern.
 
-7. **Apply automatic fix (if safe)** — If the fix is deterministic, local, reversible, and within this skill's tool allowlist, apply it automatically. Otherwise proceed through the SDD pipeline.
 
-8. **Verify the fix** — Re-run the exact failing command from step 1. Report exit code and output.
 
-9. **Report** — Investigation report with: root cause, evidence, fix applied (or "none"), verification result, prevention recommendation.
 
 10. **Stop or Run** — Either stop and inform user of next steps, or if user requests full automation, run `/investigate-issue run` to automatically proceed through verification, specification, implementation, evaluation, and review.
 
@@ -68,11 +59,6 @@ Classify the failure as exactly **one** of:
 
 ### Historical Failure Comparison
 
-1. `glob` for investigation reports: `**/milestones/**/*I*.md`
-2. Extract `type: investigation` files
-3. Compare current failure class against previous investigations of same class
-4. If a known fix exists, reference the prior report's prevention recommendation
-5. If same failure class recurs across milestones, flag as systemic
 
 ### Evidence Framework
 
@@ -98,14 +84,6 @@ The report MUST include these sections:
 - **Run**:
   - **Description**: Execute the complete SDD pipeline from investigation completion to review, with automation for steps that don't require user decisions.
   - **Process**:
-    1. **Complete investigation** — Finish investigation report (steps 1-9 of your process).
-    2. **Auto-generate verification and tests** — Automatically run generate-verification and generate-tests based on findings.
-    3. **Generate specification** — Run generate-spec to create M{X}S{Y+1}.md incorporating investigation findings.
-    4. **Manual approval** — User reviews and confirms specification via approve-spec.
-    5. **Auto-implement** — After approval, automatically run implement-specification.
-    6. **Auto-evaluate** — Automatically run evaluate-implementation.
-    7. **Auto-review** — Automatically run review-implementation.
-    8. **Output summary** — Display final completion summary.
   - **User intervention points**:
     - Investigation completion (if issues found)
     - Specification approval (via approve-spec skill)
@@ -139,13 +117,6 @@ How to avoid this failure class in the future. What tooling, validation, or proc
 
 Investigation is complete when:
 
-1. Failure reproduced and captured.
-2. Failure classified into exactly one taxonomy category.
-3. Historical investigations checked for matching patterns.
-4. Fix applied (auto-fix) or explicitly deferred to SDD pipeline.
-5. Verification re-run confirms fix (or failure reproduced for SDD).
-6. Investigation report `M{X}S{Y}I{Z}.md` written with all 5 required sections.
-7. User can either:
    - Run `/investigate-issue run` for SDD automation, OR
    - Invoke `/generate-spec` manually, OR
    - Invoke `/investigate-issue` again.
@@ -154,9 +125,6 @@ Investigation is complete when:
 
 Your investigation report may recommend creating new specifications to address the issue. However:
 
-1. You are STRICKLY FORBIDDEN from prescribing or suggesting specification identifiers that contain semantic qualifiers, version numbers, or correction tags (e.g., do NOT recommend `SPEC-001-CORRECTED` or `M5S1I1-CORRECTED`).
-2. You must instruct the downstream specification generator (`generate-spec`) to allocate a clean, sequential specification ID (e.g., `SPEC-002`).
-3. The relationship to this investigation and the original specification must be documented purely in the new specification's metadata fields:
    derived_from: [INV-{N}]
    supersedes: [SPEC-{Y}]
 
@@ -168,10 +136,6 @@ Your investigation report may recommend creating new specifications to address t
 
 This skill MAY apply automatic fixes ONLY when ALL conditions are met:
 
-1. **Deterministic** — The fix is clear from the evidence (e.g., typo, wrong path, missing import).
-2. **Local** — The fix touches only one file, and the change is self-contained.
-3. **Reversible** — The fix can be reverted with a single `git checkout`.
-4. **Within allowlist** — The fix is within the tools declared in frontmatter.
 
 When conditions are met:
 - Apply the fix without creating a new specification/implementation cycle.

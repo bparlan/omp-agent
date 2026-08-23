@@ -10,31 +10,31 @@ Usage:
     python skills-auditor.py list
 """
 
-    # 14 skills audited
-    skills_list = [
-        "bootstrap-project",
-        "generate-spec",
-        "generate-verification",
-        "implement-specification",
-        "evaluate-tests",
-        "evaluate-implementation",
-        "investigate-issue",
-        "milestone",
-        "review-implementation",
-        "sync-documentation",
-        "hotfix-issue",
-        "manage-roadmap",
-        "manage-development",
-        "evolve-skills",
-        "session-audit"
-    ]
+import sys
+from pathlib import Path
+from typing import Dict, List, Optional
+
+# Import yaml for YAML parsing and re for regex
+import yaml
+import re
+
+# 14 skills audited
+SKILLS_LIST = [
+    "bootstrap-project",
+    "generate-spec",
+    "generate-verification",
+    "implement-specification",
+    "evaluate-tests",
+    "evaluate-implementation",
+    "investigate-issue",
+    "milestone",
     "review-implementation",
     "sync-documentation",
     "hotfix-issue",
     "manage-roadmap",
     "manage-development",
     "evolve-skills",
-    "session-audit",
+    "session-audit"
 ]
 
 
@@ -83,6 +83,105 @@ def read_skill_frontmatter(skill_dir: Path) -> Dict:
         return data
     except yaml.YAMLError:
         return {}
+
+
+def check_gemini_notebooklm_corruption(skill_dir: Path, content: str) -> List[Dict]:
+    """Check for Gemini NotebookLM reference data corruption (numbers in brackets)."""
+    issues = []
+    
+    # Pattern: numbers in brackets like [7], [49], [100]
+    # These are likely corrupted reference data
+    pattern = r'\[(\d+)\]'
+    matches = re.findall(pattern, content)
+    
+    if matches:
+        unique_numbers = sorted(set(matches), key=int)
+        issues.append({
+            "type": "gemini_notebooklm_corruption",
+            "description": f"Found {len(matches)} instances of corrupted NotebookLM references: {[n for n in unique_numbers[:5]]}",
+            "severity": "LOW"
+        })
+    
+    return issues
+
+
+def check_line_number_text(skill_dir: Path, content: str) -> List[Dict]:
+    """Check for lines starting with written line numbers as text."""
+    issues = []
+    
+    lines = content.split("\n")
+    for i, line in enumerate(lines, 1):
+        stripped = line.lstrip()
+        # Check if line starts with digits followed by period or space (e.g., "1. " or "1 ")
+        if stripped and stripped[0].isdigit():
+            # Look ahead to see if it's a line number marker
+            if stripped[0] == '1' and len(stripped) > 1:
+                # Check if next character is period or space (common line number pattern)
+                next_char = stripped[1]
+                if next_char in '. ':
+                    issues.append({
+                        "type": "line_number_text",
+                        "description": f"Line {i} starts with text that looks like a line number: '{stripped[:20]}'",
+                        "severity": "LOW"
+                    })
+    
+    return issues
+
+
+def check_backtick_blocks(skill_dir: Path, content: str) -> List[Dict]:
+    """Check for 4-backtick markdown blocks (should be 3)."""
+    issues = []
+    
+    # Pattern: 4 backticks followed by markdown
+    pattern = r'```\`\`markdown'
+    
+    matches = re.findall(pattern, content)
+    
+    if matches:
+        issues.append({
+            "type": "four_backticks",
+            "description": f"Found {len(matches)} instances of 4-backtick markdown blocks (should be 3)",
+            "severity": "LOW"
+        })
+    
+    return issues
+
+
+def check_dormant_triple_dash(skill_dir: Path, content: str) -> List[Dict]:
+    """Check for dormant --- at end of file."""
+    issues = []
+    
+    lines = content.split("\n")
+    last_lines = lines[-5:]  # Check last 5 lines
+    
+    for line in last_lines:
+        if line.strip() == "---":
+            issues.append({
+                "type": "dormant_triple_dash",
+                "description": "Found dormant '---' at end of file",
+                "severity": "LOW"
+            })
+    
+    return issues
+
+
+def check_extra_spaces_before_closing_backticks(skill_dir: Path, content: str) -> List[Dict]:
+    """Check for extra 4 spaces before closing ``` triple ticks."""
+    issues = []
+    
+    # Pattern: closing ``` preceded by 4 spaces (or more)
+    pattern = r'(    )```$'
+    
+    matches = re.findall(pattern, content, re.MULTILINE)
+    
+    if matches:
+        issues.append({
+            "type": "extra_spaces_before_backticks",
+            "description": f"Found {len(matches)} instances of extra spaces before closing backticks",
+            "severity": "LOW"
+        })
+    
+    return issues
 
 
 def check_version_consistency(skill_dir: Path, frontmatter: Dict) -> List[Dict]:
@@ -171,6 +270,76 @@ def check_description_quality(skill_dir: Path, frontmatter: Dict) -> List[Dict]:
     return issues
 
 
+
+
+def fix_gemini_notebooklm_corruption(content: str) -> str:
+    """Remove Gemini NotebookLM reference data corruption (numbers in brackets)."""
+    import re
+    # Replace numbers in brackets like [7], [49], [100] with empty string
+    fixed_content = re.sub(r'\[(\d+)\]', '', content)
+    return fixed_content
+
+
+def fix_line_number_text(content: str) -> str:
+    """Remove lines starting with written line numbers as text."""
+    lines = content.split("\n")
+    fixed_lines = []
+    for line in lines:
+        stripped = line.lstrip()
+        # Check if line starts with digits followed by period or space
+        if stripped and stripped[0].isdigit() and len(stripped) > 1:
+            next_char = stripped[1]
+            if next_char in ". ":
+                # Skip this line (it looks like a line number)
+                continue
+        fixed_lines.append(line)
+    return "\n".join(fixed_lines)
+
+def fix_backtick_blocks(content: str) -> str:
+    """Fix 4-backtick markdown blocks to 3-backtick blocks."""
+    # Replace ````markdown with ```markdown
+    fixed_content = content.replace('````markdown', '```markdown')
+    return fixed_content
+
+
+def fix_dormant_triple_dash(content: str) -> str:
+    """Remove dormant --- at end of file."""
+    lines = content.split("\n")
+# Remove trailing lines that are just ---
+    while len(lines) > 0 and lines[-1].strip() == "---":
+        lines.pop()
+    return "\n".join(lines)
+
+
+def fix_extra_spaces_before_closing_backticks(content: str) -> str:
+    """Remove extra spaces before closing triple backticks."""
+    # Replace lines ending with 4 spaces followed by ``` with just ```
+    return content.replace("    ```\n", "```\n")
+
+
+
+def fix_skill_file(skill_file: Path) -> bool:
+    """Fix all identified issues in a SKILL.md file."""
+    with open(skill_file, 'r') as f:
+        content = f.read()
+    
+    original_content = content
+    
+    content = fix_gemini_notebooklm_corruption(content)
+    content = fix_line_number_text(content)
+    content = fix_backtick_blocks(content)
+    content = fix_dormant_triple_dash(content)
+    content = fix_extra_spaces_before_closing_backticks(content)
+    
+    # Only write if content changed
+    if content != original_content:
+        with open(skill_file, 'w') as f:
+            f.write(content)
+        return True
+    
+    return False
+
+
 def audit_skill(skill_name: str) -> Optional[Dict]:
     """Audit a single skill and generate health report."""
     skill_dir = get_skill_dir(skill_name)
@@ -183,8 +352,21 @@ def audit_skill(skill_name: str) -> Optional[Dict]:
     if not frontmatter:
         return None
 
+    # Read content for content-based checks
+    skill_file = skill_dir / "SKILL.md"
+    with open(skill_file, "r") as f:
+        content = f.read()
+
+    # Fix identified issues
+    fix_skill_file(skill_file)
+
     # Collect all checks
     issues = []
+    issues.extend(check_gemini_notebooklm_corruption(skill_dir, content))
+    issues.extend(check_line_number_text(skill_dir, content))
+    issues.extend(check_backtick_blocks(skill_dir, content))
+    issues.extend(check_dormant_triple_dash(skill_dir, content))
+    issues.extend(check_extra_spaces_before_closing_backticks(skill_dir, content))
     issues.extend(check_version_consistency(skill_dir, frontmatter))
     issues.extend(check_user_invocable(skill_dir, frontmatter))
     issues.extend(check_tool_adequacy(skill_dir, frontmatter))
@@ -212,7 +394,7 @@ def audit_skill(skill_name: str) -> Optional[Dict]:
     health_report = {
         "skill": skill_name,
         "version": version,
-        "last_audited": "2026-07-23",
+        "last_audited": "2026-08-22",
         "priority": priority,
         "priority_reason": f"{len(high_issues)} HIGH issues, {len(medium_issues)} MEDIUM issues",
         "issues": issues,
@@ -240,7 +422,7 @@ def list_skills():
     print("=" * 80)
     print()
 
-    health_dir = Path("health")
+    health_dir = Path(__file__).parent / "health"
 
     if not health_dir.exists():
         print("No health reports found. Run 'python skills-auditor.py audit' first.")
@@ -305,7 +487,7 @@ def main():
         health_dir = Path(__file__).parent / "health"
         health_dir.mkdir(parents=True, exist_ok=True)
 
-        if target and target in DEPENDENCIES:
+        if target and target in SKILLS_LIST:
             # Audit specific skill
             report = audit_skill(target)
             if report:
@@ -316,12 +498,12 @@ def main():
                 sys.exit(1)
         else:
             # Audit all dependencies
-            for dependency in DEPENDENCIES:
+            for dependency in SKILLS_LIST:
                 print(f"Auditing {dependency}...")
                 report = audit_skill(dependency)
                 if report:
                     save_health_report(report, health_dir)
-            print(f"\nAudited {len(DEPENDENCIES)} skills")
+            print(f"\nAudited {len(SKILLS_LIST)} skills")
 
     elif command == "list":
         list_skills()
