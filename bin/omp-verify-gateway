@@ -1,0 +1,122 @@
+#!/usr/bin/env python3
+"""
+omp-verify-gateway — FreeLLMAPI Gateway connectivity verifier.
+
+Pings the local FreeLLMAPI gateway (port 3001) and asserts that:
+  1. The gateway is reachable.
+  2. The returned model list includes "auto" (the smart-routing model).
+
+Exit codes:
+  0 = VALID (gateway reachable, "auto" model present)
+  1 = UNREACHABLE (gateway not responding)
+  2 = MISSING_MODEL ("auto" not in model list)
+  3 = ENV_WARNING (API key not set — gateway may reject)
+  4 = UNEXPECTED_ERROR (parse failure, etc.)
+
+Usage:
+    bin/omp-verify-gateway
+"""
+
+import json
+import os
+import sys
+import urllib.error
+import urllib.request
+
+GATEWAY_BASE = "http://localhost:3001"
+MODELS_URL = f"{GATEWAY_BASE}/v1/models"
+EXPECTED_MODEL = "auto"
+
+EXIT_VALID = 0
+EXIT_UNREACHABLE = 1
+EXIT_MISSING_MODEL = 2
+EXIT_ENV_WARNING = 3
+EXIT_UNEXPECTED_ERROR = 4
+
+
+def check_env_warning() -> bool:
+    """Return True if either expected API key is unset (warning, not fatal)."""
+    openai_key = os.environ.get("OPENAI_API_KEY", "")
+    anthropic_key = os.environ.get("ANTHROPIC_API_KEY", "")
+    return not openai_key and not anthropic_key
+
+
+def fetch_model_list() -> list[str] | None:
+    """Fetch the model list from FreeLLMAPI. Returns list of model ids or None on failure."""
+    try:
+        req = urllib.request.Request(
+            MODELS_URL,
+            method="GET",
+            headers={
+                "Accept": "application/json",
+            },
+        )
+        # Use any available API key for auth
+        api_key = os.environ.get("OPENAI_API_KEY") or os.environ.get("ANTHROPIC_API_KEY")
+        if api_key:
+            req.add_header("Authorization", f"Bearer {api_key}")
+
+        with urllib.request.urlopen(req, timeout=5) as resp:
+            body = resp.read().decode("utf-8")
+            data = json.loads(body)
+
+        # OpenAI-compatible /v1/models returns {"data": [{"id": "...", ...}, ...]}
+        models_raw = data.get("data", data)
+        if isinstance(models_raw, dict):
+            models_raw = [models_raw]
+
+        model_ids = []
+        for entry in models_raw:
+            if isinstance(entry, dict):
+                eid = entry.get("id") or entry.get("model") or ""
+            elif isinstance(entry, str):
+                eid = entry
+            else:
+                continue
+            model_ids.append(eid)
+
+        return model_ids
+
+    except (urllib.error.URLError, urllib.error.HTTPError) as e:
+        print(f"GATEWAY_UNREACHABLE: {GATEWAY_BASE} — {e}", file=sys.stderr)
+        return None
+    except (json.JSONDecodeError, KeyError, ValueError) as e:
+        print(f"PARSE_ERROR: Could not parse model list — {e}", file=sys.stderr)
+        return None
+
+
+def main() -> int:
+    # 1. Check env warning
+    env_missing = check_env_warning()
+    if env_missing:
+        print(
+            "ENV_WARNING: Neither OPENAI_API_KEY nor ANTHROPIC_API_KEY is set. "
+            "FreeLLMAPI may reject unauthenticated requests.",
+            file=sys.stderr,
+        )
+
+    # 2. Fetch model list
+    model_ids = fetch_model_list()
+    if model_ids is None:
+        return EXIT_UNREACHABLE if not env_missing else EXIT_ENV_WARNING
+
+    if not model_ids:
+        print("EMPTY_MODEL_LIST: Gateway returned no models.", file=sys.stderr)
+        return EXIT_MISSING_MODEL
+
+    print(f"Gateway reachable at {GATEWAY_BASE}")
+    print(f"Models available ({len(model_ids)}): {', '.join(sorted(model_ids)[:10])}{'...' if len(model_ids) > 10 else ''}")
+
+    # 3. Check for expected model
+    if EXPECTED_MODEL in model_ids:
+        print(f"PRESENT: '{EXPECTED_MODEL}' model found in model list.")
+        if env_missing:
+            return EXIT_ENV_WARNING
+        return EXIT_VALID
+    else:
+        print(f"MISSING: '{EXPECTED_MODEL}' not found in model list.", file=sys.stderr)
+        return EXIT_MISSING_MODEL
+
+
+if __name__ == "__main__":
+    sys.exit(main())
