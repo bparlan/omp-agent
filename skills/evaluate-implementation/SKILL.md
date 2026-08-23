@@ -49,18 +49,32 @@ Use the `write` tool to generate the final Evaluation Report at `milestones/M{X}
 *   `status`: `completed` (or `failed` if unresolved `VALID_TEST` failures or invalid tests remain).
 *   `derived_from`: `[SPEC-{Y}, VER-{Y}]`.
 
-##### Machine-Readable Summary Requirements:
-The report MUST contain these exact summary fields on standard disk:
-*   `TESTS_RUN=N`          # Total test scripts executed from active ledger
-*   `TESTS_PASSED=N`       # Test scripts that passed successfully
-*   `TESTS_FAILED=N`       # Test scripts that failed
-*   `VALID_TESTS=N`        # Total tests verified as valid checks
-*   `INVALID_TESTS=N`      # Total tests flagged as defective/invalid
-*   `EXIT_CODE=0|1|2`      # 0 = All PASS, 1 = Valid failures remain, 2 = Validity failure (INVALID_TEST found)
+##### Structured Findings (Machine-parseable taxonomy block)
 
-*   `EXIT_CODE=0`: All tests passed. Handoff to `review-implementation`.
-*   `EXIT_CODE=1`: One or more valid implementation failures remain unresolved. Handoff to `review-implementation` (marked as needs work).
-*   `EXIT_CODE=2`: Blocked. One or more test scripts contain syntax or structural defects (`INVALID_TEST` found).
+In addition to the narrative prose above, the report MUST contain a YAML
+`## Structured Findings` block (defined in the template) with one entry per
+distinct finding identified during evaluation.
+
+Each finding requires:
+- `category`: One of `ARCHITECTURE_AMBIGUITY`, `INVALID_TEST`,
+  `INACCURATE_DOCUMENTATION`, `EVIDENCE_GAP`, `TEST_VALIDATION_BLOCKED`,
+  `OTHER` (open-ended). Map from the failure taxonomy in AUDIT-001 §E.4.
+- `severity`: `CRITICAL`, `HIGH`, `MEDIUM`, `LOW`.
+- `affected_files`: List of file paths implicated by the finding.
+- `classification`: One of `mechanically_auto_fixable`,
+  `judgment_required`, `process_failure`.
+- `raw_evidence`: Non-empty string. Exact command output, file excerpt, or
+  exit-code/stderr trace that proves the finding. MUST NOT be empty.
+
+Populate findings from all evaluation results — do not limit to failures.
+If a test passed cleanly but reveals a documentation inaccuracy, that is an
+`INACCURATE_DOCUMENTATION` finding. If a test failed due to a server not
+running, that is a `TEST_VALIDATION_BLOCKED` finding. If the report itself
+lacks command traces, that is an `EVIDENCE_GAP` finding (self-referential).
+
+If zero findings were identified, emit the block with `findings: []`.
+
+##### Machine-Readable Summary Requirements:
 
 ---
 

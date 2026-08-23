@@ -1,10 +1,10 @@
 ---
-id: REVIEW-001
+id: aef:REVIEW-M7S2
 type: review
 title: "Review Report for M7S2"
 milestone_id: M7
 status: completed
-derived_from: [EVAL-001]
+derived_from: [aef:EVAL-M7S2]
 template_version: 1.0.2
 ---
 

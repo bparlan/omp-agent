@@ -1,5 +1,5 @@
 ---
-id: COMP-001
+id: aef:COMP-M7S2
 type: completion
 title: "Completion Report for SPEC-002"
 milestone_id: M7

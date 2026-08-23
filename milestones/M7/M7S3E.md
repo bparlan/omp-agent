@@ -1,5 +1,5 @@
 ---
-id: EVAL-001
+id: aef:EVAL-M7S3
 type: evaluation
 title: "Evaluation Report for M7S3: Legacy Compatibility & Transition"
 milestone_id: M7
