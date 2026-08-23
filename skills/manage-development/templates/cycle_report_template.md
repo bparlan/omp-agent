@@ -1,20 +1,25 @@
-# Cycle Report M{X}
-
-| Property         | Value          |
-| ---------------- | -------------- |
-| Document Type    | Cycle Report   |
-| Identifier       | M{X}           |
-| Derived From     | M{X}           |
-| Cycle Number     | {N}            |
-| template_version | 1.0.0          |
-
-## Cycle Summary
-
-Brief description of work completed in this cycle.
-
+---
+id: CYCLE-M{X}-{N}
+type: cycle_report
+title: "Cycle Report for M{X}"
+milestone_id: M{X}
+status: draft
+derived_from:
+  - M{X}
+  - CLOSE-M{X}-{N_CLOSE}
+  - # Individual spec sequences derived automatically
+template_version: 2.0.0
 ---
 
-## Artifacts Generated
+# Cycle Report M{X}
+
+| Property | Value |
+| --- | --- |
+| Document Type | Cycle Report |
+| Identifier | CYCLE-M{X}-{N} |
+| Derived From | M{X} |
+| Cycle Number | {N} |
+| template_version | 2.0.0 |
 
 | Specification | Status | Completion | Review |
 | ------------- | ------ | ---------- | ------ |

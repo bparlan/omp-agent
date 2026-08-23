@@ -28,6 +28,8 @@ venv/
 env/
 *.env/
 
+# Local environment variable files (secrets, tokens, keys)
+.env
 # Python bytecode (covers all subdirectories)
 __pycache__/
 *.pyc
