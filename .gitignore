@@ -30,6 +30,7 @@ env/
 
 # Local environment variable files (secrets, tokens, keys)
 .env
+.human
 # Python bytecode (covers all subdirectories)
 __pycache__/
 *.pyc

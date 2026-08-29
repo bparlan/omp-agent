@@ -1,0 +1,296 @@
+{
+  "summary": {
+    "generated": "2026-08-26T19:46:11.822101",
+    "total_skills_analyzed": 25,
+    "healthy_skills": 7,
+    "skills_needing_attention": 18,
+    "compliance_rate": 28.000000000000004,
+    "total_issues_found": 30
+  },
+  "phase_analysis": {
+    "development_cycle": {
+      "total": 3,
+      "healthy": 2,
+      "issues": 1
+    },
+    "management_infra": {
+      "total": 17,
+      "healthy": 2,
+      "issues": 22
+    },
+    "planning_specification": {
+      "total": 5,
+      "healthy": 3,
+      "issues": 7
+    },
+    "testing_verification": {
+      "total": 0,
+      "healthy": 0,
+      "issues": 0
+    },
+    "implementation": {
+      "total": 0,
+      "healthy": 0,
+      "issues": 0
+    }
+  },
+  "issue_analysis": {
+    "STABILITY": [
+      "<__main__.ValidationIssue object at 0x106130090>",
+      "<__main__.ValidationIssue object at 0x106114590>",
+      "<__main__.ValidationIssue object at 0x105daa550>",
+      "<__main__.ValidationIssue object at 0x106143e50>",
+      "<__main__.ValidationIssue object at 0x106143f10>",
+      "<__main__.ValidationIssue object at 0x106143390>",
+      "<__main__.ValidationIssue object at 0x106143610>",
+      "<__main__.ValidationIssue object at 0x106143fd0>",
+      "<__main__.ValidationIssue object at 0x106143f90>",
+      "<__main__.ValidationIssue object at 0x10615d8d0>",
+      "<__main__.ValidationIssue object at 0x10615e990>",
+      "<__main__.ValidationIssue object at 0x10615c190>",
+      "<__main__.ValidationIssue object at 0x10615e110>",
+      "<__main__.ValidationIssue object at 0x10615eb90>",
+      "<__main__.ValidationIssue object at 0x10615c410>",
+      "<__main__.ValidationIssue object at 0x105f18a50>",
+      "<__main__.ValidationIssue object at 0x10615ee90>"
+    ],
+    "YAML_FRONTMATTER": [
+      "<__main__.ValidationIssue object at 0x105d3d790>",
+      "<__main__.ValidationIssue object at 0x106143b50>",
+      "<__main__.ValidationIssue object at 0x10615cd50>",
+      "<__main__.ValidationIssue object at 0x106143cd0>",
+      "<__main__.ValidationIssue object at 0x10615d810>"
+    ],
+    "COMPATIBILITY": [
+      "<__main__.ValidationIssue object at 0x106143590>",
+      "<__main__.ValidationIssue object at 0x10615dd50>",
+      "<__main__.ValidationIssue object at 0x10615dfd0>",
+      "<__main__.ValidationIssue object at 0x10615e010>",
+      "<__main__.ValidationIssue object at 0x10615d950>",
+      "<__main__.ValidationIssue object at 0x10615d890>",
+      "<__main__.ValidationIssue object at 0x10615d9d0>"
+    ],
+    "AEF_INTEGRATION": [
+      "<__main__.ValidationIssue object at 0x10615e550>"
+    ]
+  },
+  "recommendations": [
+    "Fix YAML frontmatter structure in all skills with critical errors",
+    "Add '-stable' suffix to all skill versions to meet stability requirements",
+    "Review AEF integration for all skills to ensure proper framework compliance"
+  ],
+  "action_items": [
+    {
+      "priority": "CRITICAL",
+      "skill": "skills/evaluate-tests/SKILL.md",
+      "issue": "Version '1.2.0' does not end with '-stable' suffix",
+      "action": "Immediate fix required",
+      "fix_suggestion": "Add '-stable' suffix to version field"
+    },
+    {
+      "priority": "CRITICAL",
+      "skill": "skills/approve-spec/SKILL.md",
+      "issue": "Missing required YAML fields: version",
+      "action": "Immediate fix required",
+      "fix_suggestion": "Fix YAML frontmatter according to AEF standards"
+    },
+    {
+      "priority": "CRITICAL",
+      "skill": "skills/approve-spec/SKILL.md",
+      "issue": "Version '' does not end with '-stable' suffix",
+      "action": "Immediate fix required",
+      "fix_suggestion": "Add '-stable' suffix to version field"
+    },
+    {
+      "priority": "CRITICAL",
+      "skill": "skills/archive-docs/SKILL.md",
+      "issue": "Version '1.3.0' does not end with '-stable' suffix",
+      "action": "Immediate fix required",
+      "fix_suggestion": "Add '-stable' suffix to version field"
+    },
+    {
+      "priority": "CRITICAL",
+      "skill": "skills/bootstrap-project/SKILL.md",
+      "issue": "Version '1.0.2' does not end with '-stable' suffix",
+      "action": "Immediate fix required",
+      "fix_suggestion": "Add '-stable' suffix to version field"
+    },
+    {
+      "priority": "CRITICAL",
+      "skill": "skills/close-milestone/SKILL.md",
+      "issue": "Version '1.0.0' does not end with '-stable' suffix",
+      "action": "Immediate fix required",
+      "fix_suggestion": "Add '-stable' suffix to version field"
+    },
+    {
+      "priority": "CRITICAL",
+      "skill": "skills/code-search/SKILL.md",
+      "issue": "Version '1.0.0' does not end with '-stable' suffix",
+      "action": "Immediate fix required",
+      "fix_suggestion": "Add '-stable' suffix to version field"
+    },
+    {
+      "priority": "CRITICAL",
+      "skill": "skills/evolve-skills/SKILL.md",
+      "issue": "Version '1.3.1' does not end with '-stable' suffix",
+      "action": "Immediate fix required",
+      "fix_suggestion": "Add '-stable' suffix to version field"
+    },
+    {
+      "priority": "CRITICAL",
+      "skill": "skills/graph-context/SKILL.md",
+      "issue": "Version '1.0.0' does not end with '-stable' suffix",
+      "action": "Immediate fix required",
+      "fix_suggestion": "Add '-stable' suffix to version field"
+    },
+    {
+      "priority": "CRITICAL",
+      "skill": "skills/hotfix-focus/SKILL.md",
+      "issue": "Missing required YAML fields: version",
+      "action": "Immediate fix required",
+      "fix_suggestion": "Fix YAML frontmatter according to AEF standards"
+    },
+    {
+      "priority": "CRITICAL",
+      "skill": "skills/hotfix-focus/SKILL.md",
+      "issue": "Version '' does not end with '-stable' suffix",
+      "action": "Immediate fix required",
+      "fix_suggestion": "Add '-stable' suffix to version field"
+    },
+    {
+      "priority": "CRITICAL",
+      "skill": "skills/hotfix-issue/SKILL.md",
+      "issue": "Version '1.1.0' does not end with '-stable' suffix",
+      "action": "Immediate fix required",
+      "fix_suggestion": "Add '-stable' suffix to version field"
+    },
+    {
+      "priority": "CRITICAL",
+      "skill": "skills/investigate-issue/SKILL.md",
+      "issue": "Version '2.0.0' does not end with '-stable' suffix",
+      "action": "Immediate fix required",
+      "fix_suggestion": "Add '-stable' suffix to version field"
+    },
+    {
+      "priority": "CRITICAL",
+      "skill": "skills/manage-development/SKILL.md",
+      "issue": "Missing required YAML fields: name",
+      "action": "Immediate fix required",
+      "fix_suggestion": "Fix YAML frontmatter according to AEF standards"
+    },
+    {
+      "priority": "CRITICAL",
+      "skill": "skills/manage-roadmap/SKILL.md",
+      "issue": "Version '2.0.0' does not end with '-stable' suffix",
+      "action": "Immediate fix required",
+      "fix_suggestion": "Add '-stable' suffix to version field"
+    },
+    {
+      "priority": "CRITICAL",
+      "skill": "skills/review-implementation/SKILL.md",
+      "issue": "Version '1.2.0' does not end with '-stable' suffix",
+      "action": "Immediate fix required",
+      "fix_suggestion": "Add '-stable' suffix to version field"
+    },
+    {
+      "priority": "CRITICAL",
+      "skill": "skills/session-audit/SKILL.md",
+      "issue": "Version '1.3.2' does not end with '-stable' suffix",
+      "action": "Immediate fix required",
+      "fix_suggestion": "Add '-stable' suffix to version field"
+    },
+    {
+      "priority": "CRITICAL",
+      "skill": "skills/sync-documentation/SKILL.md",
+      "issue": "Version '1.3.1' does not end with '-stable' suffix",
+      "action": "Immediate fix required",
+      "fix_suggestion": "Add '-stable' suffix to version field"
+    },
+    {
+      "priority": "CRITICAL",
+      "skill": "skills/milestone-focus/SKILL.md",
+      "issue": "Missing required YAML fields: version",
+      "action": "Immediate fix required",
+      "fix_suggestion": "Fix YAML frontmatter according to AEF standards"
+    },
+    {
+      "priority": "CRITICAL",
+      "skill": "skills/milestone-focus/SKILL.md",
+      "issue": "Version '' does not end with '-stable' suffix",
+      "action": "Immediate fix required",
+      "fix_suggestion": "Add '-stable' suffix to version field"
+    },
+    {
+      "priority": "CRITICAL",
+      "skill": "skills/milestoner/SKILL.md",
+      "issue": "YAML parsing error: while parsing a block mapping\n  in \"<unicode string>\", line 1, column 1:\n    name: milestoner\n    ^\nexpected <block end>, but found '-'\n  in \"<unicode string>\", line 4, column 1:\n    - tools: read, write, ask, edit, ... \n    ^",
+      "action": "Immediate fix required",
+      "fix_suggestion": "Fix YAML frontmatter according to AEF standards"
+    },
+    {
+      "priority": "CRITICAL",
+      "skill": "skills/milestoner/SKILL.md",
+      "issue": "Error validating stability requirements: while parsing a block mapping\n  in \"<unicode string>\", line 1, column 1:\n    name: milestoner\n    ^\nexpected <block end>, but found '-'\n  in \"<unicode string>\", line 4, column 1:\n    - tools: read, write, ask, edit, ... \n    ^",
+      "action": "Immediate fix required",
+      "fix_suggestion": "Add '-stable' suffix to version field"
+    },
+    {
+      "priority": "MEDIUM",
+      "skill": "skills/evolve-skills/SKILL.md",
+      "issue": "Skill 'evolve-skills' may depend on generate-spec but doesn't reference it properly",
+      "action": "Review and fix",
+      "fix_suggestion": "Review AEF skill compatibility"
+    },
+    {
+      "priority": "MEDIUM",
+      "skill": "skills/hotfix-issue/SKILL.md",
+      "issue": "Skill 'hotfix-issue' may depend on generate-spec but doesn't reference it properly",
+      "action": "Review and fix",
+      "fix_suggestion": "Review AEF skill compatibility"
+    },
+    {
+      "priority": "MEDIUM",
+      "skill": "skills/investigate-issue/SKILL.md",
+      "issue": "Skill 'investigate-issue' may depend on generate-spec but doesn't reference it properly",
+      "action": "Review and fix",
+      "fix_suggestion": "Review AEF skill compatibility"
+    },
+    {
+      "priority": "MEDIUM",
+      "skill": "skills/manage-development/SKILL.md",
+      "issue": "Skill '' may depend on generate-spec but doesn't reference it properly",
+      "action": "Review and fix",
+      "fix_suggestion": "Review AEF skill compatibility"
+    },
+    {
+      "priority": "MEDIUM",
+      "skill": "skills/manage-roadmap/SKILL.md",
+      "issue": "Skill 'manage-roadmap' may depend on generate-spec but doesn't reference it properly",
+      "action": "Review and fix",
+      "fix_suggestion": "Review AEF skill compatibility"
+    },
+    {
+      "priority": "MEDIUM",
+      "skill": "skills/milestone-focus/SKILL.md",
+      "issue": "Skill 'milestone-focus' may depend on generate-spec but doesn't reference it properly",
+      "action": "Review and fix",
+      "fix_suggestion": "Review AEF skill compatibility"
+    },
+    {
+      "priority": "MEDIUM",
+      "skill": "skills/milestoner/SKILL.md",
+      "issue": "Error validating AEF integration: while parsing a block mapping\n  in \"<unicode string>\", line 1, column 1:\n    name: milestoner\n    ^\nexpected <block end>, but found '-'\n  in \"<unicode string>\", line 4, column 1:\n    - tools: read, write, ask, edit, ... \n    ^",
+      "action": "Review and fix",
+      "fix_suggestion": "Review AEF integration requirements"
+    },
+    {
+      "priority": "MEDIUM",
+      "skill": "skills/milestoner/SKILL.md",
+      "issue": "Error checking skill compatibility: while parsing a block mapping\n  in \"<unicode string>\", line 1, column 1:\n    name: milestoner\n    ^\nexpected <block end>, but found '-'\n  in \"<unicode string>\", line 4, column 1:\n    - tools: read, write, ask, edit, ... \n    ^",
+      "action": "Review and fix",
+      "fix_suggestion": "Review AEF skill compatibility"
+    }
+  ],
+  "issues": [],
+  "exported_at": "2026-08-26T19:46:11.824205"
+}

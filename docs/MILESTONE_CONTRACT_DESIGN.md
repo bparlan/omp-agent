@@ -258,36 +258,36 @@ MILESTONE SECTIONS
 SPECIFICATION
     derives FRs from milestone scope + decomposition plan
     refines but does not contradict
-    
+
     MAY: add implementation detail (file paths, CLI args, schemas)
     MUST NOT: add scope not in milestone
     MUST NOT: remove deliverables declared in milestone
-    
+
     |
     constrains │
     v
 VERIFICATION
     derives V-FRs from specification FRs
-    
+
     MUST: trace every V-FR to an FR
     MUST NOT: invent requirements not in specification
     MUST NOT: assign DOCUMENT_CHECK to requirements the milestone marked as SCRIPT_EXECUTION
-    
+
     |
     constrains │
     v
 TESTS
     derives test scripts from verification items
-    
+
     MUST: trace every test to a V-FR and FR
     MUST NOT: create tests for non-existent requirements
-    
+
     |
     constrains │
     v
 IMPLEMENTATION
     limited to specification's Strict File Scope Allowlist
-    
+
     MUST NOT: modify tests/
     MUST NOT: create files outside Allowlist
 ```

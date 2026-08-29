@@ -1,0 +1,4 @@
+#!/usr/bin/env bash
+# Make mise_validate.py executable from any directory
+cd "$(dirname "$0")/../" || exit 1
+python3 ./mise_validate.py "$@"

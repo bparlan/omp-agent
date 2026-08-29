@@ -58,7 +58,7 @@ def get_skeleton_path() -> Path:
 def extract_skeleton(filepath: Path) -> str | None:
     """Extract skeleton from source files"""
     ext = filepath.suffix
-    
+
     # Only use tree-sitter for Python files
     if ext == ".py":
         return _extract_python_skeleton(filepath)
@@ -113,19 +113,19 @@ def _extract_generic_skeleton(filepath: Path) -> str | None:
     try:
         with open(filepath, "r", encoding="utf-8", errors="ignore") as f:
             content = f.read()
-        
+
         if len(content) == 0:
             return None
 
         lines = content.splitlines()
         skeleton_lines = [f"### File: {filepath}"]
-        
+
         # Extract imports, exports, declarations
         for line in lines:
             stripped = line.strip()
             if stripped.startswith(("import ", "export ", "from ", "const ", "function ", "class ", "type ", "interface ", "enum ", "namespace ", "var ", "let ")):
                 skeleton_lines.append(stripped)
-        
+
         # Also extract standalone declarations
         for line in lines:
             stripped = line.strip()
@@ -156,19 +156,19 @@ def generate_skeletons():
         for dirpath, dirnames, filenames in os.walk(root):
             # Exclude directories
             dirnames[:] = [d for d in dirnames if d not in EXCLUDE_DIRS]
-            
+
             for file in filenames:
                 filepath = Path(dirpath) / file
                 ext = filepath.suffix
-                
+
                 # FIX 1: Use SUPPORTED_EXTS instead of hardcoded ".py"
                 if ext not in SUPPORTED_EXTS:
                     continue
-                    
+
                 # FIX 2: Extra safety — skip files inside excluded dirs
                 if any(part in EXCLUDE_DIRS for part in filepath.parts):
                     continue
-                    
+
                 skeleton = extract_skeleton(filepath)
                 if skeleton:
                     out.write(skeleton)

@@ -1,0 +1,856 @@
+# M9 — AEF Artifact-System Integration & Project Workspace Alignment
+
+## Status
+
+Proposed
+
+## Objective
+
+Integrate the canonical artifact architecture established by M9 into the existing AEF/OMP development infrastructure.
+
+This milestone ensures that AEF skills which create, locate, validate, or update artifacts operate consistently with the canonical artifact identity, type, metadata, lineage, storage, and legacy-compatibility rules defined by M9.
+
+The milestone also establishes project-level workspace isolation so that AEF can be used both to develop AEF itself and to bootstrap and maintain independent application projects such as BariaDAO without leaking AEF-specific documentation, metadata, or development artifacts into those projects.
+
+This milestone focuses on **artifact-system integration and workspace correctness**.
+
+It does **not** redesign AEF's higher-level orchestration model.
+
+---
+
+## Architectural Context
+
+M9 established the canonical artifact architecture.
+
+The resulting infrastructure must now be adopted by the skills that interact with artifacts.
+
+The canonical model is:
+
+```
+Project
+  │
+  ├── Project Configuration
+  │     └── .omp/config.yml
+  │
+  ├── Canonical Artifacts
+  │     ├── identity
+  │     ├── type
+  │     ├── metadata
+  │     ├── lineage
+  │     └── lifecycle state
+  │
+  ├── Artifact Registry / Type Definitions
+  │
+  ├── Artifact Resolver
+  │
+  └── Artifact Metadata Validator
+```
+
+Skills are consumers and producers of this model.
+
+They must not independently invent:
+
+* artifact IDs
+* artifact types
+* artifact storage locations
+* metadata schemas
+* frontmatter rules
+* resolution precedence
+* legacy handling
+* project boundaries
+
+Those concerns belong to the canonical artifact system.
+
+---
+
+# Scope
+
+## In Scope
+
+### 1. Artifact-System Adoption
+
+Update existing artifact-producing and artifact-consuming skills to use the M9 canonical artifact model.
+
+Affected skills include, at minimum:
+
+* `bootstrap-project`
+* `generate-spec`
+* `generate-verification`
+* `generate-tests`
+* `implement-specification`
+* `evaluate-implementation`
+* `sync-documentation`
+* `archive-docs`
+* `approve-specs`
+* `code-search`
+* `evolve-skills`
+* `hotfix-focus`
+* `hotfix-issue`
+* `investigate-issue`
+* `milestone`
+* `review-implementation`
+* `session-audit`
+* milestone creation/focus skills
+* any skill that directly creates, resolves, validates, or archives canonical artifacts
+
+The exact affected-skill inventory must be established during specification generation rather than assumed in advance.
+
+---
+
+### 2. Canonical Artifact Resolution
+
+Skills must resolve artifacts through the canonical artifact-resolution mechanism defined by M9.
+
+Skills must not rely on hardcoded assumptions such as:
+
+```
+milestones/M9/M9S1.md
+milestones/M{X}/{artifact}.md
+```
+
+unless the canonical resolver itself explicitly defines that location.
+
+The preferred interaction model is:
+
+```
+Skill
+  ↓
+Canonical Resolver
+  ↓
+Artifact Identity / Type / Metadata
+  ↓
+Resolved Physical Path
+  ↓
+Read or Write Artifact
+```
+
+The skill should reason from the artifact identity and metadata.
+
+The skill should not independently reconstruct filesystem paths.
+
+---
+
+### 3. Canonical Artifact Creation
+
+Any skill creating a canonical artifact must:
+
+1. determine the artifact type;
+2. assign or request a canonical artifact identity;
+3. generate required metadata;
+4. write canonical frontmatter;
+5. place the artifact in its canonical storage location;
+6. validate the resulting artifact;
+7. report the created artifact identity and resolved path.
+
+Creation must fail closed if the artifact cannot satisfy the canonical metadata contract.
+
+A skill must not report successful creation when the artifact was only partially created or when metadata validation failed.
+
+---
+
+### 4. Metadata Validation
+
+Artifact-producing skills must validate generated artifacts against the canonical metadata contract before reporting completion.
+
+Validation must be performed through the canonical metadata-validation mechanism.
+
+Individual skills must not maintain competing mandatory-field lists unless explicitly required by the artifact type registry.
+
+The architecture must avoid this failure mode:
+
+```
+generate-spec
+  └── custom metadata rules
+
+generate-tests
+  └── different custom metadata rules
+
+milestone
+  └── another metadata schema
+
+validate_metadata.py
+  └── fourth interpretation
+```
+
+The desired model is:
+
+```
+Canonical Artifact Contract
+        │
+        ├── Artifact Registry
+        ├── Resolver
+        └── Validator
+                │
+                ├── bootstrap-project
+                ├── generate-spec
+                ├── generate-verification
+                ├── generate-tests
+                ├── implement-specification
+                └── sync-documentation
+```
+
+---
+
+### 5. Project-Scoped Configuration
+
+Introduce a project-level configuration mechanism based on:
+
+```
+.omp/config.yml
+```
+
+The configuration must define, at minimum, the project identity and development mode required by AEF infrastructure.
+
+The exact schema must be defined by specification rather than hardcoded directly into this milestone.
+
+The configuration must support at least:
+
+```yaml
+project_id:
+project_slug:
+mode:
+```
+
+Supported modes initially include:
+
+```
+framework
+application
+```
+
+Additional modes must not be invented unless required by the specification.
+
+---
+
+### 6. Mode-Aware Bootstrapping
+
+`bootstrap-project` must distinguish between at least:
+
+```
+framework
+application
+```
+
+### Framework Mode
+
+Used when developing AEF itself or another framework-like project.
+
+Framework-specific documentation may be generated where explicitly required.
+
+### Application Mode
+
+Used for projects such as BariaDAO.
+
+Application-mode bootstrapping must not blindly generate AEF-internal architectural documents such as:
+
+```
+FRAMEWORK.md
+PLAYBOOK.md
+DATA.md
+```
+
+unless the project configuration or specification explicitly requires them.
+
+Instead, it must establish the minimum project-specific agent guidance required to safely work on the application.
+
+The bootstrap process must preserve the application's own architecture and documentation conventions.
+
+---
+
+### 7. Application-Specific Agent Guidance
+
+For application-mode projects, bootstrap must generate or install project-local agent guidance appropriate to the detected or declared technology stack.
+
+For example, a Tailwind/DaisyUI application may require guardrails such as:
+
+```
+Do not modify, reorder, or remove layout or utility classes unless the active specification explicitly requires a visual or structural change.
+```
+
+However, such technology-specific rules must not be hardcoded into the universal bootstrap process.
+
+The bootstrap architecture should support:
+
+```
+Project Mode
+    +
+Project Technology / Stack
+    ↓
+Appropriate Agent Guidance
+```
+
+The bootstrap system must not assume that every application is a Tailwind/DaisyUI project.
+
+---
+
+### 8. Documentation Synchronisation
+
+`sync-documentation` must operate within the active project's workspace boundary.
+
+It must resolve documentation artifacts through the canonical artifact system rather than assuming that every project contains the AEF repository's own documentation structure.
+
+The skill must distinguish between:
+
+```
+AEF framework documentation
+```
+
+and:
+
+```
+Target project documentation
+```
+
+It must not inject AEF-specific documents into an application project merely because the skill itself was developed inside AEF.
+
+Documentation synchronization must respect the project's configured mode and canonical artifact architecture.
+
+---
+
+### 9. Milestone Artifact Integration
+
+Milestone creation must produce canonical milestone artifacts using the M9 artifact contract.
+
+New milestone artifacts must not be generated as legacy filename-only documents.
+
+The milestone creator must:
+
+* assign the canonical artifact identity;
+* declare `type: milestone`;
+* generate required metadata;
+* validate metadata;
+* resolve canonical storage;
+* report the resulting artifact.
+
+The implementation must not assume that the filename alone establishes artifact identity.
+
+---
+
+### 10. Specification / Verification / Test Pipeline Integration
+
+The following lifecycle must be supported:
+
+```
+Milestone
+    ↓
+Specification
+    ↓
+Verification Protocol
+    ↓
+Test Design
+    ↓
+Executable Tests
+    ↓
+Implementation
+    ↓
+Evaluation / Review
+```
+
+Each stage must consume the canonical artifact identity and metadata of the previous stage.
+
+The skills must not infer artifact relationships solely from filenames.
+
+Relationships such as:
+
+```
+derived_from
+verifies
+tests
+implements
+evaluates
+reviews
+```
+
+must use the canonical relationship model defined by M9.
+
+---
+
+# Functional Requirements
+
+## FR-1 — Canonical Artifact Contract Adoption
+
+All affected artifact-producing and artifact-consuming skills must use the M9 canonical artifact model.
+
+### Acceptance Criteria
+
+* No affected skill independently defines a competing canonical artifact schema.
+* Artifact type, identity, metadata, lineage, and storage decisions originate from the canonical artifact system.
+* Skills consume canonical artifact metadata rather than reconstructing semantics from filenames.
+
+---
+
+## FR-2 — Canonical Artifact Resolution
+
+Affected skills must resolve artifacts through the canonical resolver.
+
+### Acceptance Criteria
+
+* Skills do not hardcode milestone-specific artifact paths as their primary resolution mechanism.
+* Artifact resolution works when canonical artifacts are stored according to the M9 storage model.
+* Resolver failures are explicit and actionable.
+* Ambiguous resolution does not silently select an arbitrary artifact.
+
+---
+
+## FR-3 — Canonical Artifact Creation
+
+All affected artifact-producing skills must create artifacts conforming to the canonical metadata contract.
+
+### Acceptance Criteria
+
+Every successful artifact creation results in:
+
+* canonical identity;
+* canonical type;
+* required metadata;
+* valid frontmatter;
+* canonical storage;
+* successful metadata validation.
+
+---
+
+## FR-4 — Validation Before Completion
+
+Artifact-producing skills must validate their generated output before reporting successful completion.
+
+### Acceptance Criteria
+
+* Invalid artifacts cause the producing skill to fail.
+* Partial artifact creation is not reported as successful.
+* Validation is performed against the canonical validator.
+* Skills do not silently bypass validation.
+
+---
+
+## FR-5 — Project Configuration
+
+`bootstrap-project` must create or update project configuration using the canonical `.omp/config.yml` model.
+
+### Acceptance Criteria
+
+A bootstrapped project has:
+
+```
+.omp/config.yml
+```
+
+containing valid project configuration.
+
+The configuration is itself treated according to the canonical artifact/configuration rules where applicable.
+
+---
+
+## FR-6 — Mode-Aware Bootstrap
+
+`bootstrap-project` must support framework and application modes.
+
+### Acceptance Criteria
+
+Framework mode:
+
+* preserves framework-oriented initialization behavior where appropriate.
+
+Application mode:
+
+* does not generate irrelevant AEF-internal documentation by default;
+* creates project-appropriate agent guidance;
+* preserves project-specific architecture;
+* establishes the canonical artifact infrastructure required by AEF.
+
+---
+
+## FR-7 — Project Isolation
+
+AEF infrastructure must respect the active project boundary.
+
+### Acceptance Criteria
+
+Running AEF skills inside an application project must not:
+
+* write artifacts into the AEF repository;
+* resolve artifacts from the AEF repository unintentionally;
+* inject AEF-specific documentation into the application;
+* modify unrelated projects.
+
+---
+
+## FR-8 — Milestone Integration
+
+New milestones must be canonical artifacts.
+
+### Acceptance Criteria
+
+A newly created milestone:
+
+* has valid canonical frontmatter;
+* has canonical identity;
+* has `type: milestone`;
+* is stored according to canonical storage rules;
+* passes metadata validation before creation is reported successful.
+
+---
+
+## FR-9 — Pipeline Traceability
+
+The specification → verification → test → implementation pipeline must use explicit canonical artifact relationships.
+
+### Acceptance Criteria
+
+The system can establish:
+
+```
+SPEC → VERIFICATION → TEST → IMPLEMENTATION
+```
+
+without relying exclusively on filename conventions.
+
+---
+
+## FR-10 — Legacy Compatibility
+
+Existing legacy artifacts must remain readable according to M9's legacy compatibility rules.
+
+### Acceptance Criteria
+
+* Existing M1-M9 legacy artifacts are not mass-migrated automatically.
+* Existing artifacts remain discoverable through the canonical resolution process where supported.
+* New artifacts use canonical rules.
+* Legacy artifacts and canonical artifacts can coexist safely.
+
+---
+
+## FR-11 — Generated Test Reliability
+
+The verification/test generation pipeline must generate tests that are grounded in the current canonical specification and verification artifacts.
+
+### Acceptance Criteria
+
+Generated tests:
+
+* reference the correct source specification;
+* reference the correct verification protocol;
+* test stated requirements rather than invented requirements;
+* establish a valid initial failure path where applicable;
+* do not validate documentation claims that are absent from the canonical specification;
+* do not become specification validators accidentally;
+* are executable in an isolated fixture environment;
+* are persisted as canonical test artifacts.
+
+The generator must not create tests whose assertions are based on guessed or hallucinated requirements.
+
+---
+
+## FR-12 — Artifact-Type Consistency
+
+All pipeline stages must use canonical artifact types.
+
+### Acceptance Criteria
+
+The system must not produce ambiguous artifacts such as:
+
+```
+M9S4.md
+M9S4V.md
+M9S4T1.md
+```
+
+whose semantic meaning depends only on filename conventions.
+
+The filename may remain human-readable, but the artifact's machine-readable type and identity must be explicit in canonical metadata.
+
+---
+
+## FR-13 — Existing Artifact Migration Safety
+
+The integration must not silently rewrite existing milestone artifacts merely to make them conform to the new system.
+
+### Acceptance Criteria
+
+Migration of legacy artifacts is explicitly separate from normal artifact creation.
+
+Any migration process must:
+
+* preserve original content;
+* preserve provenance;
+* establish lineage;
+* validate the migrated artifact;
+* report migration results explicitly.
+
+---
+
+# Negative Requirements
+
+The implementation MUST NOT:
+
+1. redesign AEF orchestration;
+2. introduce an autonomous orchestration engine;
+3. modify OMP internal agent implementations;
+4. create a second artifact registry;
+5. create a second metadata validator;
+6. create skill-specific canonical path resolution;
+7. require all historical artifacts to be migrated immediately;
+8. mass-rewrite legacy milestone documents;
+9. infer artifact type exclusively from filenames;
+10. silently fabricate missing artifact relationships;
+11. silently select among ambiguous artifact matches;
+12. treat successful file creation as successful artifact creation without validation;
+13. generate application projects with irrelevant AEF framework documentation by default;
+14. assume all application projects use Tailwind or DaisyUI;
+15. couple AEF's artifact model to a single project's technology stack.
+
+---
+
+# Explicitly Deferred: Orchestration
+
+Orchestration is intentionally outside the scope of this milestone.
+
+This milestone establishes the reliable substrate that orchestration will later consume.
+
+The intended dependency is:
+
+```
+M9
+Canonical Artifact Architecture
+        ↓
+M10
+Infrastructure / Skill Integration
+        ↓
+Future Orchestration Milestone
+        ↓
+Cross-Skill Workflow Automation
+```
+
+The future orchestration milestone may define:
+
+* workflow coordination;
+* artifact lifecycle orchestration;
+* dependency graphs;
+* automated stage transitions;
+* agent delegation;
+* multi-agent execution;
+* approval gates;
+* recovery workflows;
+* state machines;
+* event-driven execution.
+
+Those concerns must not be prematurely implemented in M9.
+
+The current milestone should ensure only that the infrastructure is **orchestration-ready**.
+
+---
+
+# Verification Strategy
+
+Verification must validate the architecture at three levels.
+
+## Level 1 — Artifact Contract
+
+Verify:
+
+* identity;
+* type;
+* metadata;
+* frontmatter;
+* relationships;
+* lifecycle state.
+
+## Level 2 — Skill Integration
+
+Verify:
+
+* bootstrap;
+* resolution;
+* creation;
+* validation;
+* documentation synchronization;
+* milestone generation;
+* specification generation;
+* verification generation;
+* test generation.
+
+## Level 3 — Cross-Project Isolation
+
+Verify at minimum:
+
+```
+AEF framework project
+        ↓
+bootstrap
+        ↓
+framework mode
+```
+
+and:
+
+```
+BariaDAO application project
+        ↓
+bootstrap
+        ↓
+application mode
+```
+
+The verification environment must confirm that artifacts and documentation remain inside the intended project boundary.
+
+---
+
+# Test Architecture
+
+Tests for this milestone must be generated from the canonical specification and verification protocol.
+
+Tests must be isolated from the live workspace.
+
+The preferred structure is:
+
+```
+tests/
+  M9/
+    fixtures/
+      framework-project/
+      application-project/
+      legacy-project/
+      canonical-project/
+      mixed-project/
+    test_*.sh
+```
+
+Tests must not mutate the user's active repository during normal verification.
+
+Tests must use temporary fixture workspaces.
+
+Tests must be deterministic.
+
+Tests must clearly distinguish:
+
+```
+TEST VALIDITY FAILURE
+```
+
+from:
+
+```
+EXPECTED IMPLEMENTATION FAILURE
+```
+
+A test that fails because its own assumptions, fixtures, or dependencies are invalid must not be classified as evidence that the implementation is missing.
+
+---
+
+# Success Criteria
+
+M9 is complete when:
+
+1. AEF skills consume the M9 canonical artifact model.
+2. Canonical artifact resolution is used instead of skill-specific path guessing.
+3. Artifact creation produces validated canonical artifacts.
+4. Metadata validation occurs before successful completion is reported.
+5. `bootstrap-project` supports framework and application modes.
+6. `.omp/config.yml` establishes project-scoped configuration.
+7. Application projects remain isolated from AEF-specific documentation.
+8. New milestones are canonical artifacts.
+9. Specification → verification → test relationships are explicit.
+10. Generated tests are traceable to canonical verification criteria.
+11. Legacy artifacts remain readable.
+12. No competing artifact registries or validators are introduced.
+13. Existing legacy artifacts are not mass-migrated.
+14. All M9 verification tests execute in isolated fixtures.
+15. The M9 implementation leaves the system ready for a future orchestration milestone.
+
+---
+
+# Implementation Order
+
+Implementation should proceed in this order:
+
+```
+1. Confirm M9 canonical artifact APIs/contracts
+        ↓
+2. Establish project configuration contract
+        ↓
+3. Integrate canonical resolver
+        ↓
+4. Integrate canonical metadata validator
+        ↓
+5. Update artifact creation primitives
+        ↓
+6. Update bootstrap-project
+        ↓
+7. Update milestone creation
+        ↓
+8. Update generate-spec
+        ↓
+9. Update generate-verification
+        ↓
+10. Update generate-tests
+        ↓
+11. Update implement/evaluate/review consumers
+        ↓
+12. Update sync-documentation
+        ↓
+13. Verify legacy compatibility
+        ↓
+14. Verify cross-project isolation
+        ↓
+15. Final integration verification
+```
+
+The implementation order should be confirmed by the generated specifications and verification protocol before coding begins.
+
+---
+
+# Required Deliverables
+
+The milestone must produce:
+
+* updated infrastructure skills;
+* canonical project configuration handling;
+* canonical resolver integration;
+* canonical metadata-validator integration;
+* mode-aware bootstrap behavior;
+* project isolation guarantees;
+* canonical milestone creation;
+* canonical specification/verification/test pipeline integration;
+* isolated integration fixtures;
+* verification tests;
+* implementation review;
+* updated documentation.
+
+---
+
+# Completion Gate
+
+M9 may not be considered complete merely because the modified skills execute successfully.
+
+Completion requires evidence that:
+
+```
+canonical artifact contract
+        ↓
+canonical resolver
+        ↓
+canonical validator
+        ↓
+skill integration
+        ↓
+project isolation
+        ↓
+legacy compatibility
+        ↓
+specification → verification → test traceability
+```
+
+all operate consistently.
+
+The completion report must identify:
+
+* changed skills;
+* changed infrastructure components;
+* canonical artifact types exercised;
+* test fixtures used;
+* verification results;
+* legacy compatibility evidence;
+* project-isolation evidence;
+* known limitations;
+* explicitly deferred orchestration work.
+
+The completion report must not claim orchestration capability as part of M9.

@@ -6,7 +6,7 @@ from pathlib import Path
 
 def clean_content(content: str) -> tuple[str, dict]:
     stats = {"brackets_removed": 0, "lines_removed": 0, "prefixes_stripped": 0, "backticks_fixed": 0}
-    
+
     # 1. Fix 4 backtick quotations (Rule 3)
     # Replaces exactly four backticks ```` with three backticks ```
     backtick_pattern = re.compile(r"(?<!`)````(?!`)")
@@ -14,7 +14,7 @@ def clean_content(content: str) -> tuple[str, dict]:
     if matches:
         stats["backticks_fixed"] += len(matches)
         content = backtick_pattern.sub("```", content)
-        
+
     # 2. Process line numbers (Rule 2)
     lines = content.splitlines()
     cleaned_lines = []
@@ -23,7 +23,7 @@ def clean_content(content: str) -> tuple[str, dict]:
         if re.match(r"^\s*\[\d+\]\s*$", line):
             stats["lines_removed"] += 1
             continue  # Skip/remove the line completely
-            
+
         # If the line starts with a bracketed number followed by text (and is not a reference definition like "[97]: url")
         match = re.match(r"^\s*\[\d+\](?!\s*:)\s*(.*)$", line)
         if match:
@@ -32,7 +32,7 @@ def clean_content(content: str) -> tuple[str, dict]:
         else:
             cleaned_lines.append(line)
     content = "\n".join(cleaned_lines)
-    
+
     # 3. Remove NotebookLM reference bracketed numbers (Rule 1)
     # Matches [7], [49], [154, 162] etc when NOT followed by ( or [ to protect links/reference links
     ref_pattern = re.compile(r"\s*\[\d+(?:\s*,\s*\d+)*\](?!\s*[\(\[])")
@@ -40,14 +40,14 @@ def clean_content(content: str) -> tuple[str, dict]:
     if matches:
         stats["brackets_removed"] += len(matches)
         content = ref_pattern.sub("", content)
-        
+
     return content, stats
 
 def clean_file(filepath: Path) -> bool:
     try:
         content = filepath.read_text(encoding="utf-8", errors="ignore")
         cleaned, stats = clean_content(content)
-        
+
         # Check if any changes were made
         if cleaned != content:
             filepath.write_text(cleaned, encoding="utf-8")
@@ -73,21 +73,21 @@ def main():
         if not targets:
             print("[INFO] No default skill directories found. Scanning current directory recursively.")
             targets = ["."]
-            
+
     print("=========================================================")
     print(" OMP AEF Skill and Document Health Repair Agent")
     print("=========================================================")
-    
+
     processed_files = 0
     healed_files = 0
-    
+
     for target in targets:
         target_path = Path(target).resolve()
         if not target_path.exists() or not target_path.is_dir():
             # Gracefully handle partial implementation folders without crashing (Rule 4)
             print(f"[SKIP] Directory {target} does not exist or is not a directory. Continuing...")
             continue
-            
+
         print(f"Scanning directory: {target_path}")
         # Recursively search for all .md files
         md_files = list(target_path.glob("**/*.md"))
@@ -98,7 +98,7 @@ def main():
             processed_files += 1
             if clean_file(file):
                 healed_files += 1
-                
+
     print("=========================================================")
     print(f" Healing Sweep Completed!")
     print(f" Processed: {processed_files} files, Healed: {healed_files} files.")

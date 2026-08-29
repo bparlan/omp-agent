@@ -1,6 +1,6 @@
 ---
 name: close-milestone
-version: 1.0.0
+version: 1.0.0-stable
 description: Terminal gate that validates loop-closure (hotfix/investigation re-evaluation), mechanically re-validates all milestone artifacts, and produces a single authoritative lineage-traced closure artifact. Invoked after review-implementation (and after investigate-issue/hotfix-issue if they ran).
 tools: read, bash, glob, write, grep
 user-invocable: true
@@ -33,12 +33,12 @@ If **any** investigation or hotfix reports exist, you must verify loop-closure:
 
 ### Loop-Closure Validation Rules
 
-| Condition | Result |
-|---|---|
-| No investigation/hotfix reports exist | Loop-closure check passes — no fixes happened |
-| Investigation/hotfix reports exist AND a newer evaluation AND a newer review report exist | Loop-closure check passes — fixes were re-evaluated and re-reviewed |
-| Investigation/hotfix reports exist but NO newer evaluation exists | **REFUSE CLOSURE** — fixes were never re-evaluated |
-| Investigation/hotfix reports exist and a newer evaluation exists but NO newer review exists | **REFUSE CLOSURE** — fixes were evaluated but never re-reviewed |
+| Condition                                                                                                                  | Result                                                                                                                                          |
+| -------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------- |
+| No investigation/hotfix reports exist                                                                                      | Loop-closure check passes — no fixes happened                                                                                                   |
+| Investigation/hotfix reports exist AND a newer evaluation AND a newer review report exist                                  | Loop-closure check passes — fixes were re-evaluated and re-reviewed                                                                             |
+| Investigation/hotfix reports exist but NO newer evaluation exists                                                          | **REFUSE CLOSURE** — fixes were never re-evaluated                                                                                              |
+| Investigation/hotfix reports exist and a newer evaluation exists but NO newer review exists                                | **REFUSE CLOSURE** — fixes were evaluated but never re-reviewed                                                                                 |
 | Investigation/hotfix reports exist and newer evaluation + review exist, but their `derived_from` doesn't reference the fix | Loop-closure check **may** still pass if timestamps confirm the chain. Log a warning but do not block — the derived_from chain may be implicit. |
 
 **When closure is refused**, emit:
@@ -124,7 +124,18 @@ If the duplicate-ID check fails, record it in the closure artifact as a `CRITICA
 
 **Exception**: If the only ID collisions are pre-existing in legacy milestone directories listed in `legacy_boundaries`, they are excluded from enforcement.
 
-### 2c. Artifact Completeness Check
+### 2c. Filename Sequentialization Check
+
+Verify that all spec-artifact filenames follow the canonical sequential pattern and do not collide:
+
+- `M{X}S{Y}.md`
+- `M{X}S{Y}V1.md`, `M{X}S{Y}V2.md`
+- `M{X}S{Y}T1.md`, `M{X}S{Y}T2.md`
+- `M{X}S{Y}C1.md`, `M{X}S{Y}C2.md`
+
+Reject bare repeated forms such as `M9S1C.md`, `VER-M9S1V.md`, `M9S1E.md`, or `M9S1R.md`.
+
+### 2d. Artifact Completeness Check
 
 Verify that the minimum required artifact chain exists against the specification YAML:
 
@@ -175,6 +186,7 @@ else:
 Build the full `derived_from` chain. Read each artifact's YAML frontmatter from the most recent back, constructing a `DAG`-style lineage:
 
 For each spec sequence Y in this milestone, trace:
+
 ```
 M{X} (milestone)
   └→ SPEC-M{X}S{Y}
@@ -226,6 +238,7 @@ The closure artifact MUST contain:
 If `MILESTONES.md` or any project-level status tracking document exists (typically at the repo root or in `docs/`), update it to reflect this milestone's closure status. This is the **only** place milestone-completion status gets written, to avoid the ambiguity of "documentation about the fix is done" vs "the fix is done."
 
 Update rules:
+
 - Set the milestone row/entry status to match the closure artifact's status assertion (`CLOSED` / `CLOSED_WITH_DEFECTS`).
 - Append a reference to the closure artifact: `See milestones/M{X}/M{X}CLOSE-{N}.md`.
 - Do NOT modify any other status fields or add editorial commentary.
@@ -234,16 +247,16 @@ If `MILESTONES.md` doesn't exist, create it at `docs/MILESTONES.md` with an init
 
 ## Step 6 — Handoff
 
-Output the final message:
+After generating the closure artifact, you MUST use the `ask` tool to present the user with the final next steps:
 
-```
-Task complete.
+| Option Label        | Action                                                                     |
+| :------------------ | :------------------------------------------------------------------------- |
+| Archive Artifacts   | Run `/archive-docs` to clean up and archive milestone artifacts.           |
+| Sync Documentation  | Run `/sync-documentation` to update canonical docs with the new milestone. |
+| Start New Milestone | Run `/milestone` to begin planning the next milestone.                     |
+| Custom              | Let me specify a different next step.                                      |
 
-Milestone M{X} closure status: [CLOSED | CLOSED_WITH_DEFECTS | REFUSED]
-Closure artifact: milestones/M{X}/M{X}CLOSE-{N}.md
-
-Next step: [user action, e.g., "Run /archive-docs to archive milestone artifacts" or "Re-run /evaluate-implementation and /review-implementation before retrying close-milestone"]
-```
+You MUST NOT emit a legacy hardcoded text message — the interactive ask prompt replaces this mechanism entirely.
 
 ## ID Minting Rules (from Prompt A compliance)
 

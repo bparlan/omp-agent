@@ -1,10 +1,10 @@
 ---
 id: TEVAL-{N}  # Sequential integer matching the test evaluation run
-*   `type`: Set strictly to `evaluation`.
-*   `title`: "Test Evaluation Report for M{X}S{Y}" (Wrap in double-quotes).
+type: evaluation
+title: "Test Evaluation Report for M{X}S{Y}"
 milestone_id: M{X}
 status: completed
-derived_from: [SPEC-{Y}, VER-{Y}, TSET-{Z}]
+derived_from: ["SPEC-{Y}", "VER-{Y}V", "TSET-{Z}"]
 template_version: 1.0.0
 ---
 
@@ -79,7 +79,7 @@ Every baseline verification claim must be backed by the exact terminal command a
     ```
     Metadata OK: milestones/M{X}/M{X}S{Y}V.md
     ```
-*   [ ] **Test Execution (`test_legacy_document_handling.py`):** `pytest tests/M{X}/test_legacy_document_handling.py`
+*   [ ] **Test Execution:** For each test file listed in the ledger, run with its declared interpreter and record raw output below.
     ```
-    <pytest output showing natural pre-implementation fail state or spec-check pass>
+    <raw terminal output for each test>
     ```

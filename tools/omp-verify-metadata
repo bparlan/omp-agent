@@ -1,0 +1,32 @@
+#!/usr/bin/env python3
+"""Metadata verification CLI: exits 0 for valid, 1 for invalid."""
+import os
+import sys
+
+ROOT = pathlib.Path(__file__).resolve().parents[1]
+if ROOT not in sys.path:
+    sys.path.insert(0, ROOT)
+
+from core.validation import validate_metadata
+
+
+def main(argv: list[str]) -> int:
+    if len(argv) < 2:
+        print("Usage: omp-verify-metadata <artifact_path>", file=sys.stderr)
+        return 1
+    path = argv[1]
+    if not os.path.exists(path):
+        print(f"Artifact not found: {path}", file=sys.stderr)
+        return 1
+    result = validate_metadata(path)
+    if not result.get("valid", False):
+        missing = result.get("missing_fields", [])
+        errors = result.get("errors", [])
+        print(f"INVALID: {missing} {errors}", file=sys.stderr)
+        return 1
+    print("VALID")
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main(sys.argv))

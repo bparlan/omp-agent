@@ -1,0 +1,15 @@
+#!/bin/bash
+# Environment detect CLI command - FR-1.3
+
+cd /Users/bparlan/devcode/aef/agent
+if command -v python3 >/dev/null 2>&1; then
+    python3 -c "
+import sys
+sys.path.insert(0, '/Users/bparlan/devcode/aef/agent/src')
+from env_layer.cli.env_detect import main
+sys.exit(main())
+" "$@"
+else
+    echo "Error: Python 3 not found" >&2
+    exit 127
+fi

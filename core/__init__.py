@@ -1,0 +1,1 @@
+from core.validation import validate_metadata

@@ -1,0 +1,16 @@
+#!/usr/bin/env bash
+# env-diagnose — FR-1.1 Environment Management
+# Environment validation and diagnostics: --project <path> [--output <format>]
+set -euo pipefail
+cd "$(dirname "$0")/../" || exit 1
+exec python3 -c "
+import sys, os
+sys.path.insert(0, 'src')
+import argparse
+from env_layer.cli.handlers.env_management import handle_env_diagnose
+p = argparse.ArgumentParser()
+p.add_argument('--project', required=True)
+p.add_argument('--output', default='text')
+args = p.parse_args()
+handle_env_diagnose(args)
+" "$@"

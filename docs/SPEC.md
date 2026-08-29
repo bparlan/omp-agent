@@ -21,7 +21,7 @@ The OhMyPi (OMP) Framework is designed around rigorous software engineering disc
 ### 2.2. Tactical Lifecycle Engine
 
 -   **Purpose**: Executes development tasks through a deterministic, phased workflow.
--   **Workflow Stages**: 
+-   **Workflow Stages**:
     1.  `milestone`: Define intent.
     2.  `generate-spec`: Design the solution.
     3.  `generate-verification`: Plan tests.

@@ -305,7 +305,7 @@ class MetadataSchemaValidator:
     def test_legacy_boundaries_validation(self):
         """Test that legacy_boundaries are accepted as an optional field."""
         print("\n[TEST] Legacy Boundaries Validation")
-        
+
         test_cases = [
             {
                 "name": "Valid milestone with empty legacy_boundaries",
@@ -346,7 +346,7 @@ class MetadataSchemaValidator:
                 "should_have_warnings": False
             }
         ]
-        
+
         all_passed = True
         for test_case in test_cases:
             print(f"  - {test_case['name']}")
@@ -363,12 +363,12 @@ class MetadataSchemaValidator:
                 else:
                     print("    ✗ FAIL: Should be invalid but passed")
                     all_passed = False
-        
+
         if all_passed:
             print("  ✓ All legacy_boundaries tests passed")
         else:
             print("  ✗ Some legacy_boundaries tests failed")
-        
+
         return all_passed
 
     def test_lineage_relationships(self):

@@ -1,0 +1,33 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Environment Configuration Schema",
+  "type": "object",
+  "required": ["environment"],
+  "properties": {
+    "environment": {
+      "type": "object",
+      "required": ["detection", "tools"],
+      "properties": {
+        "detection": {
+          "type": "object",
+          "required": ["method", "supported_languages"],
+          "properties": {
+            "method": {"type": "string", "enum": ["mise"]},
+            "supported_languages": {"type": "array", "items": {"type": "string"}},
+            "validation": {
+              "type": "object",
+              "properties": {
+                "strict": {"type": "boolean"},
+                "enforce_constraints": {"type": "boolean"}
+              }
+            }
+          }
+        },
+        "tools": {
+          "type": "object",
+          "additionalProperties": {"type": "string"}
+        }
+      }
+    }
+  }
+}

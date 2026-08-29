@@ -28,7 +28,7 @@ import re
 import hashlib
 import argparse
 
-from _frontmatter import extract_frontmatter
+from core.artifacts.metadata import extract_frontmatter
 
 
 # ---------------------------------------------------------------------------
@@ -96,7 +96,7 @@ VALID_LEGACY_SUFFIXES = frozenset({"V", "T", "C", "E", "R", "I", "H"})
 
 def classify_tier1(filepath, verbose):
     """Tier 1: Classify via YAML frontmatter metadata.
-    
+
     Returns (artifact_type, classification_source) or (None, None).
     """
     try:
@@ -138,7 +138,7 @@ def classify_tier1(filepath, verbose):
 
 def classify_tier2(filepath, verbose):
     """Tier 2: Classify via directory structure.
-    
+
     Infers artifact type from the parent directory name.
     Returns (artifact_type, classification_source) or (None, None).
     """
@@ -153,7 +153,7 @@ def classify_tier2(filepath, verbose):
 
 def classify_tier3(filepath, verbose):
     """Tier 3: Classify via top-level Markdown headers.
-    
+
     Reads the first line and checks for '# <heading>' patterns.
     Returns (artifact_type, classification_source) or (None, None).
     """
@@ -179,7 +179,7 @@ def classify_tier3(filepath, verbose):
 
 def classify_tier4(filepath, verbose):
     """Tier 4: Classify via legacy filename naming conventions.
-    
+
     Matches M{X}S{Y}[SUFFIX][N].md patterns.
     Returns (artifact_type, classification_source) or (None, None).
     """
@@ -204,7 +204,7 @@ def classify_tier4(filepath, verbose):
 
 def classify_tier5(filepath, pattern_map, verbose):
     """Tier 5: Classify via custom filename pattern mapping.
-    
+
     pattern_map: dict of {filename: artifact_type}
     Returns (artifact_type, classification_source) or (None, None).
     """
@@ -221,7 +221,7 @@ def classify_tier5(filepath, pattern_map, verbose):
 
 def load_pattern_map(pattern_map_path):
     """Load custom filename→type mapping from a text file.
-    
+
     Format: one line per entry, <filename>:<artifact_type>
     Returns dict of {filename: artifact_type}.
     """
@@ -259,7 +259,7 @@ def sha256_file(filepath):
 
 def index_milestones(milestone_dir, output_path, verbose, pattern_map_path):
     """Scan M1-M9 directories, classify files, and write manifest.
-    
+
     Returns 0 on success, 1 on error.
     """
     # Resolve the milestone base directory

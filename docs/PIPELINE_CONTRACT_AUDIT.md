@@ -1,8 +1,8 @@
 # AEF Pipeline Contract Audit: Prepare for Milestone Evolution
 
-**Date**: 2026-08-09  
-**Scope**: Read-only architectural audit of the AEF/OhMyPi pipeline  
-**Audit Type**: Contract discovery, source-of-truth mapping, historical failure verification  
+**Date**: 2026-08-09
+**Scope**: Read-only architectural audit of the AEF/OhMyPi pipeline
+**Audit Type**: Contract discovery, source-of-truth mapping, historical failure verification
 **READ-ONLY**: No skills, templates, validators, tests, or production code were modified.
 
 ---
@@ -190,38 +190,38 @@ Defined in:
 
 ### YAML/frontmatter parsing collisions
 
-**Status**: PARTIALLY_FIXED  
+**Status**: PARTIALLY_FIXED
 **Evidence**: `HF_20260728_ARCH_FRONTMATTER.md` documents creation of shared `_frontmatter.py` module used by both `validate_metadata.py` and `resolve_artifact.py`. However, `omp-verify-traceability` and `omp-verify-git-integrity` still have their own inline frontmatter parsing (duplicated regex logic). The `M10SA1.md` session audit reports continued metadata type inconsistencies (incorrect `type` fields like `completion_report` instead of `completion`).
 
 ### Shebang/traceability ordering conflicts
 
-**Status**: FIXED  
+**Status**: FIXED
 **Evidence**: The `generate-tests` SKILL.md now mandates shebang + traceability comment headers on line 1 for test scripts. `omp-verify-test-ledger` validates `# {Verification IDs: ...}` and `# {Requirement IDs: ...}` headers.
 
 ### Passive syntax failure/deletion
 
-**Status**: PARTIALLY_FIXED  
+**Status**: PARTIALLY_FIXED
 **Evidence**: `HF_20260727_GENERATE_TESTS_FIX.md` documents allowing test file modifications in generate-tests for syntax self-healing (up to 3 attempts). However, `evaluate-tests` and `implement-specification` still freeze on INVALID_TEST — the self-healing only applies within generate-tests. The `tests/M10/` directory is empty, meaning generated test files from M10S10 were deleted or never written, which represents a passive failure.
 
 ### Brownfield false-green detection
 
-**Status**: FIXED  
+**Status**: FIXED
 **Evidence**: `evaluate-tests` SKILL.md has explicit `VALID_BROWNFIELD_PASS` detection logic. When a test passes with exit 0, the evaluator checks whether the target binary already exists on disk. If it does and has non-trivial logic, the pass is classified as healthy brownfield rather than a TDD leak.
 
 ### Stale test ledger entries
 
-**Status**: PARTIALLY_FIXED  
+**Status**: PARTIALLY_FIXED
 **Evidence**: `omp-sanitize-tests.py` has a `prune_stale_ledger_rows()` function that removes ledger rows referencing non-existent test files. However, this tool is a standalone script not integrated into the pipeline — no skill invokes it. The `tests/M10/` directory is empty, but `milestones/M10/M10S10T1.md` still lists `tests/M10/test_legacy_document_handling.py` and `tests/M10/test_artifact_separation.py`. The `generate-tests` skill has a ledger truncation rule ("completely overwrite or truncate any existing file") — but this only guards against stale rows at generation time, not deletion after generation.
 
 ### CLI positional-vs-flag mismatches
 
-**Status**: FIXED  
+**Status**: FIXED
 **Evidence**: All CLI binaries (`omp-verify-test-ledger`, `omp-verify-git-integrity`, `resolve_artifact.py`, `validate_metadata.py`, `aef-test-runner`) use argparse with named `--flag` arguments. The old `omp-test.bak` and `omp-verify-traceability.bak` backup files suggest the flag conversion was completed.
 
 ### Metadata enum/schema inconsistencies
 
-**Status**: STILL_PRESENT  
-**Evidence**: 
+**Status**: STILL_PRESENT
+**Evidence**:
 1. `validate_metadata.py` has `ALLOWED_TYPES` but `resolve_artifact.py` has `TYPE_DIR_MAP` — these are separate enum lists not synchronized with `ARTIFACT_ARCHITECTURE.md`.
 2. `M10S10TE.md` and `M10S10E.md` use `VALID_TESTS` / `INVALID_TESTS` / `ENVIRONMENT_FAILURE` keys that differ from the evaluation template's `VALID_TESTS` / `INVALID_TESTS` naming (template uses `VALID_TESTS` / `INVALID_TESTS` / no `ENVIRONMENT_FAILURE`).
 3. Frontmatter `type` field values vary: `completion`, `evaluation`, `review`, `test_set`, `specification`, `verification`, `milestone`, `session_audit`, `architecture`, `hotfix`. No single canonical list unifies them.

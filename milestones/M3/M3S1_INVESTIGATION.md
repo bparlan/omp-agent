@@ -1,7 +1,7 @@
 # M3S1 Graph-Based Scope Verification: Investigation Report
 
-**Date**: 2026-07-26  
-**Milestone**: M3  
+**Date**: 2026-07-26
+**Milestone**: M3
 **Task**: Investigate and stabilize Graph-Based Scope Verification before V2 rollout
 
 ---
@@ -44,7 +44,7 @@ The Graph-Based Scope Verification implementation has **critical instability** t
 
 **Live Schema (via lbug shell)**:
 - **File node**: properties = `name2, path, path2, language2`
-- **Symbol node**: properties = `name2, kind2, file2`  
+- **Symbol node**: properties = `name2, kind2, file2`
 - **IMPORTS edge**: relationship between File nodes
 - **GraphMetadata**: metadata nodes
 
@@ -364,24 +364,24 @@ symbol = {
 for file_entry in skeleton_data.get("files", []):
     file_name = file_entry.get("name")
     file_id = f"file://{file_entry.get('path')}"
-    
+
     for import_entry in file_entry.get("imports", []):
         from_type = import_entry.get("from")
         to_import = import_entry.get("to")
-        
+
         # Check if this is a module import (not built-in)
         if to_import.startswith("src."):
             # Extract target file name
             target_module = to_import.split(".")[-1]
             target_file_name = target_module + ".py"
-            
+
             # Find target file node
             target_file_id = None
             for other_file in skeleton_data.get("files", []):
                 if other_file.get("name") == target_file_name:
                     target_file_id = f"file://{other_file.get('path')}"
                     break
-            
+
             if target_file_id:
                 # Create IMPORTS edge
                 cypher = f"""
@@ -409,11 +409,11 @@ for file_entry in skeleton_data.get("files", []):
     file_path = file_entry.get("path")
     file_name = file_entry.get("name")
     file_id = f"file://{file_path}"
-    
+
     # Check if File node exists
     cypher = "MATCH (f:File {{file2: $file_id}}) RETURN count(f) as count"
     result = execute_cypher(cypher, {"file_id": file_id})
-    
+
     if result[0]["count"] == 0:
         # Create File node
         cypher = """
@@ -449,24 +449,24 @@ def get_graph_scope(file_path):
     """Get files in scope including transitive imports."""
     # Normalize path
     normalized_path = normalize_path(file_path)
-    
+
     # Query graph for File node
     cypher = """
     MATCH (f:File {file2: $path})
     RETURN f
     """
     result = execute_cypher(cypher, {"path": normalized_path})
-    
+
     if not result:
         return {normalized_path}  # File not in graph, treat as out of scope
-    
+
     # Get all files in scope including transitive imports
     cypher = """
     MATCH path = (start:File {file2: $path})-[:IMPORTS*]->(target:File)
     RETURN DISTINCT target.file2 as file2
     """
     result = execute_cypher(cypher, {"path": normalized_path})
-    
+
     scope = {row["file2"] for row in result}
     scope.add(normalized_path)  # Include start file
     return scope
@@ -474,19 +474,19 @@ def get_graph_scope(file_path):
 def verify_scope_graph(declared_scope, modified_files):
     """Verify scope using graph-based scope resolution."""
     declared_normalized = {normalize_path(f) for f in declared_scope}
-    
+
     # Build scope graph
     scope_graph = set()
     for file in declared_normalized:
         scope_graph.update(get_graph_scope(file))
-    
+
     # Check modified files
     outside_scope = []
     for modified_file in modified_files:
         normalized = normalize_path(modified_file)
         if normalized not in scope_graph:
             outside_scope.append(modified_file)
-    
+
     return outside_scope
 ```
 
@@ -740,6 +740,6 @@ lbug baria.lbug "MATCH (s:Symbol {name2: 'index_page'}) RETURN s.file2 as file"
 
 ---
 
-**Report Prepared By**: Agent Investigation Session  
-**Review Required**: Yes (for V2 rollout decision)  
+**Report Prepared By**: Agent Investigation Session
+**Review Required**: Yes (for V2 rollout decision)
 **Estimated Time to Stabilize**: 4-6 hours (Fixes 1-3)

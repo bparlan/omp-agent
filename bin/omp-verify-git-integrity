@@ -23,7 +23,7 @@ def parse_test_ledger(ledger_path: Path) -> list[Path]:
     try:
         with open(ledger_path, 'r') as f:
             lines = f.readlines()
-            
+
             # Attempt to find the 'Test File' column header.
             # This is a heuristic and might need adjustment if the table format varies.
             header_line_index = -1
@@ -31,7 +31,7 @@ def parse_test_ledger(ledger_path: Path) -> list[Path]:
                 if "| Test File |" in line or "| Test file |" in line:
                     header_line_index = i
                     break
-            
+
             if header_line_index == -1:
                 print(f"Error: Could not find 'Test File' header in ledger: {ledger_path}", file=sys.stderr)
                 sys.exit(2) # VALIDITY_FAILURE
@@ -42,7 +42,7 @@ def parse_test_ledger(ledger_path: Path) -> list[Path]:
                 line = lines[i].strip()
                 if not line or line.startswith('---'): # Skip empty lines or separator lines
                     continue
-                
+
                 # Split by pipe, strip whitespace, and try to get the second element
                 parts = [part.strip() for part in line.split('|')]
                 if len(parts) > 2: # Ensure there are at least 3 parts (e.g., | Col1 | Col2 | Col3 |)
@@ -53,7 +53,7 @@ def parse_test_ledger(ledger_path: Path) -> list[Path]:
     except Exception as e:
         print(f"Error parsing ledger file {ledger_path}: {e}", file=sys.stderr)
         sys.exit(2) # VALIDITY_FAILURE
-    
+
     if not test_files:
         print(f"Warning: No test files found in ledger {ledger_path}. Exiting with PASS.", file=sys.stderr)
         # As per edge case: Empty ledger should exit with 0.
@@ -90,17 +90,17 @@ def check_git_integrity(test_files: list[Path]) -> int:
             # stdout will be empty if tracked and unchanged.
             # stdout will start with '??' if untracked.
             # stdout will start with 'A ', 'M ', ' M' if staged/modified.
-            
+
             # Ensure file_path is relative to the git repository root for git status to work correctly.
             # git status --short takes paths relative to the repository root.
             # If the script is run from a subdirectory, we need to ensure paths are handled correctly.
             # The simplest approach is to run `git status --short -- <file_path>` from the repo root.
             # However, here we'll assume the file_path is already relative to the current working directory
             # and git will resolve it if the CWD is within the repo.
-            
+
             # To be more robust, we can determine the repo root and make paths relative to it.
             # For now, let's rely on the current working directory being within the repo.
-            
+
             result = subprocess.run(
                 ["git", "status", "--short", "--", str(file_path)],
                 capture_output=True,
@@ -112,9 +112,9 @@ def check_git_integrity(test_files: list[Path]) -> int:
             # it might be considered untracked or a different kind of error.
             # For simplicity, if git status fails for a file and it's not '??', we'll treat it as untracked.
             # A more precise handling might be needed depending on exact git status output for edge cases.
-            
+
             status_output = result.stdout.strip()
-            
+
             if status_output.startswith("??"):
                 untracked_files.append(file_path)
             elif result.returncode != 0 and not status_output:
@@ -154,9 +154,9 @@ def main():
     args = parser.parse_args()
 
     ledger_path = Path(args.ledger)
-    
+
     test_files = parse_test_ledger(ledger_path)
-    
+
     if not test_files and ledger_path.is_file(): # Check if ledger was valid but empty
         sys.exit(0) # Empty ledger is a pass.
     elif not test_files and not ledger_path.is_file(): # Ledger file itself was not found by parse_test_ledger

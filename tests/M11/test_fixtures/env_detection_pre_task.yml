@@ -1,0 +1,22 @@
+# test_fixtures/env_detection_pre_task.yml
+env_detection_pre_task:
+  test_cases:
+    - name: "Pre-task Python setup"
+      project: "python_task_project"
+      runtime: "python"
+      expected_detection_result:
+        runtime_detected: "python"
+        tools_found: ["python", "pip"]
+        version: "3.11.0"
+        isolation_setup: true
+      should_pass: true
+
+    - name: "Pre-task Node.js setup"
+      project: "node_task_project"
+      runtime: "node"
+      expected_detection_result:
+        runtime_detected: "node"
+        tools_found: ["node", "npm"]
+        version: "18.0.0"
+        isolation_setup: true
+      should_pass: true

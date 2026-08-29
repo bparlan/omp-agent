@@ -1,0 +1,58 @@
+{
+  "evolve-skills": {
+    "name": "evolve-skills",
+    "status": "needs_review",
+    "confidence_score": 0.9,
+    "last_modified": "2026-08-25T15:49:13.485953",
+    "last_processed": "2026-08-26T22:08:11.963119",
+    "issues": [
+      "Duplicate section headers found"
+    ],
+    "suggestions": [],
+    "validation_score": 0.0
+  },
+  "close-milestone": {
+    "name": "close-milestone",
+    "status": "healthy",
+    "confidence_score": 1.0,
+    "last_modified": "2026-08-26T12:42:59.371636",
+    "last_processed": "2026-08-26T20:21:52.556609",
+    "issues": [],
+    "suggestions": [],
+    "validation_score": 0.0
+  },
+  "manage-roadmap": {
+    "name": "manage-roadmap",
+    "status": "needs_review",
+    "confidence_score": 0.9,
+    "last_modified": "2026-08-25T11:07:54.502635",
+    "last_processed": "2026-08-26T22:08:11.963632",
+    "issues": [
+      "Unclosed code blocks detected"
+    ],
+    "suggestions": [],
+    "validation_score": 0.0
+  },
+  "code-search": {
+    "name": "code-search",
+    "status": "needs_review",
+    "confidence_score": 0.9,
+    "last_modified": "2026-08-25T15:24:12.921245",
+    "last_processed": "2026-08-26T22:08:11.963275",
+    "issues": [
+      "Missing section headers (###)"
+    ],
+    "suggestions": [],
+    "validation_score": 0.0
+  },
+  "milestoner": {
+    "name": "milestoner",
+    "status": "healthy",
+    "confidence_score": 1.0,
+    "last_modified": "2026-08-26T12:39:00.186219",
+    "last_processed": "2026-08-26T21:25:08.434499",
+    "issues": [],
+    "suggestions": [],
+    "validation_score": 0.0
+  }
+}

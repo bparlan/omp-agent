@@ -1,0 +1,80 @@
+#!/usr/bin/env python3
+"""Workspace cleanup command for AEF Environment Layer"""
+import sys
+import json
+import subprocess
+from pathlib import Path
+import argparse
+import shutil
+import time
+
+def workspace_clean(project_path, runtime, force=False):
+    """Clean workspace isolation"""
+    print(f"Cleaning workspace isolation")
+    print(f"Project: {project_path}")
+    print(f"Runtime: {runtime}")
+    print(f"Force: {'enabled' if force else 'disabled'}")
+    print("=" * 50)
+
+    project_dir = Path(project_path)
+    if not project_dir.exists():
+        print(f"ERROR: Project directory does not exist: {project_path}")
+        return False
+
+    # Find workspace directories
+    workspace_pattern = project_dir / ".aef-env" / "*" / runtime
+    workspaces_to_clean = list(workspace_pattern.parent.glob("*"))
+
+    cleaned_count = 0
+    for workspace_dir in workspaces_to_clean:
+        try:
+            # Remove workspace directory
+            shutil.rmtree(workspace_dir)
+            cleaned_count += 1
+            print(f"✓ Cleaned workspace: {workspace_dir}")
+        except Exception as e:
+            if force:
+                print(f"Warning: Failed to clean {workspace_dir}: {e}")
+            else:
+                print(f"Error: Failed to clean {workspace_dir}: {e}")
+                return False
+
+    # Clean activation file
+    activation_file = project_dir / f".env_activated_{runtime}.txt"
+    if activation_file.exists():
+        activation_file.unlink()
+        print(f"✓ Removed activation file: {activation_file}")
+        cleaned_count += 1
+
+    # Clean mise cache
+    mise_cache = project_dir / ".cache" / "mise"
+    if mise_cache.exists():
+        if force:
+            shutil.rmtree(mise_cache)
+            print(f"✓ Cleaned mise cache: {mise_cache}")
+            cleaned_count += 1
+        else:
+            print(f"Note: Mise cache exists (use --force to clean): {mise_cache}")
+
+    print(f"✓ Workspace cleanup complete")
+    print(f"  Workspaces cleaned: {cleaned_count}")
+
+    return True
+
+def main():
+    parser = argparse.ArgumentParser(description="Clean workspace isolation")
+    parser.add_argument("--project", required=True, help="Project path")
+    parser.add_argument("--runtime", required=True, help="Runtime environment")
+    parser.add_argument("--force", action="store_true", help="Force cleanup without confirmation")
+
+    args = parser.parse_args()
+
+    try:
+        success = workspace_clean(args.project, args.runtime, args.force)
+        return 0 if success else 1
+    except Exception as e:
+        print(f"ERROR: {e}")
+        return 1
+
+if __name__ == "__main__":
+    sys.exit(main())

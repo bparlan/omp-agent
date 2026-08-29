@@ -1,0 +1,17 @@
+#!/usr/bin/env bash
+# env-list — FR-1.1 Environment Management
+# List available runtimes and tools: --runtime <runtime> --all [--json]
+set -euo pipefail
+cd "$(dirname "$0")/../" || exit 1
+exec python3 -c "
+import sys, os
+sys.path.insert(0, 'src')
+import argparse
+from env_layer.cli.handlers.env_management import handle_env_list
+p = argparse.ArgumentParser()
+p.add_argument('--runtime', required=True)
+p.add_argument('--all', action='store_true', default=False)
+p.add_argument('--json', action='store_true', default=False)
+args = p.parse_args()
+handle_env_list(args)
+" "$@"

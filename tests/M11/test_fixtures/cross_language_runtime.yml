@@ -1,0 +1,18 @@
+# test_fixtures/cross_language_runtime.yml
+cross_language_runtime:
+  test_cases:
+    - name: "Python to Node.js runtime switch"
+      project: "multi_runtime_project"
+      from_runtime: "python"
+      to_runtime: "node"
+      expected_compatibility: true
+      cross_contamination_risk: "low"
+      should_pass: true
+
+    - name: "Rust to Go runtime switch"
+      project: "multi_runtime_project"
+      from_runtime: "rust"
+      to_runtime: "go"
+      expected_compatibility: true
+      cross_contamination_risk: "low"
+      should_pass: true

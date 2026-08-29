@@ -31,7 +31,7 @@ This report identifies minimal changes required to align the `generate-spec` ski
 
 **Change Type:** correction
 
-**Expected Impact:** 
+**Expected Impact:**
 - Generated specifications become neutral containers for requirements rather than toolchain design documents
 - Eliminates artificial cohesion requirements that constrain implementation innovation
 
@@ -60,7 +60,7 @@ This report identifies minimal changes required to align the `generate-spec` ski
 
 **Change Type:** removal of harmful restriction
 
-**Expected Impact:** 
+**Expected Impact:**
 - Specifications become semantically neutral containers
 - Verification stage gains flexibility to implement ID strategies matching contract needs
 - Eliminates artificial ordering constraints that confuse requirement semantics
@@ -91,7 +91,7 @@ This report identifies minimal changes required to align the `generate-spec` ski
 
 **Change Type:** consolidation
 
-**Expected Impact:** 
+**Expected Impact:**
 - Higher specification purity (verifiable boundaries only)
 - Earlier detection of placeholder content
 - Clearer boundary between requirement definition and design implementation
@@ -123,7 +123,7 @@ This report identifies minimal changes required to align the `generate-spec` ski
 
 **Change Type:** correction
 
-**Expected Impact:** 
+**Expected Impact:**
 - Specifications become terminal contracts rather than exploratory design documents
 - Reduces downstream friction by removing self-imposed constraints
 - Eliminates false-completeness signals that mask missing verification contracts
@@ -147,7 +147,7 @@ The following behaviors must remain untouched to maintain core invariants:
 | Replace investigation questions | Gains requirement purity | No effect | Eliminates design-space coupling |
 
 ## Implementation Readiness Assessment
-**Current Test Coverage:** 
+**Current Test Coverage:**
 - 67% of critical failures currently caught by placeholder checks
 - 33% false-positive acceptance when specifications lack verification contracts
 

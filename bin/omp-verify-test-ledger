@@ -26,21 +26,21 @@ def validate_ledger(ledger_path, verification_path, test_dir):
         test_file_paths = []
         lines = ledger_content.splitlines()
         header_found = False
-        
+
         for line in lines:
             if line.startswith('|') and 'Test File' in line and 'Verification ID' in line:
                 # Distinguish between header and data rows using the header pattern
                 if re.match(ledger_header_pattern, line):
                     header_found = True
                     continue
-                
+
                 if header_found and line.startswith('|'):
                     # This is a data row. Parse it.
                     parts = [part.strip() for part in line.split('|')]
                     # Expected format: | test_file | verification_id | requirement_id | test_type |
                     # After split, parts will have empty strings at the beginning and end.
                     # So, parts[1] is Test File, parts[2] is Verification ID, etc.
-                    if len(parts) >= 5: 
+                    if len(parts) >= 5:
                         test_file_path_str = parts[1]
                         verification_id = parts[2]
                         requirement_id = parts[3]
@@ -49,13 +49,13 @@ def validate_ledger(ledger_path, verification_path, test_dir):
                         if not test_file_path_str or not verification_id or not requirement_id or not test_type:
                             print(f"FAIL: Incomplete data in ledger row: {line} in {ledger_path}", file=sys.stderr)
                             return False
-                        
+
                         test_file_paths.append(test_file_path_str)
 
         if not header_found:
             print(f"FAIL: Ledger schema header not found in {ledger_path}", file=sys.stderr)
             return False
-        
+
         if not test_file_paths: # If header was found but no data rows with test files extracted
             print(f"FAIL: No test files found in ledger: {ledger_path}", file=sys.stderr)
             return False
@@ -125,7 +125,7 @@ def main():
     # Core Validation Logic (FR-1, FR-2, FR-3, FR-4, FR-5)
     # SPEC_FILE: Derive from ledger path. Extract milestone and spec IDs.
     SPEC_FILE = None  # Reserved for future FR-4 spec content validation
-    
+
     validation_success = validate_ledger(args.ledger, args.verification, args.test_dir)
 
     # FR-2 & FR-3: Determine exit code based on validation result

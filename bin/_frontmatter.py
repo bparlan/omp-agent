@@ -18,13 +18,13 @@ import yaml
 
 def extract_frontmatter(filepath: str):
     """Extract and parse YAML frontmatter from a file.
-    
+
     Opens the file, reads its content, and extracts the YAML frontmatter
     block delimited by --- ... --- at the start of the file.
-    
+
     Args:
         filepath: Path to the file to parse.
-    
+
     Returns:
         A dict of parsed YAML metadata, or None if no valid frontmatter
         is found (missing delimiters, unparseable YAML, or non-dict content).

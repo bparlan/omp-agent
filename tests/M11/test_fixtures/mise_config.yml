@@ -1,0 +1,35 @@
+mise_config_validation:
+  test_cases:
+    - name: "Valid Python config"
+      config:
+        environment:
+          runtime: "python"
+          version: "3.11.0"
+        tools:
+          - name: "python"
+            version: "3.11.0"
+          - name: "pip"
+            version: "22.0.0"
+      should_pass: true
+
+    - name: "Invalid version format"
+      config:
+        environment:
+          runtime: "python"
+          version: "invalid-version"
+      should_pass: false
+
+    - name: "Rust config with workspace"
+      config:
+        environment:
+          runtime: "rust"
+          version: "1.70.0"
+        tools:
+          - name: "rustc"
+            version: "1.70.0"
+          - name: "cargo"
+            version: "1.70.0"
+        workspace:
+          isolation: true
+          path: ".rust-env"
+      should_pass: true

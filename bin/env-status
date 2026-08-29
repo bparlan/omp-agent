@@ -1,0 +1,26 @@
+#!/bin/bash
+# Environment status CLI command - FR-1.3
+
+cd /Users/bparlan/devcode/aef/agent
+if command -v python3 >/dev/null 2>&1; then
+    python3 -c "
+import sys
+import json
+sys.path.insert(0, '/Users/bparlan/devcode/aef/agent/src')
+from env_layer.core.detector import EnvironmentDetector
+from pathlib import Path
+import argparse
+
+parser = argparse.ArgumentParser()
+parser.add_argument('--project', required=True, help='Project path')
+parser.add_argument('--runtime', help='Runtime (optional)')
+args = parser.parse_args(sys.argv[1:])
+
+detector = EnvironmentDetector(Path(args.project))
+status = detector.get_status(args.runtime)
+print(json.dumps(status, indent=2))
+" "$@"
+else
+    echo "Error: Python 3 not found" >&2
+    exit 127
+fi

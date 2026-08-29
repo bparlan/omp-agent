@@ -28,12 +28,12 @@
 for import_entry in file_data.get("imports", []):
     from_type = import_entry.get("from")
     to_import = import_entry.get("to")
-    
+
     # Extract module name using regex
     match = re.match(r'^(?:from\s+(\S+)\s+import|import\s+(\S+))', to_import)
     if match:
         module = match.group(1) or match.group(2)
-        
+
         # Create IMPORTS edge only for valid module imports
         if module:
             cypher = f"""
@@ -57,8 +57,8 @@ for import_entry in file_data.get("imports", []):
 ```python
 # Line 248-250
 graph_reachable = check_graph_reachability(
-    declared_scope, 
-    modified_files, 
+    declared_scope,
+    modified_files,
     graph_path  # NEW: Pass graph_path parameter
 )
 ```
@@ -132,12 +132,12 @@ imports:
     to: from fastapi import APIRouter
 ```
 
-**Behavior**: 
+**Behavior**:
 - Regex pattern `r'^(?:from\s+(\S+)\s+import|import\s+(\S+))'` correctly extracts `fastapi` as module name
 - IMPORTS edge is created for valid Python module imports
 - Malformed entries like `import: import json` (missing module name) are ignored
 
-**Verification**: 
+**Verification**:
 ```bash
 lbug baria.lbug "MATCH (f1)-[:IMPORTS]->(f2) RETURN f1.file2 as from, f2.file2 as to"
 # Returns: file:///Users/bparlan/devcode/BariaDAO/src/app_routes.py -> file:///Users/bparlan/devcode/BariaDAO/src/data/content_loader.py

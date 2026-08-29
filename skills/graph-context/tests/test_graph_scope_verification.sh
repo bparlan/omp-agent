@@ -26,17 +26,17 @@ run_test() {
     local scope="$2"
     local files_to_modify="$3"
     local expected_result="$4"  # "pass" or "fail"
-    
+
     TESTS_RUN=$((TESTS_RUN + 1))
     echo -e "\n${YELLOW}Test $TESTS_RUN: $test_name${NC}"
     echo "Scope: $scope"
     echo "Files: $files_to_modify"
     echo "Expected: $expected_result"
-    
+
     # Reset git state
     cd "$PROJECT_DIR"
     git reset --hard HEAD 2>/dev/null || true
-    
+
     # Create test files
     for file in $files_to_modify; do
         if [ -f "$file" ]; then

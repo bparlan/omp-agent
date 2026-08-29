@@ -1,0 +1,19 @@
+{
+  "schema_version": "1.0.0",
+  "mise_config": {
+    "environment": {
+      "runtime": "python",
+      "version": "3.11.0"
+    },
+    "tools": [
+      {
+        "name": "python",
+        "version": "3.11.0"
+      },
+      {
+        "name": "pip",
+        "version": "22.0.0"
+      }
+    ]
+  }
+}

@@ -208,7 +208,7 @@ grep -n "class RepairLoopTracker" skills/manage-development/SKILL.md
 # Verify only SKILL.md and README.md in manage-development changed
 git diff --name-only milestones/M5/M5S1.md
 
-# Expected: 
+# Expected:
 # - skills/manage-development/SKILL.md
 # - skills/manage-development/README.md
 ```

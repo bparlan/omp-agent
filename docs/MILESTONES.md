@@ -49,10 +49,11 @@ This document lists active and archived milestones for the OMP Framework project
     - `milestones/M9/M9S1E.md` — Evaluation report (to be generated)
     - `milestones/M9/M9S1R.md` — Review report (to be generated)
     - `tests/M9/` — Verification tests (to be generated)
-- ### M8 — Valid Evidence — Formalise Test Validity as a Lifecycle Concept
-  - **Status**: ✅ Successful
+- ### M8 — HealthCheck Skill Modular Refactoring
+  - **Status**: CLOSED_WITH_DEFECTS
   - **Phase**: Testing & Validation
-  - **Date**: 2026-07-27
+  - **Date**: 2026-08-27
+  - **Closure**: See `milestones/M8/M8CLOSE-1.md`
   - **Description**: Introduce a mandatory validity check between test execution and evidence interpretation in the SDD pipeline. Test exit codes alone are insufficient — we must first establish that a test failure is attributable to the intended subject before advancing the lifecycle. This is a direct architectural followup to M7's finding that "test failed" is not equivalent to "implementation missing."
   - **Key Deliverables**:
     - "Valid Evidence" concept codified in framework documentation with the core principle: "Never advance the lifecycle based solely on test exit codes"
@@ -75,6 +76,16 @@ This document lists active and archived milestones for the OMP Framework project
     - `milestones/M8/M8S1E.md` — Evaluation report (to be generated)
     - `milestones/M8/M8S1R.md` — Review report (to be generated)
     - `tests/M8/` — Meta-test scripts (to be generated)
+- ### M11 — AEF Orchestration Concurrency Controls (Proposed)
+  - **Status**: Proposed
+  - **Phase**: Planning
+  - **Description**: Hard subagent concurrency limits for management skills (manage-development, manage-roadmap). Prevents cascading failures from uncontrolled fan-out. Extends M10's pipeline contract to the execution engine.
+  - **Key Deliverables**:
+    - Max 3 concurrent subagent enforcement
+    - Skill-invocation boundary definitions
+    - Backpressure/routing when limit is hit
+  - **Artifacts**: *(to be generated)*
+
 -
 
 

@@ -1,0 +1,114 @@
+#!/usr/bin/env python3
+"""
+Bootstrap project - FR-MODE_AWARE_BOOTSTRAP
+
+Creates project structure and configuration based on mode.
+Implements contract: bootstrap-project --mode <framework|application>
+"""
+
+import os
+import sys
+import json
+import argparse
+from pathlib import Path
+
+from core.config import create_default_config, save_project_config, load_project_config
+from core.errors import ConfigurationError
+
+
+def bootstrap_framework(project_id: str, project_slug: str) -> None:
+    """Bootstrap framework mode project with AEF-specific infrastructure."""
+    print(f"Bootstrapping framework mode project: {project_slug}")
+
+    # Create .omp directory structure
+    omp_dir = Path(".omp")
+    omp_dir.mkdir(exist_ok=True)
+
+    # Create AEF-specific directories
+    (omp_dir / "skills").mkdir(exist_ok=True)
+    (omp_dir / "templates").mkdir(exist_ok=True)
+    (omp_dir / "milestones").mkdir(exist_ok=True)
+
+    # Create default configuration
+    config = create_default_config(project_id, project_slug, "framework")
+    save_project_config(config)
+
+    # Create AEF-specific documentation
+    create_aef_documentation()
+
+    print(f"Framework mode bootstrap complete for {project_slug}")
+
+
+def bootstrap_application(project_id: str, project_slug: str) -> None:
+    """Bootstrap application mode project, preserving project architecture."""
+    print(f"Bootstrapping application mode project: {project_slug}")
+
+    # Create minimal .omp directory
+    omp_dir = Path(".omp")
+    omp_dir.mkdir(exist_ok=True)
+
+    # Create default configuration
+    config = create_default_config(project_id, project_slug, "application")
+    save_project_config(config)
+
+    print(f"Application mode bootstrap complete for {project_slug}")
+
+
+def create_aef_documentation() -> None:
+    """Create AEF-specific documentation for framework mode."""
+    docs_dir = Path(".omp") / "docs"
+    docs_dir.mkdir(exist_ok=True)
+
+    # Create basic AEF documentation
+    readme = docs_dir / "README.md"
+    readme.write_text(
+        "# Agentic Engineering Framework Documentation\n\n"
+        "This project uses the AEF framework for artifact-driven development.\n"
+        "See `milestones/` for project artifacts and roadmap.\n"
+    )
+
+
+def main() -> None:
+    """Main CLI entry point for bootstrap-project."""
+    parser = argparse.ArgumentParser(
+        description="Bootstrap project structure based on mode"
+    )
+
+    parser.add_argument(
+        "--mode",
+        choices=["framework", "application"],
+        required=True,
+        help="Project mode: framework or application"
+    )
+
+    parser.add_argument(
+        "--project-id",
+        help="Project identifier (defaults to directory name)"
+    )
+
+    parser.add_argument(
+        "--project-slug",
+        help="Project slug (defaults to directory name)"
+    )
+
+    args = parser.parse_args()
+
+    # Determine project identifiers
+    project_id = args.project_id or Path.cwd().name
+    project_slug = args.project_slug or Path.cwd().name.lower().replace(" ", "-")
+
+    try:
+        if args.mode == "framework":
+            bootstrap_framework(project_id, project_slug)
+        else:
+            bootstrap_application(project_id, project_slug)
+    except ConfigurationError as e:
+        print(f"Configuration error: {e}", file=sys.stderr)
+        sys.exit(1)
+    except Exception as e:
+        print(f"Bootstrap failed: {e}", file=sys.stderr)
+        sys.exit(1)
+
+
+if __name__ == "__main__":
+    main()

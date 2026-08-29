@@ -1,11 +1,7 @@
 ---
 name: session-audit
 version: 1.3.2
-description:
-  Capture any session (milestone, hotfix, manual edits, external reports) into
-  Session Audit Reports (M{X}SA{Y}.md) that drive documentation updates,
-  skill evolution, and quality monitoring. Use when the user says
-  "session-audit", "document this session", "capture this session".
+description: Capture any session (milestone, hotfix, manual edits, external reports) into Session Audit Reports (M{X}SA{Y}.md) that drive documentation updates, skill evolution, and quality monitoring. Use when the user says "session-audit", "document this session", "capture this session".
 tools: code-search, read, ask, write, edit, askuserquestion, bash
 user-invocable: true
 ---
@@ -16,10 +12,7 @@ user-invocable: true
 
 ### 1. Milestone Session
 
-**Trigger**: User mentions milestone (M1, M2, etc.) or milestone > development
-         - [Date] **Topic:** {topic} | **Issue:** {issue} | **Suggested Fix:** {fix}
-         - Analyze the relevant `SKILL.md` file
-         - Apply prompt fixes or new Out of Scope guardrails
+**Trigger**: User mentions milestone (M1, M2, etc.) or milestone > development - [Date] **Topic:** {topic} | **Issue:** {issue} | **Suggested Fix:** {fix} - Analyze the relevant `SKILL.md` file - Apply prompt fixes or new Out of Scope guardrails
 
 ## Out of Scope (Negative Guardrails)
 
@@ -75,14 +68,13 @@ user-invocable: true
 
 Auto-detect external report patterns and ask user for clarification:
 
-   - "Detected external report pattern in [file]. Summary: [summary]. Is this a new Session Audit (create M{X}SA{Y}.md)?"
+- "Detected external report pattern in [file]. Summary: [summary]. Is this a new Session Audit (create M{X}SA{Y}.md)?"
 
 **Note**: Do NOT auto-create Session Audit from external reports. Wait for user to explicitly call `session-audit`.
 
 ## Automatic Workflow After Session Audit
 
 After generating M{X}SA{Y}.md, automatically trigger:
-
 
 Each step shows changes clearly before applying.
 

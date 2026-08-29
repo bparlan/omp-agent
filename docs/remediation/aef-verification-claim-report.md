@@ -1,0 +1,15 @@
+# AEF Verification — Confirm Claims Before Acting
+
+Verification of claims made in the original document.
+
+| # | Claim | Verdict | Evidence |
+|---|-------|---------|----------|
+| 1 | `LEGACY_BOUNDARIES_DEFAULTS` constant exists in the metadata validator script and contains the list `["m1","m2","m3","m4","m5","m6","m7","m8","m9"]`. | **CONFIRMED** | `bin/validate_metadata.py` lines 11‑12:<br>`LEGACY_BOUNDARIES_DEFAULTS = ["m1", "m2", "m3", "m4", "m5", "m6", "m7", "m8", "m9"]` |
+| 2 | `omp-sanitize-tests-v3.py` file exists (implying a “v3” version). | **DOES NOT EXIST** | `glob` of `bin/` shows only `omp-sanitize-tests.py`; a search for `omp‑sanitize‑tests‑v3.py` returned “Path not found”. |
+| 3 | `evolve‑skills` is a real, registered skill with a `SKILL.md`. | **CONFIRMED** | `skills/evolve-skills/SKILL.md` present (front‑matter shows name `evolve‑skills`). |
+| 4 | `skills-auditor.py` exists and can be run (`python3 skills-auditor.py audit`). | **CONFIRMED** | Running `python3 skills/evolve-skills/skills-auditor.py audit` produced console output listing audits of all 15 skills. No error. |
+| 5 | `bin/omp-verify-gateway` exists, is executable, and runs. | **CONFIRMED** | Executed `./bin/omp-verify-gateway` – output:<br>`Gateway reachable at http://localhost:3001`<br>`Models available …`<br>`PRESENT: 'auto' model found in model list.` |
+| 6 | The gateway verifier checks for a **401 Unauthorized** token failure (i.e. invalid API key) rather than merely the presence of a token. | **CONTRADICTED** | `omp-verify-gateway` only checks for missing API keys (`check_env_warning`) and then attempts to fetch the model list. It does **not** explicitly detect a 401 response; it treats any fetch failure as “UNREACHABLE” or “UNEXPECTED_ERROR”. |
+| 7 | `manage‑development`’s current state machine has **12 stages**, with `close‑milestone` at stage 10 and `sync‑documentation` at stage 11 (as claimed in the SKILL.md). | **CONFIRMED** (relative to SKILL.md) | `skills/manage-development/SKILL.md` (lines 14‑62) lists a “12‑stage sequential workflow”. The diagram shows `close‑milestone → Stage 10` and `sync‑documentation → Stage 11`. `report_pipeline_C.md` documents an older **11‑stage** design (close‑milestone at stage 9, sync‑doc at 10). The repository now contains the updated 12‑stage version. |
+| 8 | A bug where the YAML safe‑loader crashes (due to unsafe loading) ever occurred and was fixed by quoting flow sequences in `test‑evaluation_template.md`. | **COULD NOT VERIFY** | No occurrences of “safe‑loader”, “yaml.safe_load” errors, or references to a crash were found via `grep`. No log, issue, or commit mentions the bug or the quoted‑flow‑sequence fix. |
+| 9 | `LEGACY_BOUNDARIES_DEFAULTS` is actually **wired into** the validator’s bulk‑checkup path (Option A), not merely a proposed‑but‑unimplemented option. | **CONFIRMED** | In `bin/validate_metadata.py`, the constant is used in `get_active_milestone_id()` (line 38) to determine if a scanned milestone directory matches a legacy boundary. This indicates it is active code, not a placeholder. |

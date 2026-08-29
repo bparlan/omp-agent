@@ -1,0 +1,306 @@
+{
+  "metadata": {
+    "version": "1.0.0",
+    "last_updated": "2026-08-29T08:30:00Z",
+    "description": "Central ledger of all AEF skills with metadata and validation rules"
+  },
+  "skills": {
+    "approve-spec": {
+      "name": "approve-spec",
+      "description": "Approve specification changes and milestone deliverables",
+      "version": "1.0.0-stable",
+      "status": "healthy",
+      "last_modified": "1970-01-01T00:00:00Z",
+      "version_validation": {
+        "min_confidence": 0.8,
+        "stable_suffix_required": true
+      }
+    },
+    "archive-docs": {
+      "name": "archive-docs",
+      "description": "Archive completed milestone artifacts and infrastructure reports",
+      "version": "1.3.0-stable",
+      "status": "healthy",
+      "last_modified": "1970-01-01T00:00:00Z",
+      "version_validation": {
+        "min_confidence": 0.8,
+        "stable_suffix_required": true
+      }
+    },
+    "bootstrap-project": {
+      "name": "bootstrap-project",
+      "description": "Initial project setup and configuration",
+      "version": "1.0.2-stable",
+      "status": "healthy",
+      "last_modified": "2026-08-26T19:38:00Z",
+      "version_validation": {
+        "min_confidence": 0.8,
+        "stable_suffix_required": true
+      }
+    },
+    "close-milestone": {
+      "name": "close-milestone",
+      "description": "Terminal gate that validates loop-closure at milestone level only after all specs in the milestone have been individually closed by close-spec. Mechanically re-validates all milestone artifacts and produces a single authoritative lineage-traced closure artifact for the milestone.",
+      "version": "1.1.0-stable",
+      "status": "healthy",
+      "last_modified": "2026-08-29T08:30:00Z",
+      "version_validation": {
+        "min_confidence": 0.8,
+        "stable_suffix_required": true
+      }
+    },
+    "code-search": {
+      "name": "code-search",
+      "description": "Search and analyze codebase for patterns and patterns",
+      "version": "1.0.0",
+      "status": "healthy",
+      "last_modified": "1970-01-01T00:00:00Z",
+      "version_validation": {
+        "min_confidence": 0.8,
+        "stable_suffix_required": false
+      }
+    },
+    "diagrammer": {
+      "name": "diagrammer",
+      "description": "Generate visual diagrams and architecture maps",
+      "version": "3.0.0-stable",
+      "status": "healthy",
+      "last_modified": "2026-08-26T19:38:00Z",
+      "version_validation": {
+        "min_confidence": 0.8,
+        "stable_suffix_required": true
+      }
+    },
+    "evaluate-implementation": {
+      "name": "evaluate-implementation",
+      "description": "Evaluate implementation quality and test coverage",
+      "version": "1.2.0-stable",
+      "status": "healthy",
+      "last_modified": "2026-08-26T19:38:00Z",
+      "version_validation": {
+        "min_confidence": 0.8,
+        "stable_suffix_required": true
+      }
+    },
+    "evaluate-tests": {
+      "name": "evaluate-tests",
+      "description": "Validate test quality and coverage analysis",
+      "version": "1.2.0",
+      "status": "healthy",
+      "last_modified": "1970-01-01T00:00:00Z",
+      "version_validation": {
+        "min_confidence": 0.8,
+        "stable_suffix_required": false
+      }
+    },
+    "evolve-skills": {
+      "name": "evolve-skills",
+      "description": "Evolution agent that analyzes artifacts and recommends skill improvements",
+      "version": "1.3.1-stable",
+      "status": "healthy",
+      "last_modified": "2026-08-26T20:25:00Z",
+      "version_validation": {
+        "min_confidence": 0.8,
+        "stable_suffix_required": true
+      }
+    },
+    "generate-spec": {
+      "name": "generate-spec",
+      "description": "Transform an approved milestone document into a detailed implementation specification",
+      "version": "2.0.0-stable",
+      "status": "healthy",
+      "last_modified": "2026-08-26T19:38:00Z",
+      "version_validation": {
+        "min_confidence": 0.8,
+        "stable_suffix_required": true
+      }
+    },
+    "generate-tests": {
+      "name": "generate-tests",
+      "description": "Generate comprehensive test plans from specifications",
+      "version": "3.7.0-stable",
+      "status": "healthy",
+      "last_modified": "2026-08-26T19:38:00Z",
+      "version_validation": {
+        "min_confidence": 0.8,
+        "stable_suffix_required": true
+      }
+    },
+    "generate-verification": {
+      "name": "generate-verification",
+      "description": "Generate verification protocols and test oracles",
+      "version": "2.5.0-stable",
+      "status": "healthy",
+      "last_modified": "2026-08-26T19:38:00Z",
+      "version_validation": {
+        "min_confidence": 0.8,
+        "stable_suffix_required": true
+      }
+    },
+    "graph-context": {
+      "name": "graph-context",
+      "description": "Graph context relationships and dependencies",
+      "version": "1.0.0",
+      "status": "healthy",
+      "last_modified": "1970-01-01T00:00:00Z",
+      "version_validation": {
+        "min_confidence": 0.8,
+        "stable_suffix_required": false
+      }
+    },
+    "healthcheck": {
+      "name": "healthcheck",
+      "description": "Comprehensive skill health checking and -stable suffix management for AEF-OMP skills",
+      "version": "1.0.0-stable",
+      "status": "healthy",
+      "last_modified": "2026-08-26T20:56:52Z",
+      "version_validation": {
+        "min_confidence": 0.8,
+        "stable_suffix_required": true
+      }
+    },
+    "hotfix-focus": {
+      "name": "hotfix-focus",
+      "description": "Focus on critical bug fixes and urgent issues",
+      "version": "1.0.0",
+      "status": "healthy",
+      "last_modified": "1970-01-01T00:00:00Z",
+      "version_validation": {
+        "min_confidence": 0.8,
+        "stable_suffix_required": false
+      }
+    },
+    "hotfix-issue": {
+      "name": "hotfix-issue",
+      "description": "Handle urgent issue resolution and emergency fixes",
+      "version": "1.1.0-stable",
+      "status": "healthy",
+      "last_modified": "2026-08-26T19:38:00Z",
+      "version_validation": {
+        "min_confidence": 0.8,
+        "stable_suffix_required": true
+      }
+    },
+    "implement-specification": {
+      "name": "implement-specification",
+      "description": "Implement approved specifications and designs",
+      "version": "1.3.0-stable",
+      "status": "healthy",
+      "last_modified": "2026-08-26T19:38:00Z",
+      "version_validation": {
+        "min_confidence": 0.8,
+        "stable_suffix_required": true
+      }
+    },
+    "investigate-issue": {
+      "name": "investigate-issue",
+      "description": "Investigate complex issues and root causes",
+      "version": "2.0.0-stable",
+      "status": "healthy",
+      "last_modified": "2026-08-26T19:38:00Z",
+      "version_validation": {
+        "min_confidence": 0.8,
+        "stable_suffix_required": true
+      }
+    },
+    "manage-development": {
+      "name": "manage-development",
+      "description": "Tactical Engineering Manager that orchestrates the Spec-Driven Development (SDD) pipeline for an active milestone. Proactively walks spec sequences, performs team-meet consolidation between phases, asks the user only when needed, raises critical issues, and runs the full route from earliest unfinished spec through closure. Integrates evaluate-tests (Phase 1 pre-implementation baseline), evaluate-implementation (Phase 2 optimizer), close-spec (spec closure), and close-milestone (milestone closure).",
+      "version": "2.4.0-stable",
+      "status": "healthy",
+      "last_modified": "2026-08-29T08:30:00Z",
+      "version_validation": {
+        "min_confidence": 0.8,
+        "stable_suffix_required": true
+      }
+    },
+    "manage-roadmap": {
+      "name": "manage-roadmap",
+      "description": "Manage project roadmaps and strategic planning",
+      "version": "2.0.0-stable",
+      "status": "healthy",
+      "last_modified": "2026-08-26T20:25:00Z",
+      "version_validation": {
+        "min_confidence": 0.8,
+        "stable_suffix_required": true
+      }
+    },
+    "milestone": {
+      "name": "milestone",
+      "description": "Manage milestone completion and delivery",
+      "version": "1.0.0",
+      "status": "healthy",
+      "last_modified": "1970-01-01T00:00:00Z",
+      "version_validation": {
+        "min_confidence": 0.8,
+        "stable_suffix_required": false
+      }
+    },
+    "milestone-focus": {
+      "name": "milestone-focus",
+      "description": "Focus on specific milestone requirements and delivery",
+      "version": "1.0.0",
+      "status": "healthy",
+      "last_modified": "1970-01-01T00:00:00Z",
+      "version_validation": {
+        "min_confidence": 0.8,
+        "stable_suffix_required": false
+      }
+    },
+    "milestoner": {
+      "name": "milestoner",
+      "description": "Advanced milestone management and tracking",
+      "version": "1.0.0",
+      "status": "healthy",
+      "last_modified": "1970-01-01T00:00:00Z",
+      "version_validation": {
+        "min_confidence": 0.8,
+        "stable_suffix_required": false
+      }
+    },
+    "review-implementation": {
+      "name": "review-implementation",
+      "description": "Review implementation quality and adherence to specifications",
+      "version": "1.2.0-stable",
+      "status": "healthy",
+      "last_modified": "2026-08-26T19:38:00Z",
+      "version_validation": {
+        "min_confidence": 0.8,
+        "stable_suffix_required": true
+      }
+    },
+    "session-audit": {
+      "name": "session-audit",
+      "description": "Audit and analyze development sessions and changes",
+      "version": "1.3.2-stable",
+      "status": "healthy",
+      "last_modified": "2026-08-26T19:38:00Z",
+      "version_validation": {
+        "min_confidence": 0.8,
+        "stable_suffix_required": true
+      }
+    },
+    "sync-documentation": {
+      "name": "sync-documentation",
+      "description": "Synchronize documentation across all project components",
+      "version": "1.3.1-stable",
+      "status": "healthy",
+      "last_modified": "2026-08-26T20:25:00Z",
+      "version_validation": {
+        "min_confidence": 0.8,
+        "stable_suffix_required": true
+      }
+    },
+    "close-spec": {
+      "name": "close-spec",
+      "description": "Terminal gate that validates loop-closure for a single spec sequence, mechanically re-validates all spec artifacts, and produces a single authoritative lineage-traced closure artifact for the spec. Invoked after review-implementation.",
+      "version": "1.0.0-stable",
+      "status": "healthy",
+      "last_modified": "2026-08-29T08:30:00Z",
+      "version_validation": {
+        "min_confidence": 0.8,
+        "stable_suffix_required": true
+      }
+    }
+  }
+}
