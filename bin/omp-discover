@@ -152,4 +152,3 @@ echo "" # Newline after JSON output
 
 exit $SUCCESS_EXIT_CODE
 exit $SUCCESS_EXIT_CODE
-

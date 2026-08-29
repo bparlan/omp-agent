@@ -13,7 +13,7 @@ All 36 skills are documented in detail in `docs/SKILLS.md`.
 **Strategic Layer (3 agents)**:
 - manage-roadmap — Align ROADMAP.md with goals, generate milestones
 - manage-development — Orchestrate SDD pipeline, report cycles
-- milestone — Elicit requirements, create M{X}.md
+- milestoner — Elicit requirements, create M{X}.md
 
 **Core Development (8 agents)** :
 *  generate-spec — Milestone → detailed specification (M{X}S{Y}.md)
@@ -40,7 +40,7 @@ All 36 skills are documented in detail in `docs/SKILLS.md`.
 The framework orchestrates agent interactions through a well-defined pipeline:
 
 ```
-User → milestone → generate-spec → implement-specification → generate-verification → generate-tests → evaluate-implementation → review-implementation
+User → milestoner → generate-spec → implement-specification → generate-verification → generate-tests → evaluate-implementation → review-implementation
 ```
 
 Each agent handoffs to the next, maintaining clear boundaries and avoiding redundant work.

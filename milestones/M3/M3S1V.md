@@ -356,7 +356,7 @@
 
 #### Graph Schema Validation
 
-**Command:** 
+**Command:**
 ```bash
 mkdir -p /tmp/test-ladybug/.omp
 cd /tmp/test-ladybug

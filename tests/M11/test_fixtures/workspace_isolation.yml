@@ -1,0 +1,18 @@
+# test_fixtures/workspace_isolation.yml
+workspace_isolation:
+  test_cases:
+    - name: "Python workspace isolation"
+      project: "python_iso_project"
+      runtime: "python"
+      isolation_mode: "complete"
+      expected_separation: true
+      cross_contamination_check: true
+      should_pass: true
+
+    - name: "Node.js workspace isolation"
+      project: "node_iso_project"
+      runtime: "node"
+      isolation_mode: "complete"
+      expected_separation: true
+      cross_contamination_check: true
+      should_pass: true

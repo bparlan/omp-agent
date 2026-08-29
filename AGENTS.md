@@ -72,7 +72,7 @@ Reports claiming defects (tool, framework, environment, execution, runtime, file
 | Layer         | Agent / Skill             | Primary Mandate                                          | Core Artifact                       | Next Handoff Target       |
 | :------------ | :------------------------ | :------------------------------------------------------- | :---------------------------------- | :------------------------ |
 | **Strategic** | `manage-roadmap`          | Align roadmap; handle ingestion folders with permission. | `ROADMAP.md`, `M{X}.md`             | `manage-development`      |
-| **Strategic** | `milestone`               | Elicit requirements interactively; define scope.         | `milestones/M{X}/M{X}.md`           | `generate-spec`           |
+*75:| **Strategic** | `milestoner`               | Elicit requirements interactively; define scope.         | `milestones/M{X}/M{X}.md`           | `generate-spec`           |
 | **Tactical**  | `manage-development`      | Orchestrate SDD pipeline; track state and repair limits. | `milestones/M{X}/M{X}C.md`          | Sequence-dependent        |
 | **Core Dev**  | `generate-spec`           | Translate milestones into concrete Interface Contracts.  | `milestones/M{X}/M{X}S{Y}.md`       | `generate-verification`   |
 | **Core Dev**  | `generate-verification`   | Translate specifications into testable assertions.       | `milestones/M{X}/M{X}S{Y}V.md`      | `generate-tests`          |

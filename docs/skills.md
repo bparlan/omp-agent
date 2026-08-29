@@ -64,18 +64,17 @@ User (via milestone) → manage-roadmap → milestone → generate-spec → ...
 
 ### manage-development
 
-**Purpose**: Tactical Engineering Manager orchestrating the Spec-Driven Development pipeline with cycle reporting and roadmap integration.
+**Purpose**: Tactical Engineering Manager that orchestrates the Spec-Driven Development (SDD) pipeline for an active milestone. Proactively walks spec sequences, performs team-meet consolidation between phases, asks the user only when needed, raises critical issues, and runs the full route from earliest unfinished spec through closure. Integrates evaluate-tests (Phase 1 pre-implementation baseline), evaluate-implementation (Phase 2 optimizer), close-spec (spec closure), and close-milestone (milestone closure).
 
 **Key Responsibilities**:
-- Monitor SDD pipeline progress
-- Ensure each phase completes before handoff
-- Report cycle status and issues
-- Coordinate between milestone planning and execution
-- Generate cycle reports
-- Integrate with manage-roadmap
+- Enforce strict sequential SDD workflow with quality gates
+- Walk spec sequences in `M{X}.md` and advance each through implementation, evaluation, review, and spec closure
+- Perform team-meet consolidation before phase transitions
+- Route failures to `hotfix-issue`, `investigate-issue`, or user escalation
+- Validate loop-closure and milestone completeness before closure
 
 **Artifacts Generated**:
-- None (pure orchestrator)
+- None directly; orchestrates generation of spec/test/implementation/evaluation/review/closure artifacts
 
 **Out of Scope**:
 - Writing specifications
@@ -85,10 +84,39 @@ User (via milestone) → manage-roadmap → milestone → generate-spec → ...
 
 **Interaction Flow**:
 ```
-manage-roadmap → milestone → generate-spec → implement-specification → generate-verification → generate-tests → evaluate-implementation → review-implementation → manage-development → ...
+manage-development → generate-spec → generate-verification → generate-tests → evaluate-tests → approve-spec → implement-specification → evaluate-implementation → review-implementation → close-spec → close-milestone → sync-documentation
 ```
 
 **Location**: `skills/manage-development/SKILL.md`
+
+---
+
+### close-spec
+
+**Purpose**: Terminal gate for a single spec sequence. Validates loop-closure, re-validates spec artifacts, and produces `M{X}S{Y}CLOSE-{N}.md`.
+
+**Key Responsibilities**:
+- Verify investigation/hotfix reports for this spec were re-evaluated and re-reviewed if any fixes occurred
+- Run lint-evaluation-gate, duplicate-ID/schema check, and artifact completeness check scoped to `M{X}S{Y}*.md`
+- Produce closure artifact with lineage DAG and status assertion (`CLOSED` | `CLOSED_WITH_DEFECTS` | `REFUSED`)
+- Hand off to next spec, documentation sync, or custom action
+
+**Artifacts Generated**:
+- `milestones/M{X}/M{X}S{Y}CLOSE-{N}.md` — Spec closure report
+
+**Out of Scope**:
+- Updating milestone-level status
+- Closing the whole milestone when some specs remain open
+- Archiving artifacts
+
+**Interaction Flow**:
+```
+review-implementation → close-spec → next spec / close-milestone
+```
+
+**Location**: `skills/close-spec/SKILL.md`
+
+---
 
 ---
 

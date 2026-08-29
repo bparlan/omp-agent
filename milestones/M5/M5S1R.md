@@ -254,7 +254,7 @@ class RepairLoopTracker:        # ← Python syntax in bash file
         self.counter = 0
 ```
 
-**Impact**: 
+**Impact**:
 - Cannot verify FR-1 through FR-8 implementation correctness
 - Cannot verify NFR-1 through NFR-7
 - Cannot confirm no regression in M4 test suite
@@ -265,12 +265,12 @@ class RepairLoopTracker:        # ← Python syntax in bash file
    - Rewrite all 16 test scripts to use bash functions (`test_A()`, `test_B()`)
    - Use `setup()` and `main()` pattern
    - Replace Python class with bash functions or mock objects
-   
+
 2. **Option B**: Convert M5 test scripts to Python files (`.py` extension)
    - Rename all test scripts to `.py` extension
    - Replace bash-specific commands with Python equivalents
    - Use pytest framework
-   
+
 3. **Option C**: Use a different testing framework
    - Keep bash scripts but use proper bash syntax
    - Consider `bats-core` for bash testing
@@ -469,7 +469,7 @@ head -20 tests/M4/test_orchestration_validation.sh
 ```bash
 # Verify only SKILL.md and README.md changed
 git diff --name-only milestones/M5/M5S1.md
-# Expected: 
+# Expected:
 # - skills/manage-development/SKILL.md
 # - skills/manage-development/README.md
 # Conclusion: Scope compliance verified (PASS)

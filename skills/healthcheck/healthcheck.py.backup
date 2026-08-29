@@ -1,0 +1,238 @@
+#!/usr/bin/env python3
+"""
+Simple AEF-OMP Skill Health Checker
+
+Validates SKILL.md files and checks for -stable suffix in versions.
+"""
+
+import json
+import re
+import os
+import sys
+from pathlib import Path
+from datetime import datetime
+
+# Skills directory - project-agnostic discovery
+def discover_skills_directory() -> Path:
+    """Find skills directory using multiple strategies"""
+    script_dir = Path(__file__).parent.absolute()
+
+    # Strategy 1: Look for skills directory in parent of script
+    possible_paths = [
+        script_dir.parent,  # /Users/bparlan/devcode/aef/agent/skills
+    ]
+
+    # Strategy 2: Check environment variable
+    omp_project_root = os.environ.get("OMP_PROJECT_ROOT")
+    if omp_project_root:
+        possible_paths.append(Path(omp_project_root))
+
+    # Strategy 3: Look for skills-ledger.json upward
+    for parent in script_dir.parents:
+        ledger_path = parent / "skills-ledger.json"
+        if ledger_path.exists():
+            return parent
+
+    # Fallback to current working directory
+    cwd = Path.cwd()
+    if (cwd / "skills-ledger.json").exists():
+        return cwd
+
+    # Absolute fallback - check if skills directory exists with skills-ledger.json
+    for path in possible_paths:
+        if (path / "skills-ledger.json").exists():
+            return path
+
+    # Default fallback
+    return script_dir
+
+SKILLS_DIR = discover_skills_directory()
+print(f"Skills directory: {SKILLS_DIR}", file=sys.stderr)
+
+def validate_skill_file(skill_path: Path) -> dict:
+    """Validate a single skill SKILL.md file"""
+    try:
+        content = skill_path.read_text()
+
+        # Check for required fields
+        required_fields = [
+            ("name:", "name field"),
+            ("version:", "version field"),
+            ("description:", "description field"),
+            ("tools:", "tools field"),
+            ("userInvocable:", "userInvocable field"),
+        ]
+
+        issues = []
+        validation_score = 0.0
+        total_checks = len(required_fields)
+
+        for field, field_name in required_fields:
+            if field in content.lower():
+                validation_score += 1.0
+            else:
+                issues.append(f"Missing {field_name}")
+
+        validation_score = validation_score / total_checks
+
+        # Check for -stable suffix in version
+        version_match = re.search(r'version:\s*([^\n]+)', content, re.IGNORECASE)
+        has_stable_suffix = "-stable" in content.lower()
+
+        # Extract skill name
+        name_match = re.search(r'name:\s*([^\n]+)', content, re.IGNORECASE)
+        skill_name = name_match.group(1).strip() if name_match else skill_path.parent.name
+
+        return {
+            "name": skill_name,
+            "status": "healthy" if validation_score >= 0.8 else "needs_review",
+            "validation_score": validation_score,
+            "has_stable_suffix": has_stable_suffix,
+            "issues": issues,
+            "last_modified": datetime.fromtimestamp(skill_path.stat().st_mtime).isoformat(),
+            "last_checked": datetime.now().isoformat(),
+        }
+
+    except Exception as e:
+        return {
+            "name": skill_path.parent.name,
+            "status": "error",
+            "validation_score": 0.0,
+            "has_stable_suffix": False,
+            "issues": [f"Error reading file: {str(e)}"],
+            "last_modified": datetime.now().isoformat(),
+            "last_checked": datetime.now().isoformat(),
+        }
+def discover_skills():
+    """Discover all skill directories"""
+    skills = []
+    if not SKILLS_DIR.exists():
+        print(f"Skills directory does not exist: {SKILLS_DIR}", file=sys.stderr)
+        return skills
+
+    for skill_dir in SKILLS_DIR.iterdir():
+        if skill_dir.is_dir():
+            skill_file = skill_dir / "SKILL.md"
+            if skill_file.exists():
+                skills.append(skill_file)
+    return skills
+def run_health_check():
+    """Run complete health check"""
+    print("=== AEF-OMP Skill Health Checker ===\n")
+
+    skills = discover_skills()
+
+    if not skills:
+        print(f"No skills found in {SKILLS_DIR}")
+        return []
+
+    print(f"Found {len(skills)} skills to check\n")
+
+    results = []
+    for skill_file in skills:
+        print(f"Checking {skill_file.parent.name}...", end=" ")
+        result = validate_skill_file(skill_file)
+        print(f"{result['status']} (score: {result['validation_score']:.2f})")
+        results.append(result)
+
+    # Generate reports
+    print("\n=== Health Check Reports ===")
+
+    # Generate badges
+    generate_badges(results)
+
+    # Generate health report
+    generate_health_report(results)
+
+    # Generate processed skills report
+    generate_processed_skills(results)
+
+    # Print summary
+    total = len(results)
+    healthy = len([r for r in results if r['status'] == 'healthy'])
+    needs_review = len([r for r in results if r['status'] == 'needs_review'])
+    errors = len([r for r in results if r['status'] == 'error'])
+
+    print(f"\n=== SUMMARY ===")
+    print(f"Total skills checked: {total}")
+    print(f"Healthy skills: {healthy} ({healthy/total*100:.1f}%)")
+    print(f"Skills needing review: {needs_review} ({needs_review/total*100:.1f}%)")
+    print(f"Skills with errors: {errors} ({errors/total*100:.1f}%)")
+
+    stable_ready = len([r for r in results if r['status'] == 'healthy' and r['has_stable_suffix']])
+    if stable_ready > 0:
+        print(f"\n=== SKILLS READY FOR -STABLE DESIGNATION ===")
+        print(f"{stable_ready} skills have -stable suffix")
+        stable_skills = [r for r in results if r['status'] == 'healthy' and r['has_stable_suffix']]
+        for skill in sorted([s['name'] for s in stable_skills]):
+            print(f"  - {skill}")
+
+    return results
+def generate_badges(results):
+    """Generate health badges markdown file"""
+    badges_file = SKILLS_DIR / "health_badges.md"
+
+    content = f"""# Skill Health Check Badges
+
+This file provides a quick overview of skill health status.
+Generated on: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}
+
+## Skill Health Summary
+
+| Skill Name | Status | Last Checked | Validation Score | Has Stable Suffix |
+|------------|--------|---------------|------------------|-------------------|
+"""
+
+    for result in sorted(results, key=lambda x: x['name']):
+        status_emoji = {
+            "healthy": "✅",
+            "needs_review": "⚠️",
+            "blocked": "❌",
+            "error": "🔴",
+            "skipped": "⏭️"
+        }.get(result['status'], "❓")
+
+        content += f"| {result['name']} | {status_emoji} {result['status']} | {result['last_checked']} | {result['validation_score']:.2f} | {'✅' if result['has_stable_suffix'] else '❌'} |\n"
+
+    badges_file.write_text(content)
+    print(f"Generated: {badges_file.name}")
+    print(f"  Lines: {len(content.splitlines())}")
+def generate_health_report(results):
+    """Generate health report JSON file"""
+    health_report = {
+        "timestamp": datetime.now().isoformat(),
+        "total_skills": len(results),
+        "healthy_count": len([r for r in results if r['status'] == 'healthy']),
+        "needs_review_count": len([r for r in results if r['status'] == 'needs_review']),
+        "error_count": len([r for r in results if r['status'] == 'error']),
+        "skipped_count": len([r for r in results if r['status'] == 'skipped']),
+        "skills": results,
+    }
+
+    health_report_file = SKILLS_DIR / "health_check_report.json"
+    with open(health_report_file, 'w') as f:
+        json.dump(health_report, f, indent=2)
+
+    print(f"Generated: {health_report_file.name}")
+    print(f"  Skills: {health_report['healthy_count']} healthy, {health_report['needs_review_count']} needs review, {health_report['error_count']} errors")
+def generate_processed_skills(results):
+    """Generate processed skills JSON file"""
+    processed_skills = {result['name']: result for result in results}
+
+    processed_file = SKILLS_DIR / "processed_skills.json"
+    with open(processed_file, 'w') as f:
+        json.dump(processed_skills, f, indent=2)
+
+    print(f"Generated: {processed_file.name}")
+    print(f"  Skills: {len(processed_skills)}")
+def main():
+    """Main entry point"""
+    try:
+        run_health_check()
+    except Exception as e:
+        print(f"Error: {e}")
+        return 1
+
+    return 0
+if __name__ == "__main__":
+    exit(main())

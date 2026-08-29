@@ -1,20 +1,31 @@
 #!/usr/bin/env python3
 import sys
 import os
-import subprocess
+_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+if _root not in sys.path:
+    sys.path.insert(0, _root)
+from core.validation import validate_metadata
 
 def main():
-    script_dir = os.path.dirname(os.path.abspath(__file__))
-    # Resolves validate_metadata.py in the same directory (bin/)
-    binary_path = os.path.join(script_dir, 'validate_metadata.py')
-    
-    # If not found in the same directory, search project root
-    if not os.path.exists(binary_path):
-        binary_path = os.path.join(os.path.dirname(script_dir), 'validate_metadata.py')
-        
-    cmd = [sys.executable, binary_path] + sys.argv[1:]
-    result = subprocess.run(cmd)
-    sys.exit(result.returncode)
+    if len(sys.argv) < 2:
+        print("Usage: bin/omp-verify-metadata <artifact_path> [schema]")
+        sys.exit(1)
+
+    artifact_path = sys.argv[1]
+    schema = sys.argv[2] if len(sys.argv) > 2 else None
+
+    result = validate_metadata(artifact_path, schema)
+
+    if result.get('valid'):
+        print(f"✓ {artifact_path}: Valid")
+        sys.exit(0)
+    else:
+        print(f"✗ {artifact_path}: Invalid")
+        for error in result.get('errors', []):
+            print(f"  Error: {error}")
+        for field in result.get('missing_fields', []):
+            print(f"  Missing: {field}")
+        sys.exit(1)
 
 if __name__ == '__main__':
     main()

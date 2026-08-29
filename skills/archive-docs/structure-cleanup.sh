@@ -65,9 +65,9 @@ scan_files() {
     fi
 
     # Scan for build artifacts
-    
-    
-    
+
+
+
 
     if [ "$pycache_count" -gt 0 ] || [ "$pyc_count" -gt 0 ] || [ "$pyo_count" -gt 0 ]; then
         print_warn "Found build artifacts:"

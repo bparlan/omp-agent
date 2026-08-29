@@ -4,7 +4,7 @@ Verification complete. Here is the consolidation report.
 
 ## Semantic Consolidation Report
 
-**Final line count:** 145  
+**Final line count:** 145
 **Final character count:** 10,749
 
 ### Rules Removed

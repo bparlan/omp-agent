@@ -1,0 +1,155 @@
+#!/usr/bin/env python3
+"""Workspace activation command for AEF Environment Layer"""
+import sys
+import json
+import subprocess
+import os
+from pathlib import Path
+import argparse
+import time
+
+def workspace_activate(project_path, runtime):
+    """Activate workspace isolation"""
+
+    print(f"Activating workspace isolation")
+    print(f"Project: {project_path}")
+    print(f"Runtime: {runtime}")
+    print("=" * 50)
+
+    # Convert to absolute path
+    project_path = os.path.abspath(project_path)
+    project_dir = Path(project_path)
+
+    if not project_dir.exists():
+        print(f"ERROR: Project directory does not exist: {project_path}")
+        return False
+
+    # Check if workspace already exists
+    workspace_pattern = project_dir / ".aef-env" / "*" / runtime
+    possible_workspaces = list(workspace_pattern.parent.glob("*"))
+
+    workspace_dir = None
+    if possible_workspaces:
+        workspace_dir = possible_workspaces[0]
+        print(f"✓ Found existing workspace: {workspace_dir}")
+    else:
+        # Create workspace if it doesn't exist
+        workspace_dir = project_dir / ".aef-env" / f"proj_{project_dir.name}" / runtime
+        workspace_dir.mkdir(parents=True, exist_ok=True)
+
+        # Create workspace configuration
+        workspace_config = {
+            "name": f"proj_{project_dir.name}",
+            "runtime": runtime,
+            "project": project_path,
+            "created_at": time.time(),
+            "status": "active",
+            "isolation": {
+                "mode": "workspace_per_project",
+                "shared_base": "mise_global_cache",
+                "cross_contamination_prevention": True,
+                "workspace_prefix": ".aef-env"
+            }
+        }
+
+        # Write workspace configuration
+        config_file = workspace_dir / "workspace.json"
+        with open(config_file, 'w') as f:
+            json.dump(workspace_config, f, indent=2)
+
+        # Create runtime markers
+        markers = {
+            "runtime.txt": runtime,
+            "project.txt": project_path,
+            "status.txt": "active",
+            "created.txt": str(time.time())
+        }
+
+        for filename, content in markers.items():
+            (workspace_dir / filename).write_text(content)
+
+        print(f"✓ Created new workspace: {workspace_dir}")
+
+    # Create activation file
+    activation_file = project_dir / f".env_activated_{runtime}.txt"
+    activation_data = {
+        "workspace_name": workspace_dir.name,
+        "workspace_path": str(workspace_dir),
+        "runtime": runtime,
+        "project_path": project_path,
+        "activated_at": time.time(),
+        "status": "active"
+    }
+
+    with open(activation_file, 'w') as f:
+        for key, value in activation_data.items():
+            f.write(f"{key}={value}\n")
+
+    # Set environment variables
+    os.environ["AEF_RUNTIME"] = runtime
+    os.environ["AEF_WORKSPACE"] = str(workspace_dir)
+    os.environ["AEF_PROJECT"] = project_path
+    os.environ["AEF_ISOLATION"] = "true"
+
+    # Try to activate mise environment
+    try:
+        result = subprocess.run(
+            ["mise", "env", "use", runtime, str(workspace_dir)],
+            capture_output=True,
+            text=True,
+            check=False
+        )
+        if result.returncode == 0:
+            print(f"✓ Mise environment activated")
+        else:
+            print(f"Note: Mise activation failed (may not be available)")
+    except (subprocess.CalledProcessError, FileNotFoundError):
+        print(f"Note: Mise tool not available for environment activation")
+
+    # Verify activation
+    print(f"\nActivation Results:")
+    print(f"  Runtime: {runtime}")
+    print(f"  Workspace: {workspace_dir}")
+    print(f"  Status: ACTIVE")
+    print(f"  Environment variables set:")
+    print(f"    - AEF_RUNTIME={runtime}")
+    print(f"    - AEF_WORKSPACE={workspace_dir}")
+    print(f"    - AEF_PROJECT={project_path}")
+    print(f"    - AEF_ISOLATION=true")
+
+    return True
+
+def main():
+    parser = argparse.ArgumentParser(description="Activate workspace isolation")
+    parser.add_argument("--project", required=True, help="Project path")
+    parser.add_argument("--runtime", required=True, help="Runtime environment")
+
+    args = parser.parse_args()
+
+    try:
+        success = workspace_activate(args.project, args.runtime)
+
+        # Output activation data as JSON for programmatic consumption
+        result = {
+            "success": success,
+            "runtime": args.runtime,
+            "project_path": args.project,
+            "workspace_path": f".aef-env/proj_{os.path.basename(args.project)}/{args.runtime}",
+            "activated_at": time.time(),
+            "environment_variables": {
+                "AEF_RUNTIME": args.runtime,
+                "AEF_WORKSPACE": f".aef-env/proj_{os.path.basename(args.project)}/{args.runtime}",
+                "AEF_PROJECT": args.project,
+                "AEF_ISOLATION": "true"
+            }
+        }
+
+        print(json.dumps(result, indent=2))
+
+        return 0 if success else 1
+    except Exception as e:
+        print(f"ERROR: {e}")
+        return 1
+
+if __name__ == "__main__":
+    sys.exit(main())

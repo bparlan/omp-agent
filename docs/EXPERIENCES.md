@@ -36,4 +36,23 @@
 - evolve-skills/SKILL.md - Health Audit Layer: Successfully implemented automated health monitoring for evolve-skills dependencies, discovering and fixing critical issues in 5 skills (missing edit tool in frontmatter).
 
 - `bin/_frontmatter.py` - BOM Handling: M7.md (and potentially other files) has a UTF-8 BOM prefix (`\ufeff`) that prevented `extract_frontmatter()` from matching the `^---` regex. Fixed by adding BOM stripping before regex matching. Discovered during M7S3 review-implementation phase.
+
+- AEF — Skills-as-Tools Re-evaluation (User Note 2026-08-27): The AGENTS.md
+  classification that skills are "NOT programmatic tools" is too rigid. Skills
+  like `session-audit` and `close-milestone` produce structured artifacts with
+  high data value — their output feeds back into `evolve-skills` for continuous
+  framework improvement. Proposal: treat certain skills (session-audit,
+  close-milestone, archive-docs, sync-documentation) as "agent-invocable tools"
+  in addition to human-invoked commands, allowing the framework to autonomously
+  capture lessons, close milestones, and evolve itself. Further exploration
+  needed — not yet assigned to a milestone.
+
+- M11 — AEF Orchestration Concurrency Controls (Proposed 2026-08-27):
+  Problem: manage-development and manage-roadmap fail when subagent count
+  exceeds capacity. User suspects a "max 3 subagent" rule would resolve
+  cascading failures.
+  Scope: Hard subagent limits in manage-development and manage-roadmap;
+  skill-invocation boundaries; backpressure/routing when limit is hit.
+  Extends M10's safe-to-proceed philosophy to the execution engine.
+  Status: Not yet started — user will initiate after M9 context.
 - YAML `&` Anchor Operator: `milestones/M7/M7S3E.md` had `title: Evaluation Report for M7S3: Legacy Compatibility & Transition` — the `&` is a YAML anchor operator, causing `validate_metadata.py` to fail silently. Fixed by quoting the title string. Discovered during M7S3 evaluation phase.

@@ -24,7 +24,7 @@ if start_idx != -1:
         if "split(" in lines[j] or "rows =" in lines[j]:
             end_idx = j
             break
-            
+
     # Swap the broken multiline string with a clean, parenthesized implicit concatenation
     lines[start_idx:end_idx+1] = [
         "    table_match = re.search(",
@@ -40,7 +40,7 @@ if start_idx != -1:
         "    table_rows_text = table_match.group(1)",
         "    rows = table_rows_text.strip().split(\"\\\\n\")"
     ]
-    
+
     target.write_text("\n".join(lines), encoding="utf-8")
     print("[+] Successfully repaired bin/omp-verify-traceability compilation syntax and regex!")
 else:

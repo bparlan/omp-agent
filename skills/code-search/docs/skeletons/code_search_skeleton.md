@@ -21,4 +21,3 @@ def _extract_generic_skeleton(filepath: Path) -> str | None:
 def generate_skeletons():
 def index_project():
 def search(query: str, limit: int = 10):
-

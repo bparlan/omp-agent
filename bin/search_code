@@ -1,0 +1,27 @@
+#!/bin/bash
+# {Verification IDs: V-INFRA-CODE-SEARCH}
+# {Requirement IDs: INFRA-CODE-SEARCH}
+
+# Determine the absolute path of the active AEF agent directory
+AEF_DIR="$HOME/devcode/aef/agent"
+if [ ! -d "$AEF_DIR" ]; then
+    # Fallback to local skills folder if executing from a different directory
+    AEF_DIR="./skills/code-search"
+fi
+
+INDEXER_PATH="$AEF_DIR/skills/code-search/code_indexer.py"
+
+if [ ! -f "$INDEXER_PATH" ]; then
+    echo "Error: code_indexer.py not found at $INDEXER_PATH" >&2
+    exit 1
+fi
+
+# Forward arguments directly to the python semantic indexer
+if [[ "$1" == "--index" || "$1" == "--refresh" ]]; then
+    python3 "$INDEXER_PATH"
+elif [[ "$1" == "--skeletons" ]]; then
+    python3 "$INDEXER_PATH" --skeletons
+else
+    # Perform semantic code search
+    python3 "$INDEXER_PATH" --search "$@"
+fi

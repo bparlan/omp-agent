@@ -66,12 +66,12 @@ def read_skill_frontmatter(skill_dir: Path) -> Dict:
     # Extract frontmatter (stop at first blank line)
     lines = content.split("\n")
     frontmatter_lines = []
-    
+
     for i, line in enumerate(lines):
         frontmatter_lines.append(line)
         if not line.strip():
             break
-    
+
     frontmatter = "\n".join(frontmatter_lines)
     # Trim trailing --- if present
     if frontmatter.strip().endswith("---"):
@@ -88,12 +88,12 @@ def read_skill_frontmatter(skill_dir: Path) -> Dict:
 def check_gemini_notebooklm_corruption(skill_dir: Path, content: str) -> List[Dict]:
     """Check for Gemini NotebookLM reference data corruption (numbers in brackets)."""
     issues = []
-    
+
     # Pattern: numbers in brackets like [7], [49], [100]
     # These are likely corrupted reference data
     pattern = r'\[(\d+)\]'
     matches = re.findall(pattern, content)
-    
+
     if matches:
         unique_numbers = sorted(set(matches), key=int)
         issues.append({
@@ -101,14 +101,14 @@ def check_gemini_notebooklm_corruption(skill_dir: Path, content: str) -> List[Di
             "description": f"Found {len(matches)} instances of corrupted NotebookLM references: {[n for n in unique_numbers[:5]]}",
             "severity": "LOW"
         })
-    
+
     return issues
 
 
 def check_line_number_text(skill_dir: Path, content: str) -> List[Dict]:
     """Check for lines starting with written line numbers as text."""
     issues = []
-    
+
     lines = content.split("\n")
     for i, line in enumerate(lines, 1):
         stripped = line.lstrip()
@@ -124,36 +124,36 @@ def check_line_number_text(skill_dir: Path, content: str) -> List[Dict]:
                         "description": f"Line {i} starts with text that looks like a line number: '{stripped[:20]}'",
                         "severity": "LOW"
                     })
-    
+
     return issues
 
 
 def check_backtick_blocks(skill_dir: Path, content: str) -> List[Dict]:
     """Check for 4-backtick markdown blocks (should be 3)."""
     issues = []
-    
+
     # Pattern: 4 backticks followed by markdown
     pattern = r'```\`\`markdown'
-    
+
     matches = re.findall(pattern, content)
-    
+
     if matches:
         issues.append({
             "type": "four_backticks",
             "description": f"Found {len(matches)} instances of 4-backtick markdown blocks (should be 3)",
             "severity": "LOW"
         })
-    
+
     return issues
 
 
 def check_dormant_triple_dash(skill_dir: Path, content: str) -> List[Dict]:
     """Check for dormant --- at end of file."""
     issues = []
-    
+
     lines = content.split("\n")
     last_lines = lines[-5:]  # Check last 5 lines
-    
+
     for line in last_lines:
         if line.strip() == "---":
             issues.append({
@@ -161,26 +161,26 @@ def check_dormant_triple_dash(skill_dir: Path, content: str) -> List[Dict]:
                 "description": "Found dormant '---' at end of file",
                 "severity": "LOW"
             })
-    
+
     return issues
 
 
 def check_extra_spaces_before_closing_backticks(skill_dir: Path, content: str) -> List[Dict]:
     """Check for extra 4 spaces before closing ``` triple ticks."""
     issues = []
-    
+
     # Pattern: closing ``` preceded by 4 spaces (or more)
     pattern = r'(    )```$'
-    
+
     matches = re.findall(pattern, content, re.MULTILINE)
-    
+
     if matches:
         issues.append({
             "type": "extra_spaces_before_backticks",
             "description": f"Found {len(matches)} instances of extra spaces before closing backticks",
             "severity": "LOW"
         })
-    
+
     return issues
 
 
@@ -322,21 +322,21 @@ def fix_skill_file(skill_file: Path) -> bool:
     """Fix all identified issues in a SKILL.md file."""
     with open(skill_file, 'r') as f:
         content = f.read()
-    
+
     original_content = content
-    
+
     content = fix_gemini_notebooklm_corruption(content)
     content = fix_line_number_text(content)
     content = fix_backtick_blocks(content)
     content = fix_dormant_triple_dash(content)
     content = fix_extra_spaces_before_closing_backticks(content)
-    
+
     # Only write if content changed
     if content != original_content:
         with open(skill_file, 'w') as f:
             f.write(content)
         return True
-    
+
     return False
 
 

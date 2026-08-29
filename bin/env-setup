@@ -1,0 +1,18 @@
+#!/usr/bin/env bash
+# env-setup — FR-1.1 Environment Management
+# Setup/configure environment: --project <path> --runtime <runtime> --tool <name> --version <version>
+set -euo pipefail
+cd "$(dirname "$0")/../" || exit 1
+exec python3 -c "
+import sys, os
+sys.path.insert(0, 'src')
+import argparse
+from env_layer.cli.handlers.env_management import handle_env_setup
+p = argparse.ArgumentParser()
+p.add_argument('--project', required=True)
+p.add_argument('--runtime', required=True)
+p.add_argument('--tool', required=True)
+p.add_argument('--version', required=True)
+args = p.parse_args()
+handle_env_setup(args)
+" "$@"

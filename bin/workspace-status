@@ -1,0 +1,100 @@
+#!/usr/bin/env python3
+"""Workspace status command for AEF Environment Layer"""
+import sys
+import json
+from pathlib import Path
+import argparse
+
+def workspace_status(project_path, runtime):
+"""Get workspace status"""
+
+print(f"Checking workspace status")
+print(f"Project: {project_path}")
+print(f"Runtime: {runtime}")
+print("=" * 50)
+
+project_dir = Path(project_path)
+if not project_dir.exists():
+print(f"ERROR: Project directory does not exist: {project_path}")
+return False
+
+# Check for activated workspace
+activation_file = project_dir / f".env_activated_{runtime}.txt"
+status_info = {
+"activated": False,
+"workspace_path": None,
+"runtime": runtime,
+"project": str(project_path),
+"timestamp": None
+}
+
+if activation_file.exists():
+try:
+with open(activation_file, 'r') as f:
+content = f.read()
+
+# Parse activation file
+for line in content.split('\n'):
+if line.startswith('workspace='):
+status_info["workspace_name"] = line.split('=')[1]
+elif line.startswith('path='):
+status_info["workspace_path"] = line.split('=')[1]
+elif line.startswith('runtime='):
+status_info["runtime"] = line.split('=')[1]
+elif line.startswith('activated_at='):
+status_info["timestamp"] = float(line.split('=')[1])
+
+status_info["activated"] = True
+
+print(f"✓ Workspace is activated")
+print(f"  Workspace name: {status_info.get('workspace_name', 'unknown')}")
+print(f"  Workspace path: {status_info['workspace_path']}")
+print(f"  Runtime: {status_info['runtime']}")
+print(f"  Activated: {status_info['timestamp']}")
+
+except Exception as e:
+print(f"Warning: Failed to read activation file: {e}")
+status_info["error"] = str(e)
+
+else:
+print(f"✗ Workspace is not activated")
+print(f"  Run 'workspace-activate' to activate workspace isolation")
+
+# Check for workspace directory
+workspace_pattern = project_dir / ".aef-env" / "*" / runtime
+possible_workspaces = list(workspace_pattern.parent.glob("*"))
+
+if possible_workspaces:
+workspace_dir = possible_workspaces[0]
+status_info["workspace_available"] = True
+status_info["workspace_dir"] = str(workspace_dir)
+
+print(f"✓ Workspace directory exists")
+print(f"  Available workspace: {workspace_dir}")
+
+# List workspace contents
+if workspace_dir.exists():
+contents = list(workspace_dir.iterdir())
+print(f"  Contents: {len(contents)} items")
+
+# Output status as JSON
+print(json.dumps(status_info, indent=2))
+
+return True
+
+def main():
+parser = argparse.ArgumentParser(description="Get workspace status")
+parser.add_argument("--project", required=True, help="Project path")
+parser.add_argument("--runtime", required=True, help="Runtime environment")
+
+args = parser.parse_args()
+
+try:
+success = workspace_status(args.project, args.runtime)
+return 0 if success else 1
+except Exception as e:
+print(f"ERROR: {e}")
+return 1
+
+if __name__ == "__main__":
+sys.exit(main())

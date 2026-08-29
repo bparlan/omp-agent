@@ -21,28 +21,28 @@ def cli():
 @click.argument('milestone_sequence')
 def generate_tests(milestone_sequence):
     """Generates tests for a given milestone sequence."""
-    
+
     # 1. Resolve milestone/sequence args
     match = re.match(r"M(\d+)S(\d+)", milestone_sequence)
     if not match:
         click.echo(f"Error: Invalid milestone_sequence format. Expected M<number>S<number>, got {milestone_sequence}", err=True)
         sys.exit(1)
-    
+
     milestone_id_num = match.group(1)
     sequence_id_num = match.group(2)
     milestone_id = f"M{milestone_id_num}"
     sequence_id = f"S{sequence_id_num}"
-    
+
     click.echo(f"Dispatching 'generate-tests' for {milestone_id}{sequence_id}...")
-    
+
     # 2. Precondition checks
     click.echo("\nRunning Precondition Checks...")
-    
+
     # Precondition 1: Metadata Validation
     # Construct expected paths based on milestone_id and sequence_id
     spec_path = f"milestones/{milestone_id}/{milestone_id}{sequence_id}.md"
     verification_path = f"milestones/{milestone_id}/{milestone_id}{sequence_id}V.md"
-    
+
     try:
         # Call the imported validation function
         if not validate_metadata.validate_metadata_files(spec_path, verification_path):
@@ -59,34 +59,34 @@ def generate_tests(milestone_sequence):
     # Precondition 2: Lint Verification Contract
     # The lint_verification_contract function expects the path to the contract file.
     # Assuming it's the same as the verification_path for this example.
-    if not linting.lint_verification_contract(spec_path): 
+    if not linting.lint_verification_contract(spec_path):
         click.echo("Precondition Failed: Verification contract linting failed.", err=True)
         sys.exit(1)
     click.echo("Verification contract linting passed.")
-    
+
     click.echo("\nPrecondition checks passed. Proceeding to skill execution...")
-    
+
     # 3. Simulate Handoff to Skill Logic (LLM/Agent Process)
     # This section simulates calling the actual generation logic.
     # For demonstration, we'll print a message and create placeholder files.
     click.echo(f"Simulating handoff to generate-tests logic for {milestone_id}{sequence_id}...")
-    
+
     # Create placeholder directories and files to simulate LLM output
     simulated_test_dir = f"tests/{milestone_id}"
     simulated_ledger_path = f"milestones/{milestone_id}/{milestone_id}{sequence_id}T1.md"
-    
+
     os.makedirs(simulated_test_dir, exist_ok=True)
-    
+
     # Create placeholder files to simulate successful generation
     simulated_test_files = [
         os.path.join(simulated_test_dir, f"test_{milestone_id}{sequence_id}_basic.sh"),
         os.path.join(simulated_test_dir, f"test_{milestone_id}{sequence_id}_edge.py"),
     ]
-    
+
     for tf in simulated_test_files:
         with open(tf, "w") as f:
             f.write(f"#!/bin/bash\n# Mock test file for {milestone_id}{sequence_id}\nexit 0\n")
-    
+
     with open(simulated_ledger_path, "w") as f:
         f.write("---\n")
         f.write(f"id: TSET-{milestone_id}{sequence_id}T1\n")
@@ -103,12 +103,12 @@ def generate_tests(milestone_sequence):
         f.write(f"| tests/{milestone_id}/test_{milestone_id}{sequence_id}_edge.py | V-FR-2 | FR-2 | UNIT_TEST |\n")
 
     click.echo("Simulated LLM step completed.")
-    
+
     # 4. Postcondition Validation
     click.echo("\nRunning Postcondition Checks...")
-    
+
     postcondition_success = True
-    
+
     # Check for generated test files
     for test_file in simulated_test_files:
         if not os.path.exists(test_file):
@@ -116,7 +116,7 @@ def generate_tests(milestone_sequence):
             postcondition_success = False
         else:
             click.echo(f"Test file {test_file} exists.")
-            
+
     # Check for generated ledger file
     if ledger_path and not os.path.exists(ledger_path):
         click.echo(f"Postcondition Failed: Generated ledger file missing: {ledger_path}", err=True)
@@ -151,12 +151,12 @@ def generate_tests(milestone_sequence):
 def evaluate_tests(milestone_sequence):
     """Evaluates tests for a given milestone sequence."""
     click.echo(f"Dispatching 'evaluate-tests' for {milestone_sequence}...")
-    
+
     match = re.match(r"M(\d+)S(\d+)", milestone_sequence)
     if not match:
         click.echo(f"Error: Invalid milestone_sequence format. Expected M<number>S<number>, got {milestone_sequence}", err=True)
         sys.exit(1)
-    
+
     milestone_id = f"M{match.group(1)}"
     sequence_id = f"S{match.group(2)}"
 
@@ -187,7 +187,7 @@ def evaluate_tests(milestone_sequence):
 
     # Placeholder for the actual evaluation logic
     click.echo(f"Simulating evaluation of tests for {milestone_id}{sequence_id}...")
-    
+
     # Simulate a successful evaluation outcome for demonstration
     click.echo("\nSimulated evaluation results: All checks passed.")
     click.echo("[TEST_EVALUATION_COMPLETE] Baseline verified successfully. Next Step: Please run /implement-specification to continue.")

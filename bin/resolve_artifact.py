@@ -21,7 +21,7 @@ import os
 import re
 import argparse
 
-from _frontmatter import extract_frontmatter
+from core.artifacts.metadata import extract_frontmatter
 
 # Canonical type prefix to directory name mapping
 TYPE_DIR_MAP = {
@@ -57,7 +57,7 @@ LEGACY_FILENAME_PATTERN = re.compile(r"^M(\d+)S(\d+)([A-Z]+?)(\d+)?\.md$")
 
 def resolve_yaml_frontmatter(filepath):
     """Extract YAML frontmatter from a file.
-    
+
     Wraps _frontmatter.extract_frontmatter() to preserve the existing
     (metadata, None) / (None, error_msg) return convention.
     """
@@ -75,7 +75,7 @@ def get_expected_type_from_directory(fpath):
 
 def resolve_tier1(identifier, milestone_dir, verbose):
     """Tier 1: Scan all .md files for YAML frontmatter matching the identifier.
-    
+
     Only matches canonical IDs (TYPE-NNN format). Returns (filepath, metadata).
     """
     # Tier 1 only applies to canonical IDs
@@ -110,7 +110,7 @@ def resolve_tier1(identifier, milestone_dir, verbose):
 
 def resolve_tier2(identifier, milestone_dir, verbose):
     """Tier 2: Infer artifact type from identifier prefix, search canonical subdirectory.
-    
+
     For canonical IDs (e.g., SPEC-001 → specifications/), search for the file
     in the corresponding type subdirectory. Returns (filepath, metadata, type_dir_name).
     """
@@ -155,12 +155,12 @@ def resolve_tier2(identifier, milestone_dir, verbose):
 
 def resolve_tier3(identifier, milestone_dir, verbose):
     """Tier 3: Legacy filename heuristics for pre-M10 artifacts.
-    
+
     Matches against legacy naming patterns with strict boundary checking:
     - M{X}S{Y}.md                   (exact stem match)
     - M{X}S{Y}{SUFFIX}.md           (suffix: V, T, C, E, R, I, H)
     - M{X}S{Y}{SUFFIX}{N}.md        (suffix + index number)
-    
+
     Strict boundary: the character immediately following the matched
     identifier prefix MUST be '.' or a valid lifecycle suffix letter
     (V, T, C, E, R, I, H) optionally followed by an index number.
@@ -171,19 +171,19 @@ def resolve_tier3(identifier, milestone_dir, verbose):
             print(f"Tier 3: Skipped — identifier '{identifier}' does not match legacy pattern",
                   file=sys.stderr)
         return None, None
-    
+
     VALID_LEGACY_SUFFIXES = frozenset({"V", "T", "C", "E", "R", "I", "H"})
-    
+
     if verbose:
         print("Tier 3: Applying legacy filename heuristics...", file=sys.stderr)
-    
+
     for root, dirs, files in os.walk(milestone_dir):
         for fname in files:
             if not fname.endswith(".md"):
                 continue
-            
+
             stem = os.path.splitext(fname)[0]
-            
+
             # Exact stem match: "M7S1.md"  →  identifier "M7S1"
             if stem == identifier:
                 fpath = os.path.join(root, fname)
@@ -192,7 +192,7 @@ def resolve_tier3(identifier, milestone_dir, verbose):
                     print(f"Tier 3: Legacy filename exact match — {fpath}",
                           file=sys.stderr)
                 return fpath, metadata
-            
+
             # Suffix match with strict boundary.
             # "M7S1V.md"   → stem="M7S1V",  suffix after "M7S1" = "V"      → valid
             # "M7S1T1.md"  → stem="M7S1T1", suffix after "M7S1" = "T1"     → valid
@@ -211,21 +211,21 @@ def resolve_tier3(identifier, milestone_dir, verbose):
                         print(f"Tier 3: Legacy filename heuristic match — {fpath}",
                               file=sys.stderr)
                     return fpath, metadata
-    
+
     if verbose:
         print("Tier 3: No legacy filename match found", file=sys.stderr)
 
 def resolve_legacy_manifest(identifier, base_dir, milestone_dir, verbose):
     """Tier 4: Legacy manifest lookup.
-    
+
     Consults the legacy manifest (produced by legacy_indexer.py) as a fallback
     when Tier 3 filename heuristics produce no match.
-    
+
     Searches for the manifest at:
       1. {base_dir}/legacy_manifest.txt
       2. {base_dir}/milestones/{milestone_id}/legacy_manifest.txt
       3. {milestone_dir}/legacy_manifest.txt
-    
+
     Returns (filepath, None) if a match is found, or (None, None).
     """
     if not LEGACY_ID_PATTERN.match(identifier):
@@ -233,7 +233,7 @@ def resolve_legacy_manifest(identifier, base_dir, milestone_dir, verbose):
             print(f"Tier 4 (Legacy Manifest): Skipped — identifier '{identifier}' "
                   f"does not match legacy pattern", file=sys.stderr)
         return None, None
-    
+
     # Find the legacy manifest
     manifest_path = None
     candidates = [
@@ -248,15 +248,15 @@ def resolve_legacy_manifest(identifier, base_dir, milestone_dir, verbose):
                 print(f"Tier 4 (Legacy Manifest): Found manifest at {candidate}",
                       file=sys.stderr)
             break
-    
+
     if not manifest_path:
         if verbose:
             print("Tier 4 (Legacy Manifest): No legacy manifest found", file=sys.stderr)
         return None, None
-    
+
     if verbose:
         print("Tier 4 (Legacy Manifest): Consulting legacy manifest...", file=sys.stderr)
-    
+
     try:
         with open(manifest_path, "r") as f:
             for line in f:
@@ -273,7 +273,7 @@ def resolve_legacy_manifest(identifier, base_dir, milestone_dir, verbose):
                 rel_path = parts[1]
                 fname = os.path.basename(rel_path)
                 stem = os.path.splitext(fname)[0]
-                
+
                 # Check if the stem matches the identifier exactly
                 if stem == identifier:
                     full_path = os.path.join(base_dir, rel_path)
@@ -287,7 +287,7 @@ def resolve_legacy_manifest(identifier, base_dir, milestone_dir, verbose):
             print(f"Tier 4 (Legacy Manifest): Error reading manifest: {e}",
                   file=sys.stderr)
         return None, None
-    
+
     if verbose:
         print("Tier 4 (Legacy Manifest): No match found", file=sys.stderr)
     return None, None
@@ -295,7 +295,7 @@ def resolve_legacy_manifest(identifier, base_dir, milestone_dir, verbose):
 
 def detect_conflict(fpath, metadata, identifier, verbose):
     """Check if the file's YAML 'type' disagrees with its directory location.
-    
+
     Returns a conflict dict with file_path, expected_type, actual_type, and identifier,
     or None if no conflict is detected.
     """

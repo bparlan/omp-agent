@@ -1,0 +1,15 @@
+#!/bin/bash
+# Validate fixtures CLI command
+
+if command -v python3 >/dev/null 2>&1; then
+    python3 -c "
+import sys
+import os
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'src'))
+from env_layer.cli.main import main
+sys.exit(main())
+" "$@"
+else
+    echo "Error: Python 3 not found" >&2
+    exit 127
+fi

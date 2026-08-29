@@ -61,9 +61,9 @@ def validate_file(filepath: Path) -> tuple:
     """Check syntax of a test file based on its extension. Returns (exit_code, error_msg)."""
     if not filepath.exists():
         return (EXIT_TOOLING_FAILURE, f"File not found: {filepath}")
-    
+
     suffix = filepath.suffix.lower()
-    
+
     if suffix == ".sh":
         return check_bash_syntax(filepath)
     elif suffix == ".py":
@@ -78,18 +78,18 @@ def main():
         print("Usage: python3 bin/omp-verify-test-syntax <test_file> [test_file2 ...]", file=sys.stderr)
         print("Validates syntax of .sh and .py test files.", file=sys.stderr)
         sys.exit(EXIT_TOOLING_FAILURE)
-    
+
     all_valid = True
     had_tooling_failure = False
-    
+
     for filepath_str in sys.argv[1:]:
         filepath = Path(filepath_str)
         exit_code, error_msg = validate_file(filepath)
-        
+
         suffix = filepath.suffix.lower()
         if suffix not in (".sh", ".py"):
             continue  # Skip unknown file types silently
-        
+
         if exit_code == EXIT_VALID:
             print(f"OK: {filepath} — syntax valid")
         elif exit_code == EXIT_TEST_INVALID:
@@ -98,7 +98,7 @@ def main():
         elif exit_code == EXIT_TOOLING_FAILURE:
             print(f"TOOLING_FAILURE: {filepath} — {error_msg}", file=sys.stderr)
             had_tooling_failure = True
-    
+
     if had_tooling_failure:
         sys.exit(EXIT_TOOLING_FAILURE)
     elif not all_valid:

@@ -1,0 +1,123 @@
+=== AEF SKILLS HEALTH CHECK SUMMARY ===
+
+Generated: Wed Aug 26 19:17:33 EEST 2026
+
+=== STATISTICS ===
+Total SKILL.md files:       25
+Stable skills (-stable suffix): 0
+Not stable skills: 0
+Malformed files (missing version): 0
+Large files (>10KB): 0
+
+=== COMPLIANCE ===
+Compliance rate: 0% (0/      25)
+
+=== HEALTH ISSUES IDENTIFIED ===
+
+1. Version suffix compliance:
+   Skills missing -stable suffix: 0/      25 (0%)
+
+2. File structure validation:
+   Skills with malformed frontmatter: 0/      25 (0%)
+
+3. File size concerns:
+   Skills with large files (>10KB): 0/      25 (0%)
+
+=== PRIORITY ASSESSMENT ===
+CRITICAL (requires immediate action):
+   Skills missing -stable suffix: 0
+   Skills with malformed frontmatter: 0
+
+HIGH (should be addressed):
+   Skills with large files: 0
+
+MEDIUM (monitor):
+   Skills with version compliance: 25/      25
+
+=== SPECIFIC SKILLS REQUIRING ATTENTION ===
+
+Skills missing -stable suffix:
+   - review-implementation: 1.2.0
+   - manage-roadmap: 2.0.0
+   - evaluate-implementation: 1.2.0-stable
+   - skill-healthcheck: 1.0.0-stable
+   - diagrammer: 3.0.0-stable
+   - hotfix-focus:
+   - sync-documentation: 1.3.1
+   - generate-spec: 2.0.0-stable
+   - bootstrap-project: 1.0.2
+   - evolve-skills: 1.3.1
+   - milestone-focus:
+   - code-search: 1.0.0
+   - hotfix-issue: 1.1.0
+   - generate-verification: 2.5.0-stable
+   - graph-context: 1.0.0
+   - milestoner: 2.6.0
+   - implement-specification: 1.3.0-stable
+   - close-milestone: 1.0.0
+   - evaluate-tests: 1.2.0
+   - manage-development: 2.2.0-stable
+   - approve-spec:
+   - session-audit: 1.3.2
+   - generate-tests: 3.7.0-stable
+   - investigate-issue: 2.0.0
+   - archive-docs: 1.3.0
+
+=== RECOMMENDATIONS ===
+
+IMMEDIATE ACTIONS REQUIRED:
+1. Add -stable suffix to all skills without it:
+   - Update review-implementation from version: 1.2.0 to version: 1.2.0-stable
+   - Update manage-roadmap from version: 2.0.0 to version: 2.0.0-stable
+   - Update evaluate-implementation from version: 1.2.0-stable to version: 1.2.0-stable-stable
+   - Update skill-healthcheck from version: 1.0.0-stable to version: 1.0.0-stable-stable
+   - Update diagrammer from version: 3.0.0-stable to version: 3.0.0-stable-stable
+   - Update hotfix-focus from version:  to version: -stable
+   - Update sync-documentation from version: 1.3.1 to version: 1.3.1-stable
+   - Update generate-spec from version: 2.0.0-stable to version: 2.0.0-stable-stable
+   - Update bootstrap-project from version: 1.0.2 to version: 1.0.2-stable
+   - Update evolve-skills from version: 1.3.1 to version: 1.3.1-stable
+   - Update milestone-focus from version:  to version: -stable
+   - Update code-search from version: 1.0.0 to version: 1.0.0-stable
+   - Update hotfix-issue from version: 1.1.0 to version: 1.1.0-stable
+   - Update generate-verification from version: 2.5.0-stable to version: 2.5.0-stable-stable
+   - Update graph-context from version: 1.0.0 to version: 1.0.0-stable
+   - Update milestoner from version: 2.6.0 to version: 2.6.0-stable
+   - Update implement-specification from version: 1.3.0-stable to version: 1.3.0-stable-stable
+   - Update close-milestone from version: 1.0.0 to version: 1.0.0-stable
+   - Update evaluate-tests from version: 1.2.0 to version: 1.2.0-stable
+   - Update manage-development from version: 2.2.0-stable to version: 2.2.0-stable-stable
+   - Update approve-spec from version:  to version: -stable
+   - Update session-audit from version: 1.3.2 to version: 1.3.2-stable
+   - Update generate-tests from version: 3.7.0-stable to version: 3.7.0-stable-stable
+   - Update investigate-issue from version: 2.0.0 to version: 2.0.0-stable
+   - Update archive-docs from version: 1.3.0 to version: 1.3.0-stable
+
+2. Ensure all skills have proper YAML frontmatter:
+
+3. Validate file integrity:
+   - Remove NUL bytes from review-implementation SKILL.md
+   - Remove NUL bytes from manage-roadmap SKILL.md
+   - Remove NUL bytes from evaluate-implementation SKILL.md
+   - Remove NUL bytes from skill-healthcheck SKILL.md
+   - Remove NUL bytes from diagrammer SKILL.md
+   - Remove NUL bytes from hotfix-focus SKILL.md
+   - Remove NUL bytes from sync-documentation SKILL.md
+   - Remove NUL bytes from generate-spec SKILL.md
+   - Remove NUL bytes from bootstrap-project SKILL.md
+   - Remove NUL bytes from evolve-skills SKILL.md
+   - Remove NUL bytes from milestone-focus SKILL.md
+   - Remove NUL bytes from code-search SKILL.md
+   - Remove NUL bytes from hotfix-issue SKILL.md
+   - Remove NUL bytes from generate-verification SKILL.md
+   - Remove NUL bytes from graph-context SKILL.md
+   - Remove NUL bytes from milestoner SKILL.md
+   - Remove NUL bytes from implement-specification SKILL.md
+   - Remove NUL bytes from close-milestone SKILL.md
+   - Remove NUL bytes from evaluate-tests SKILL.md
+   - Remove NUL bytes from manage-development SKILL.md
+   - Remove NUL bytes from approve-spec SKILL.md
+   - Remove NUL bytes from session-audit SKILL.md
+   - Remove NUL bytes from generate-tests SKILL.md
+   - Remove NUL bytes from investigate-issue SKILL.md
+   - Remove NUL bytes from archive-docs SKILL.md

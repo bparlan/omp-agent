@@ -1,0 +1,191 @@
+#!/usr/bin/env python3
+"""
+Main orchestrator for AEF-OMP Skill Health Checker.
+Coordinates all modular components and maintains backward compatibility.
+"""
+
+import sys
+import traceback
+from pathlib import Path
+from datetime import datetime
+
+# Import modular components
+from core.validation import SkillValidator
+from discovery import get_skills_directory, discover_skills, discover_skill_by_name
+from reporting import (
+    generate_badges,
+    generate_health_report,
+    generate_processed_skills,
+    generate_skills_summary
+)
+from cli import (
+    parse_arguments,
+    run_health_check,
+    print_help
+)
+def run_single_skill_validation(skill_name: str) -> dict:
+    """Validate a single skill using the modular validation system."""
+    skill_file = discover_skill_by_name(skill_name)
+    if not skill_file:
+        print(f"Skill '{skill_name}' not found")
+        return None
+
+    validator = SkillValidator()
+    result = validator.validate_skill_file(skill_file)
+    return result
+def run_batch_validation() -> list:
+    """Run batch validation in 3 systematic batches."""
+    skills = discover_skills()
+
+    # Batch 1: Core skills (first 3)
+    print("=== BATCH 1: CORE SKILLS ===")
+    batch1_results = []
+    validator = SkillValidator()
+
+    for skill_file in skills[:3]:
+        print(f"Checking {skill_file.parent.name}...", end=" ")
+        result = validator.validate_skill_file(skill_file)
+        print(f"{result['status']} (score: {result['validation_score']:.2f})")
+        batch1_results.append(result)
+
+    # Batch 2: Extension skills (next 3)
+    print("\n=== BATCH 2: EXTENSION SKILLS ===")
+    batch2_results = []
+    for skill_file in skills[3:6]:
+        print(f"Checking {skill_file.parent.name}...", end=" ")
+        result = validator.validate_skill_file(skill_file)
+        print(f"{result['status']} (score: {result['validation_score']:.2f})")
+        batch2_results.append(result)
+
+    # Batch 3: Edge cases (remaining)
+    print("\n=== BATCH 3: EDGE CASES ===")
+    batch3_results = []
+    for skill_file in skills[6:]:
+        print(f"Checking {skill_file.parent.name}...", end=" ")
+        result = validator.validate_skill_file(skill_file)
+        print(f"{result['status']} (score: {result['validation_score']:.2f})")
+        batch3_results.append(result)
+
+    all_results = batch1_results + batch2_results + batch3_results
+
+    print(f"\n=== BATCH SUMMARY ===")
+    print(f"Batch 1 (Core): {len(batch1_results)} skills processed")
+    print(f"Batch 2 (Extensions): {len(batch2_results)} skills processed")
+    print(f"Batch 3 (Edge Cases): {len(batch3_results)} skills processed")
+    print(f"Total: {len(all_results)} skills processed")
+
+    return all_results
+def run_all_skills_validation() -> list:
+    """Run health check on all discovered skills."""
+    skills = discover_skills()
+    print(f"Found {len(skills)} skills to check\n")
+
+    results = []
+    validator = SkillValidator()
+
+    for skill_file in skills:
+        print(f"Checking {skill_file.parent.name}...", end=" ")
+        result = validator.validate_skill_file(skill_file)
+        print(f"{result['status']} (score: {result['validation_score']:.2f})")
+        results.append(result)
+
+    return results
+class HealthCheckOrchestrator:
+    """Orchestrates the health check process across all modules."""
+
+    def __init__(self):
+        self.validator = SkillValidator()
+        self.results = []
+
+    def validate_skill(self, skill_path: Path) -> dict:
+        """Validate a single skill."""
+        return self.validator.validate_skill_file(skill_path)
+
+    def run_validation_workflow(self, mode: str = "all", skill_name: str = None, skill_path: str = None):
+        """Run validation workflow based on mode."""
+        self.results = []
+
+        if mode == "single":
+            if skill_name:
+                result = run_single_skill_validation(skill_name)
+                if result:
+                    self.results.append(result)
+
+        elif mode == "batch":
+            self.results = run_batch_validation()
+
+        elif mode == "all":
+            self.results = run_all_skills_validation()
+
+        elif mode == "workflow":
+            self.results = run_all_skills_validation()
+
+        return self.results
+
+    def generate_reports(self, results: list):
+        """Generate all reports using modular reporting system."""
+        print("\n=== Health Check Reports ===")
+
+        # Generate badges
+        generate_badges(results)
+
+        # Generate health report
+        generate_health_report(results)
+
+        # Generate processed skills report
+        generate_processed_skills(results)
+
+        # Print summary
+        total = len(results)
+        healthy = len([r for r in results if r['status'] == 'healthy'])
+        needs_review = len([r for r in results if r['status'] == 'needs_review'])
+        errors = len([r for r in results if r['status'] == 'error'])
+
+        print(f"\n=== SUMMARY ===")
+        print(f"Total skills checked: {total}")
+        print(f"Healthy skills: {healthy} ({healthy/total*100:.1f}%)")
+        print(f"Skills needing review: {needs_review} ({needs_review/total*100:.1f}%)")
+        print(f"Skills with errors: {errors} ({errors/total*100:.1f}%)")
+
+        stable_ready = len([r for r in results if r['status'] == 'healthy' and r['has_stable_suffix']])
+        if stable_ready > 0:
+            print(f"\n=== SKILLS READY FOR -STABLE DESIGNATION ===")
+            print(f"{stable_ready} skills have -stable suffix")
+            stable_skills = [r for r in results if r['status'] == 'healthy' and r['has_stable_suffix']]
+            for skill in sorted([s['name'] for s in stable_skills]):
+                print(f"  - {skill}")
+def legacy_healthcheck_main():
+    """Legacy main function for backward compatibility."""
+    try:
+        # Parse arguments
+        args = parse_arguments()
+
+        # Handle help flag
+        if args.help:
+            print_help()
+            return 0
+
+        # Run health check
+        results = run_health_check(args.skill_name, args.all)
+
+        if not results:
+            print("No results generated.")
+            return 1
+
+        # Generate all reports
+        generate_reports(results)
+
+        # Success
+        return 0
+
+    except KeyboardInterrupt:
+        print("\nOperation interrupted by user.")
+        return 1
+    except Exception as e:
+        print(f"Error: {e}")
+        return 1
+def main():
+    """Main entry point - supports both legacy and modular execution."""
+    return legacy_healthcheck_main()
+if __name__ == "__main__":
+    exit(main())

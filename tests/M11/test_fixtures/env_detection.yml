@@ -1,0 +1,27 @@
+# test_fixtures/env_detection.yml
+env_detection:
+  test_cases:
+    - name: "Python 3.11 detection"
+      project: "test_python_project"
+      expected_runtime: "python"
+      expected_tools: ["python", "pip"]
+
+    - name: "Node.js 18 detection"
+      project: "test_node_project"
+      expected_runtime: "node"
+      expected_tools: ["node", "npm"]
+
+    - name: "Rust 1.70 detection"
+      project: "test_rust_project"
+      expected_runtime: "rust"
+      expected_tools: ["rustc", "cargo"]
+
+    - name: "Go 1.20 detection"
+      project: "test_go_project"
+      expected_runtime: "go"
+      expected_tools: ["go"]
+
+    - name: "Deno 1.35 detection"
+      project: "test_deno_project"
+      expected_runtime: "deno"
+      expected_tools: ["deno"]

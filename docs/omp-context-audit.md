@@ -9,7 +9,7 @@ derived_from: [M10, SPEC-M10S10, EVAL-1, TEVAL-1]
 
 # OMP/AEF Infrastructure Context Audit & General Checkup Blueprint
 
-This context report compiles all the technical "hickups," structural deadlocks, and validation collisions encountered during the implementation and execution of **Milestone 10, Sequence 10 (Multi-Project Compatibility & Migration Contract)**. 
+This context report compiles all the technical "hickups," structural deadlocks, and validation collisions encountered during the implementation and execution of **Milestone 10, Sequence 10 (Multi-Project Compatibility & Migration Contract)**.
 
 Use this document to prime any advanced LLM (such as Claude) with the necessary technical history and provide concrete, copy-paste prompts to execute a **Unified System Checkup** across the OMP Agentic Engineering Framework (AEF).
 
@@ -146,5 +146,5 @@ rm -rf tests/M10/*
 /evaluate-tests M10S10
 ```
 
-*Expected Successful Outcome:* 
+*Expected Successful Outcome:*
 The test generator will write shebang-compliant, 4-space indented Python Pytest scripts, initialize a truncated ledger `M10S10T1.md`, and compile perfectly. The auditor will successfully validate the metadata using flag-immune positional mappings, report a healthy `VALID_BROWNFIELD_PASS` (or natural `VALID_INITIAL_FAILURE` if code is cleared), and advance the pipeline to the implementation stage with **zero manual interventions required**!

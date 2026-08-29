@@ -15,7 +15,7 @@ PROJECT_INDICATORS = {
 
 def detect_project_type(project_path: Path) -> str | None:
     """Detects the project type based on file presence and heuristics."""
-    
+
     # Check for specific files first (e.g., setup.py, SKILL.md)
     for project_type, indicators in PROJECT_INDICATORS.items():
         for indicator in indicators:
@@ -27,10 +27,10 @@ def detect_project_type(project_path: Path) -> str | None:
                 # Basic glob check for files
                 if any((project_path / indicator).glob(indicator)):
                     return project_type
-    
+
     # Fallback or more complex checks can be added here
     # For example, checking for specific directory structures or file contents.
-    
+
     # If no clear indicators are found, return None
     return None
 
@@ -38,16 +38,16 @@ if __name__ == "__main__":
     if len(sys.argv) != 2:
         print("Usage: python detect_project_type.py <project_path>", file=sys.stderr)
         sys.exit(1)
-    
+
     project_path_str = sys.argv[1]
     project_path = Path(project_path_str)
-    
+
     if not project_path.is_dir():
         print(f"Error: Project path '{project_path_str}' is not a directory.", file=sys.stderr)
         sys.exit(1)
-        
+
     project_type = detect_project_type(project_path)
-    
+
     if project_type:
         print(project_type)
     else:
