@@ -14,6 +14,15 @@ repos:
       - id: check-toml
       - id: mixed-line-ending
 
+  # AEF SKILL-Integrity
+  - repo: local
+    hooks:
+      - id: skill-integrity-gate
+        name: Block deleted SKILL.md files
+        entry: bash .githooks-custom/skill-integrity-check.sh
+        language: system
+        pass_filenames: false
+
   # Python — ruff replaces black+flake8+isort in one fast tool
   - repo: https://github.com/astral-sh/ruff-pre-commit
     rev: v0.8.0
