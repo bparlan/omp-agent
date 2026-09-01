@@ -4,18 +4,22 @@
       "name": "python_runtime_detection",
       "input": {
         "project_path": "/tmp/test-python",
-        "requirements": {"language": "python", "version": "3.9"}
+        "requirements": { "language": "python", "version": "3.9" }
       },
       "expected": {
         "status": "success",
-        "detected": {"language": "python", "version": "3.9", "installed": true}
+        "detected": {
+          "language": "python",
+          "version": "3.9",
+          "installed": true
+        }
       }
     },
     {
       "name": "workspace_isolation",
       "input": {
         "project_path": "/tmp/test-isolation",
-        "config": {"method": "per-project", "strict": true}
+        "config": { "method": "per-project", "strict": true }
       },
       "expected": {
         "status": "success",
@@ -28,7 +32,7 @@
       "input": {
         "language": "node",
         "version": "18",
-        "project": {"package.json": true, "dependencies": ["express"]}
+        "project": { "package.json": true, "dependencies": ["express"] }
       },
       "expected": {
         "status": "success",

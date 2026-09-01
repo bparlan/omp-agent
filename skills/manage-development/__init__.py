@@ -18,6 +18,7 @@ from core.artifacts.artifact_types import get_artifact_type
 from core.artifacts.registry import get_registry
 from core.artifacts.creation import create_artifact
 
+
 class PipelineStateValidator:
     """
     Pipeline State Validator for enforcing deterministic gate progression
@@ -52,7 +53,7 @@ class PipelineStateValidator:
             return {
                 "valid": False,
                 "errors": [f"Specification file not found: {spec_path}"],
-                "missing_fields": ["file_path"]
+                "missing_fields": ["file_path"],
             }
 
         # Use core AEF validation module
@@ -87,9 +88,11 @@ class PipelineStateValidator:
         if not milestone_dir.exists():
             return {
                 "valid": False,
-                "missing_artifacts": [f"Milestone directory not found: {milestone_dir}"],
+                "missing_artifacts": [
+                    f"Milestone directory not found: {milestone_dir}"
+                ],
                 "invalid_artifacts": [],
-                "gate_artifacts": {}
+                "gate_artifacts": {},
             }
 
         # Gate artifact patterns based on milestone naming convention
@@ -143,7 +146,7 @@ class PipelineStateValidator:
                 "valid": False,
                 "errors": [f"Milestone directory not found: {milestone_dir}"],
                 "missing_fields": ["milestone_id"],
-                "validation_results": {}
+                "validation_results": {},
             }
 
         # Collect validation results for all pipeline artifacts
@@ -153,9 +156,14 @@ class PipelineStateValidator:
         for artifact_file in milestone_dir.glob("*.md"):
             # Skip non-pipeline artifacts
             artifact_name = artifact_file.stem
-            if not (artifact_name.startswith("SPEC-") or artifact_name.startswith("VER-") or
-                    artifact_name.startswith("TSET-") or artifact_name.startswith("EVA-") or
-                    artifact_name.startswith("REV-") or artifact_name.startswith("CLOSE-")):
+            if not (
+                artifact_name.startswith("SPEC-")
+                or artifact_name.startswith("VER-")
+                or artifact_name.startswith("TSET-")
+                or artifact_name.startswith("EVA-")
+                or artifact_name.startswith("REV-")
+                or artifact_name.startswith("CLOSE-")
+            ):
                 continue
 
             # Determine artifact type from naming pattern for registry lookup
@@ -179,41 +187,65 @@ class PipelineStateValidator:
             frontmatter = extract_frontmatter(str(artifact_file)) or {}
 
             # Try registry lookup with the type name first, then with the artifact name
-            registry_type = get_artifact_type(registry_type_name) if registry_type_name else None
+            registry_type = (
+                get_artifact_type(registry_type_name) if registry_type_name else None
+            )
             if registry_type is None and registry_type_name == "closure":
                 # Closure type may not be registered, try with the artifact name
                 registry_type = get_artifact_type(artifact_name)
                 if registry_type is None:
                     # Register closure type in _ARTIFACT_TYPE_DEFINITIONS (FR-AEF-REGISTRY-TYPE-REGISTRATION)
                     try:
-                        from core.artifacts.artifact_types import _ARTIFACT_TYPE_DEFINITIONS, CanonicalArtifactType
-                        _ARTIFACT_TYPE_DEFINITIONS['closure'] = CanonicalArtifactType(
-                            machine_identifier='closure',
-                            human_readable_name='Closure',
-                            purpose='Milestone closure artifact',
+                        from core.artifacts.artifact_types import (
+                            _ARTIFACT_TYPE_DEFINITIONS,
+                            CanonicalArtifactType,
+                        )
+
+                        _ARTIFACT_TYPE_DEFINITIONS["closure"] = CanonicalArtifactType(
+                            machine_identifier="closure",
+                            human_readable_name="Closure",
+                            purpose="Milestone closure artifact",
                             producer_skills=[],
                             consumer_skills=[],
-                            canonical_storage_location='<M_ID>/closures/<CLOSE_ID>.md',
-                            required_metadata=['created_at', 'updated_at', 'artifact_identity', 'artifact_type'],
+                            canonical_storage_location="<M_ID>/closures/<CLOSE_ID>.md",
+                            required_metadata=[
+                                "created_at",
+                                "updated_at",
+                                "artifact_identity",
+                                "artifact_type",
+                            ],
                             optional_metadata=[],
-                            lifecycle_states=['draft', 'completed', 'archived'],
-                            allowed_relationships=['derived_from']
+                            lifecycle_states=["draft", "completed", "archived"],
+                            allowed_relationships=["derived_from"],
                         )
                         # Also register in registry
                         registry = get_registry()
-                        registry.register_type('closure', {}, {})
-                        registry_type = get_artifact_type('closure')
+                        registry.register_type("closure", {}, {})
+                        registry_type = get_artifact_type("closure")
                     except Exception:
                         registry_type = None
             # Check if frontmatter has required keys - FR-AEF-METADATA-EXTRACTION
-            required_frontmatter_keys = ["id", "type", "title", "milestone_id", "status", "derived_from", "template_version", "metadata"]
-            frontmatter_complete = all(key in frontmatter for key in required_frontmatter_keys)
+            required_frontmatter_keys = [
+                "id",
+                "type",
+                "title",
+                "milestone_id",
+                "status",
+                "derived_from",
+                "template_version",
+                "metadata",
+            ]
+            frontmatter_complete = all(
+                key in frontmatter for key in required_frontmatter_keys
+            )
 
             # Validate registry type resolution - FR-AEF-REGISTRY-TYPE-REGISTRATION
             registry_valid = registry_type is not None
 
             # Overall validation
-            artifact_valid = core_validation["valid"] and registry_valid and frontmatter_complete
+            artifact_valid = (
+                core_validation["valid"] and registry_valid and frontmatter_complete
+            )
 
             validation_results[artifact_name] = {
                 "file_path": str(artifact_file),
@@ -223,25 +255,34 @@ class PipelineStateValidator:
                 "registry_valid": registry_valid,
                 "frontmatter_complete": frontmatter_complete,
                 "valid": artifact_valid,
-                "errors": []
+                "errors": [],
             }
 
             if not artifact_valid:
                 all_valid = False
                 # Collect specific errors
                 if not core_validation["valid"]:
-                    validation_results[artifact_name]["errors"].append(f"Core validation failed: {core_validation['errors']}")
+                    validation_results[artifact_name]["errors"].append(
+                        f"Core validation failed: {core_validation['errors']}"
+                    )
                 if not registry_valid:
-                    validation_results[artifact_name]["errors"].append(f"Registry lookup failed for {artifact_name}")
+                    validation_results[artifact_name]["errors"].append(
+                        f"Registry lookup failed for {artifact_name}"
+                    )
                 if not frontmatter_complete:
-                    validation_results[artifact_name]["errors"].append(f"Frontmatter incomplete for {artifact_name}")
+                    validation_results[artifact_name]["errors"].append(
+                        f"Frontmatter incomplete for {artifact_name}"
+                    )
 
         return {
             "valid": all_valid,
-            "errors": [] if all_valid else ["Core AEF validation failed for pipeline artifacts"],
+            "errors": []
+            if all_valid
+            else ["Core AEF validation failed for pipeline artifacts"],
             "missing_fields": [],
-            "validation_results": validation_results
+            "validation_results": validation_results,
         }
+
     def validate_stage_progression(self) -> Dict[str, Any]:
         """
         Validate progression through the SDD pipeline stages.
@@ -262,7 +303,14 @@ class PipelineStateValidator:
             "closure": f"CLOSE-{self.milestone_id}-*.md",
         }
 
-        stages = ["specification", "verification", "tests", "evaluation", "review", "closure"]
+        stages = [
+            "specification",
+            "verification",
+            "tests",
+            "evaluation",
+            "review",
+            "closure",
+        ]
         stage_results = {}
 
         for stage in stages:
@@ -299,8 +347,8 @@ class PipelineStateValidator:
         state_file = milestone_dir / "PIPELINE-STATE.md"
 
         # Collect validation results from all gates
-        generation_time = datetime.now().strftime('%Y-%m-%dT%H:%M:%S')
-        unique_id_suffix = datetime.now().strftime('%Y%m%d-%H%M%S')
+        generation_time = datetime.now().strftime("%Y-%m-%dT%H:%M:%S")
+        unique_id_suffix = datetime.now().strftime("%Y%m%d-%H%M%S")
         gate_outcomes = []
 
         # Run validation functions to collect outcomes
@@ -309,37 +357,43 @@ class PipelineStateValidator:
         stage_result = self.validate_stage_progression()
 
         # Record specification validation outcome
-        gate_outcomes.append({
-            "gate_name": "SPEC-M13S1_VALIDATION",
-            "timestamp": generation_time,
-            "status": "PASSED" if spec_result["valid"] else "FAILED",
-            "artifact_path": spec_result.get("file_path", ""),
-            "validation_details": spec_result,
-            "error_count": len(spec_result["errors"]),
-            "missing_count": len(spec_result["missing_fields"]),
-        })
+        gate_outcomes.append(
+            {
+                "gate_name": "SPEC-M13S1_VALIDATION",
+                "timestamp": generation_time,
+                "status": "PASSED" if spec_result["valid"] else "FAILED",
+                "artifact_path": spec_result.get("file_path", ""),
+                "validation_details": spec_result,
+                "error_count": len(spec_result["errors"]),
+                "missing_count": len(spec_result["missing_fields"]),
+            }
+        )
 
         # Record gate artifact validation outcome
-        gate_outcomes.append({
-            "gate_name": "GATE_ARTIFACTS_VALIDATION",
-            "timestamp": generation_time,
-            "status": "PASSED" if gate_result["valid"] else "FAILED",
-            "artifact_path": "",
-            "validation_details": gate_result,
-            "error_count": len(gate_result["missing_artifacts"]),
-            "missing_count": 0,
-        })
+        gate_outcomes.append(
+            {
+                "gate_name": "GATE_ARTIFACTS_VALIDATION",
+                "timestamp": generation_time,
+                "status": "PASSED" if gate_result["valid"] else "FAILED",
+                "artifact_path": "",
+                "validation_details": gate_result,
+                "error_count": len(gate_result["missing_artifacts"]),
+                "missing_count": 0,
+            }
+        )
 
         # Record stage progression outcome
-        gate_outcomes.append({
-            "gate_name": "STAGE_PROGRESSION_VALIDATION",
-            "timestamp": generation_time,
-            "status": "PASSED" if stage_result["valid"] else "FAILED",
-            "artifact_path": "",
-            "validation_details": stage_result,
-            "error_count": 0,
-            "missing_count": 0,
-        })
+        gate_outcomes.append(
+            {
+                "gate_name": "STAGE_PROGRESSION_VALIDATION",
+                "timestamp": generation_time,
+                "status": "PASSED" if stage_result["valid"] else "FAILED",
+                "artifact_path": "",
+                "validation_details": stage_result,
+                "error_count": 0,
+                "missing_count": 0,
+            }
+        )
 
         # Generate PIPELINE-STATE.md content
         content = f"""---
@@ -384,6 +438,7 @@ template_version: 1.0.0
         state_file.write_text(content)
         return str(state_file)
 
+
 def main(milestone_id: str = "M13") -> int:
     """
     Main entry point for the manage-development skill.
@@ -398,7 +453,7 @@ def main(milestone_id: str = "M13") -> int:
     Returns:
         Exit code (0 for success, 1 for failure)
     """
-    print(f"=== Manage Development Skill (Phase 1) ===")
+    print("=== Manage Development Skill (Phase 1) ===")
     print(f"Milestone ID: {milestone_id}")
     print()
 
@@ -410,7 +465,7 @@ def main(milestone_id: str = "M13") -> int:
     specifications = []
     if milestone_path.exists():
         for spec_file in milestone_path.glob("SPEC-M13S*.md"):
-            spec_id = spec_file.name.replace('.md', '')
+            spec_id = spec_file.name.replace(".md", "")
             specifications.append(spec_id)
 
     print(f"Found {len(specifications)} specifications: {specifications}")
@@ -441,9 +496,9 @@ def main(milestone_id: str = "M13") -> int:
     print("--- Validating Gate Artifacts ---")
     gate_result = validator.validate_gate_artifacts()
     if gate_result["valid"]:
-        print(f"✓ Gate artifacts: VALID")
+        print("✓ Gate artifacts: VALID")
     else:
-        print(f"✗ Gate artifacts: INVALID")
+        print("✗ Gate artifacts: INVALID")
         print(f"  Missing artifacts: {gate_result['missing_artifacts']}")
         all_valid = False
 
@@ -453,13 +508,15 @@ def main(milestone_id: str = "M13") -> int:
     print("--- Validating Core AEF Artifact System Integration ---")
     core_result = validator.validate_core_artifacts()
     if core_result["valid"]:
-        print(f"✓ Core AEF artifacts: VALID")
-        print(f"  Validated {len(core_result['validation_results'])} pipeline artifacts")
+        print("✓ Core AEF artifacts: VALID")
+        print(
+            f"  Validated {len(core_result['validation_results'])} pipeline artifacts"
+        )
     else:
-        print(f"✗ Core AEF artifacts: INVALID")
+        print("✗ Core AEF artifacts: INVALID")
         print(f"  Errors: {core_result['errors']}")
-        for artifact_name, artifact_result in core_result['validation_results'].items():
-            if not artifact_result['valid']:
+        for artifact_name, artifact_result in core_result["validation_results"].items():
+            if not artifact_result["valid"]:
                 print(f"    {artifact_name}: {artifact_result['errors']}")
         all_valid = False
 
@@ -469,10 +526,12 @@ def main(milestone_id: str = "M13") -> int:
     print("--- Validating Stage Progression ---")
     stage_result = validator.validate_stage_progression()
     if stage_result["valid"]:
-        print(f"✓ Stage progression: VALID")
-        print(f"  Deterministic progression: {stage_result['progression_deterministic']}")
+        print("✓ Stage progression: VALID")
+        print(
+            f"  Deterministic progression: {stage_result['progression_deterministic']}"
+        )
     else:
-        print(f"✗ Stage progression: INVALID")
+        print("✗ Stage progression: INVALID")
         all_valid = False
 
     print()
@@ -493,6 +552,7 @@ def main(milestone_id: str = "M13") -> int:
         print("✗ Validation failed!")
         print("✗ Pipeline cannot proceed to implementation.")
         return 1
+
 
 if __name__ == "__main__":
     sys.exit(main())

@@ -21,11 +21,14 @@ def _git_diff_files() -> set[str]:
         )
         if result.returncode != 0:
             return set()
-        all_files = {line.strip() for line in result.stdout.strip().splitlines() if line.strip()}
+        all_files = {
+            line.strip() for line in result.stdout.strip().splitlines() if line.strip()
+        }
         # Filter to only M8S3-relevant paths — pre-existing diff noise from other
         # milestones (S1, S2, etc.) is not subject to this allowlist.
         m8s3_relevant = {
-            f for f in all_files
+            f
+            for f in all_files
             if f == "reporting.py"
             or f.startswith("tests/M8/S3/")
             or f.startswith("tests/fixtures/reporting/")

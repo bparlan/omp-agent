@@ -7,31 +7,35 @@ import sys
 from pathlib import Path
 
 REPO_ROOT = next(
-    (p for p in Path(__file__).resolve().parents if (p / 'AGENTS.md').exists() or (p / '.git').exists()),
+    (
+        p
+        for p in Path(__file__).resolve().parents
+        if (p / "AGENTS.md").exists() or (p / ".git").exists()
+    ),
     Path(__file__).resolve().parents[4],
 )
-ARTIFACT_TYPES_PATH = REPO_ROOT / 'core' / 'artifacts' / 'artifact_types.py'
+ARTIFACT_TYPES_PATH = REPO_ROOT / "core" / "artifacts" / "artifact_types.py"
 
 
 def fail(msg):
-    print(f'FAIL: {msg}')
+    print(f"FAIL: {msg}")
     sys.exit(1)
 
 
 def pass_(msg):
-    print(f'PASS: {msg}')
+    print(f"PASS: {msg}")
 
 
 def main():
     if not ARTIFACT_TYPES_PATH.exists():
-        fail(f'{ARTIFACT_TYPES_PATH}: artifact types module does not exist')
+        fail(f"{ARTIFACT_TYPES_PATH}: artifact types module does not exist")
 
     content = ARTIFACT_TYPES_PATH.read_text()
-    if 'operations-consolidation' not in content:
-        fail('operations-consolidation artifact type not registered')
+    if "operations-consolidation" not in content:
+        fail("operations-consolidation artifact type not registered")
 
-    pass_('Operations-consolidation registration validation passed')
+    pass_("Operations-consolidation registration validation passed")
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

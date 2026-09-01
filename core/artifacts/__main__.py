@@ -4,7 +4,8 @@ Entry point for python3 -m core.artifacts.resolve
 """
 
 import sys
-sys.path.insert(0, '/Users/bparlan/devcode/aef/agent')
+
+sys.path.insert(0, "/Users/bparlan/devcode/aef/agent")
 
 from core.artifacts.resolve import main
 

@@ -11,6 +11,7 @@ sys.path.insert(0, str(REPO_ROOT))
 
 from core.validation import validate_artifact
 
+
 def main():
     # Test valid health-check artifact metadata
     valid_metadata = {
@@ -30,8 +31,8 @@ def main():
             "created_at": "2024-01-01T00:00:00Z",
             "updated_at": "2024-01-01T00:00:00Z",
             "artifact_identity": "HC-skill_a-1",
-            "artifact_type": "health-check"
-        }
+            "artifact_type": "health-check",
+        },
     }
 
     # Test invalid health-check artifact metadata
@@ -52,8 +53,8 @@ def main():
             "created_at": "2024-01-01T00:00:00Z",
             "updated_at": "2024-01-01T00:00:00Z",
             "artifact_identity": "HC-skill_a-1",
-            "artifact_type": "health-check"
-        }
+            "artifact_type": "health-check",
+        },
     }
 
     # Test valid artifact
@@ -75,6 +76,7 @@ def main():
 
     print("PASS: Validation correctly validates health-check artifacts")
     sys.exit(0)
+
 
 if __name__ == "__main__":
     main()

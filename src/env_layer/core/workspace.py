@@ -11,6 +11,8 @@ import shutil
 import subprocess
 from pathlib import Path
 from typing import Dict, Any, List, Optional
+
+
 class WorkspaceManager:
     """
     Manages isolated workspaces for the AEF 6-layer substrate architecture.
@@ -51,21 +53,21 @@ class WorkspaceManager:
             # Create workspace configuration
             config = self._create_workspace_config(runtime, workspace_name)
             config_file = workspace_dir / "config.json"
-            with open(config_file, 'w') as f:
+            with open(config_file, "w") as f:
                 json.dump(config, f, indent=2)
 
             # Create environment file
             env_file = workspace_dir / ".env"
-            with open(env_file, 'w') as f:
+            with open(env_file, "w") as f:
                 f.write(f"AEF_WORKSPACE_NAME={workspace_name}\n")
                 f.write(f"AEF_RUNTIME={runtime}\n")
                 f.write(f"AEF_PROJECT_PATH={self.project_path}\n")
-                f.write(f"AEF_ISOLATION_MODE=workspace_per_project\n")
+                f.write("AEF_ISOLATION_MODE=workspace_per_project\n")
 
             # Create workspace status
             status = self._create_workspace_status(runtime, workspace_name)
             status_file = workspace_dir / "status.json"
-            with open(status_file, 'w') as f:
+            with open(status_file, "w") as f:
                 json.dump(status, f, indent=2)
 
             result["path"] = str(workspace_dir)
@@ -101,18 +103,22 @@ class WorkspaceManager:
             workspace_dir = self.workspace_base / workspace_pattern
 
             if not workspace_dir.exists():
-                result["message"] = f"No workspace found for project {self.project_path} and runtime {runtime}"
+                result["message"] = (
+                    f"No workspace found for project {self.project_path} and runtime {runtime}"
+                )
                 return result
 
             # Check if workspace is already active
             status_file = workspace_dir / "status.json"
             if status_file.exists():
-                with open(status_file, 'r') as f:
+                with open(status_file, "r") as f:
                     status = json.load(f)
                 if status.get("active", False):
                     result["success"] = True
                     result["workspace"] = str(workspace_dir)
-                    result["message"] = f"Workspace '{workspace_pattern}' is already active"
+                    result["message"] = (
+                        f"Workspace '{workspace_pattern}' is already active"
+                    )
                     return result
 
             # Activate workspace
@@ -123,19 +129,23 @@ class WorkspaceManager:
                 "active": True,
             }
 
-            with open(status_file, 'w') as f:
+            with open(status_file, "w") as f:
                 json.dump(activation_config, f, indent=2)
 
             result["success"] = True
             result["workspace"] = str(workspace_dir)
-            result["message"] = f"Workspace '{workspace_pattern}' activated successfully"
+            result["message"] = (
+                f"Workspace '{workspace_pattern}' activated successfully"
+            )
 
         except Exception as e:
             result["message"] = f"Failed to activate workspace: {e}"
 
         return result
 
-    def execute(self, runtime: str, command: str, args: List[str] = None) -> Dict[str, Any]:
+    def execute(
+        self, runtime: str, command: str, args: List[str] = None
+    ) -> Dict[str, Any]:
         """
         Execute command in isolated workspace.
 
@@ -167,7 +177,9 @@ class WorkspaceManager:
             # Find active workspace for this project and runtime
             workspace_dir = self._find_active_workspace(runtime)
             if not workspace_dir:
-                result["message"] = f"No active workspace found for project {self.project_path} and runtime {runtime}"
+                result["message"] = (
+                    f"No active workspace found for project {self.project_path} and runtime {runtime}"
+                )
                 result["message"] += "\nUse 'activate' to activate a workspace first"
                 return result
 
@@ -175,15 +187,18 @@ class WorkspaceManager:
 
             # Prepare execution environment
             env = os.environ.copy()
-            env.update({
-                "AEF_WORKSPACE_PATH": str(workspace_dir),
-                "AEF_RUNTIME": runtime,
-                "AEF_PROJECT_PATH": str(self.project_path),
-                "AEF_ISOLATION_MODE": "workspace_per_project"
-            })
+            env.update(
+                {
+                    "AEF_WORKSPACE_PATH": str(workspace_dir),
+                    "AEF_RUNTIME": runtime,
+                    "AEF_PROJECT_PATH": str(self.project_path),
+                    "AEF_ISOLATION_MODE": "workspace_per_project",
+                }
+            )
 
             # Execute command
             import time
+
             start_time = time.time()
 
             full_command = [command] + args
@@ -194,7 +209,7 @@ class WorkspaceManager:
                 capture_output=True,
                 text=True,
                 timeout=3600,  # 1 hour timeout
-                check=False
+                check=False,
             )
 
             duration = time.time() - start_time
@@ -206,12 +221,12 @@ class WorkspaceManager:
 
             if proc.returncode == 0:
                 result["success"] = True
-                result["message"] = f"Command executed successfully in workspace"
+                result["message"] = "Command executed successfully in workspace"
             else:
                 result["message"] = f"Command failed with exit code {proc.returncode}"
 
         except subprocess.TimeoutExpired:
-            result["message"] = f"Command timed out (1 hour limit)"
+            result["message"] = "Command timed out (1 hour limit)"
             result["exit_code"] = 124
 
         except Exception as e:
@@ -261,7 +276,7 @@ class WorkspaceManager:
                 # Check status file
                 status_file = workspace_dir / "status.json"
                 if status_file.exists():
-                    with open(status_file, 'r') as f:
+                    with open(status_file, "r") as f:
                         status = json.load(f)
                     workspace_info["active"] = status.get("active", False)
                     workspace_info["created"] = status.get("created_timestamp")
@@ -273,9 +288,13 @@ class WorkspaceManager:
                 result["workspaces"].append(workspace_info)
 
             result["total_workspaces"] = len(result["workspaces"])
-            result["active_count"] = sum(1 for ws in result["workspaces"] if ws["active"])
+            result["active_count"] = sum(
+                1 for ws in result["workspaces"] if ws["active"]
+            )
             result["success"] = True
-            result["message"] = f"Found {result['total_workspaces']} workspaces for project {self.project_path.name}"
+            result["message"] = (
+                f"Found {result['total_workspaces']} workspaces for project {self.project_path.name}"
+            )
 
         except Exception as e:
             result["message"] = f"Failed to get workspace status: {e}"
@@ -327,14 +346,18 @@ class WorkspaceManager:
                     result["cleaned_workspaces"].append(str(workspace_dir))
 
             result["success"] = True
-            result["message"] = f"Cleaned {len(result['cleaned_workspaces'])} workspace(s) for runtime '{runtime}'"
+            result["message"] = (
+                f"Cleaned {len(result['cleaned_workspaces'])} workspace(s) for runtime '{runtime}'"
+            )
 
         except Exception as e:
             result["message"] = f"Failed to clean workspaces: {e}"
 
         return result
 
-    def _create_workspace_config(self, runtime: str, workspace_name: str) -> Dict[str, Any]:
+    def _create_workspace_config(
+        self, runtime: str, workspace_name: str
+    ) -> Dict[str, Any]:
         """Create workspace configuration."""
         return {
             "workspace_name": workspace_name,
@@ -345,10 +368,12 @@ class WorkspaceManager:
                 "path": str(self.workspace_base / workspace_name),
                 "cross_contamination_prevention": True,
                 "environment_prefix": "AEF_",
-            }
+            },
         }
 
-    def _create_workspace_status(self, runtime: str, workspace_name: str) -> Dict[str, Any]:
+    def _create_workspace_status(
+        self, runtime: str, workspace_name: str
+    ) -> Dict[str, Any]:
         """Create workspace status."""
         return {
             "workspace_name": workspace_name,
@@ -367,7 +392,7 @@ class WorkspaceManager:
         if workspace_dir.exists():
             status_file = workspace_dir / "status.json"
             if status_file.exists():
-                with open(status_file, 'r') as f:
+                with open(status_file, "r") as f:
                     status = json.load(f)
                 if status.get("active", False):
                     return workspace_dir
@@ -379,6 +404,8 @@ class WorkspaceManager:
         # For non-force mode, we would prompt user
         # For automation, we assume confirmation in non-force mode
         return True
+
+
 def find_active_workspace(project_path: Path, runtime: str) -> Optional[Path]:
     """
     Find an active workspace for the given project and runtime.

@@ -10,6 +10,7 @@ import sys
 from pathlib import Path
 from datetime import datetime
 
+
 def main() -> int:
     """Main skill execution function"""
     print("=== Review Implementation Skill ===")
@@ -20,7 +21,7 @@ def main() -> int:
     skill_info = {
         "name": "review-implementation",
         "version": "1.2.0-stable",
-        "description": "Purely analytical review of completed implementation against approved specification and verification protocol"
+        "description": "Purely analytical review of completed implementation against approved specification and verification protocol",
     }
 
     print(f"Skill Info: {skill_info}")
@@ -37,7 +38,9 @@ def main() -> int:
 
     if not eval_reports:
         print("No M11S*E implementation evaluation reports found")
-        print("Note: Run evaluate-implementation first to generate implementation reports")
+        print(
+            "Note: Run evaluate-implementation first to generate implementation reports"
+        )
         return 1
 
     print(f"Found {len(eval_reports)} implementation evaluation reports")
@@ -47,7 +50,7 @@ def main() -> int:
     reviews_completed = []
 
     for eval_report_file in eval_reports:
-        spec_id = eval_report_file.stem.replace('E', '').replace('V', '')
+        spec_id = eval_report_file.stem.replace("E", "").replace("V", "")
         print(f"--- Reviewing {spec_id} ---")
 
         # Read evaluation report
@@ -143,13 +146,14 @@ This review is based on:
         print(f"Successfully generated: {review_file}")
         print(f"  - Review Status: {status}")
 
-    print(f"\n=== Review Complete ===")
+    print("\n=== Review Complete ===")
     print(f"Implementation reviews completed: {len(reviews_completed)}")
 
     for review_path in reviews_completed:
         print(f"  - {review_path}")
 
     return 0
+
 
 if __name__ == "__main__":
     sys.exit(main())

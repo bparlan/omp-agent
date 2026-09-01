@@ -7,8 +7,6 @@ Tests FAIL by default and will PASS only when implementation is correct.
 
 import pytest
 import sys
-import os
-import json
 from pathlib import Path
 
 # Add project root to path

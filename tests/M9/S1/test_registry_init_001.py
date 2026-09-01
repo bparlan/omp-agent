@@ -10,15 +10,16 @@ sys.path.insert(0, os.path.join(os.getcwd()))
 
 from core.artifacts.registry import get_registry
 
+
 def test_registry_initialization():
     registry = get_registry()
 
     expected_methods = [
-        'register_type',
-        'get_type',
-        'get_schema',
-        'get_storage_rule',
-        'list_types',
+        "register_type",
+        "get_type",
+        "get_schema",
+        "get_storage_rule",
+        "list_types",
     ]
     for method in expected_methods:
         if not hasattr(registry, method):
@@ -42,11 +43,14 @@ def test_registry_initialization():
 
         storage_rule = registry.get_storage_rule(expected_type)
         if not isinstance(storage_rule, dict) or not storage_rule:
-            print(f"FAIL: get_storage_rule('{expected_type}') returned invalid storage rule")
+            print(
+                f"FAIL: get_storage_rule('{expected_type}') returned invalid storage rule"
+            )
             return 1
 
     print("PASS: Registry initialized with types, schemas, and storage rules")
     return 0
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     sys.exit(test_registry_initialization())

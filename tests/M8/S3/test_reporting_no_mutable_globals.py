@@ -22,18 +22,32 @@ def _find_mutable_globals(filepath: Path) -> list[str]:
     mutable_nodes: list[str] = []
 
     for node in tree.body:
-        if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef,
-                             ast.Import, ast.ImportFrom)):
+        if isinstance(
+            node,
+            (
+                ast.FunctionDef,
+                ast.AsyncFunctionDef,
+                ast.ClassDef,
+                ast.Import,
+                ast.ImportFrom,
+            ),
+        ):
             continue
 
         if isinstance(node, ast.Assign):
             for target in node.targets:
-                if isinstance(target, ast.Name) and isinstance(node.value, mutable_types):
+                if isinstance(target, ast.Name) and isinstance(
+                    node.value, mutable_types
+                ):
                     mutable_nodes.append(f"{target.id} = {type(node.value).__name__}")
 
         elif isinstance(node, ast.AnnAssign):
-            if isinstance(node.target, ast.Name) and isinstance(node.value, mutable_types):
-                mutable_nodes.append(f"{node.target.id}: ... = {type(node.value).__name__}")
+            if isinstance(node.target, ast.Name) and isinstance(
+                node.value, mutable_types
+            ):
+                mutable_nodes.append(
+                    f"{node.target.id}: ... = {type(node.value).__name__}"
+                )
 
         elif isinstance(node, ast.AugAssign):
             if isinstance(node.target, ast.Name):
@@ -47,7 +61,6 @@ def test_no_mutable_globals():
 
     Pre-implementation: ModuleNotFoundError is the expected VALID_INITIAL_FAILURE.
     """
-    import reporting
 
     mutable = _find_mutable_globals(REPORTING_PY)
     assert len(mutable) == 0, f"Module-level mutable globals found: {mutable}"

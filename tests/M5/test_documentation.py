@@ -21,11 +21,11 @@ class DocumentationTest:
 
         # Required artifacts
         required_artifacts = [
-            "M5.md",                    # Milestone document
-            "INVESTIGATION.md",         # Investigation/design report
-            "M5S1.md",                  # Implementation specification
-            "M5S1V.md",                 # Verification protocol
-            "M5S1T1.md",                # Test plan
+            "M5.md",  # Milestone document
+            "INVESTIGATION.md",  # Investigation/design report
+            "M5S1.md",  # Implementation specification
+            "M5S1V.md",  # Verification protocol
+            "M5S1T1.md",  # Test plan
         ]
 
         all_exist = True
@@ -48,10 +48,10 @@ class DocumentationTest:
         milestone_path = self.milestone_dir / "M5.md"
 
         if not milestone_path.exists():
-            print(f"  ✗ FAIL: M5.md not found")
+            print("  ✗ FAIL: M5.md not found")
             return False
 
-        content = milestone_path.read_text(encoding='utf-8')
+        content = milestone_path.read_text(encoding="utf-8")
 
         # Check for required sections
         required_sections = [
@@ -82,10 +82,10 @@ class DocumentationTest:
         investigation_path = self.milestone_dir / "INVESTIGATION.md"
 
         if not investigation_path.exists():
-            print(f"  ✗ FAIL: INVESTIGATION.md not found")
+            print("  ✗ FAIL: INVESTIGATION.md not found")
             return False
 
-        content = investigation_path.read_text(encoding='utf-8')
+        content = investigation_path.read_text(encoding="utf-8")
 
         # Check for required sections
         required_sections = [
@@ -115,10 +115,10 @@ class DocumentationTest:
         spec_path = self.milestone_dir / "M5S1.md"
 
         if not spec_path.exists():
-            print(f"  ✗ FAIL: M5S1.md not found")
+            print("  ✗ FAIL: M5S1.md not found")
             return False
 
-        content = spec_path.read_text(encoding='utf-8')
+        content = spec_path.read_text(encoding="utf-8")
 
         # Check for required sections
         required_sections = [
@@ -147,10 +147,10 @@ class DocumentationTest:
         ver_path = self.milestone_dir / "M5S1V.md"
 
         if not ver_path.exists():
-            print(f"  ✗ FAIL: M5S1V.md not found")
+            print("  ✗ FAIL: M5S1V.md not found")
             return False
 
-        content = ver_path.read_text(encoding='utf-8')
+        content = ver_path.read_text(encoding="utf-8")
 
         # Check for required sections
         required_sections = [
@@ -179,10 +179,10 @@ class DocumentationTest:
         test_plan_path = self.milestone_dir / "M5S1T1.md"
 
         if not test_plan_path.exists():
-            print(f"  ✗ FAIL: M5S1T1.md not found")
+            print("  ✗ FAIL: M5S1T1.md not found")
             return False
 
-        print(f"  ✓ PASS: M5S1T1.md exists")
+        print("  ✓ PASS: M5S1T1.md exists")
 
         return True
 

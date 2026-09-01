@@ -13,7 +13,6 @@ def test_find_project_root_with_empty_string_and_none_defaults_to_cwd():
     # Import the module under test
     from discovery import find_project_root
 
-    import os
     expected_cwd = Path.cwd().resolve()
 
     # Test with empty string

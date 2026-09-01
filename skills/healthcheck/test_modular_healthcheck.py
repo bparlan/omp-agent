@@ -10,21 +10,22 @@ import os
 from pathlib import Path
 import json
 import sys
-import subprocess
 
 # Add the skill directory to path
 sys.path.insert(0, str(Path(__file__).parent))
 
 from core.validation import (
-    ValidatorBase, RequiredFieldsValidator,
-    StableSuffixValidator, SkillNameValidator, SkillValidator
+    ValidatorBase,
+    RequiredFieldsValidator,
+    StableSuffixValidator,
+    SkillNameValidator,
+    SkillValidator,
 )
 from discovery import discover_skills_directory, discover_skills
-from reporting import (
-    generate_badges, generate_health_report, generate_processed_skills
-)
+from reporting import generate_badges, generate_health_report, generate_processed_skills
 from cli import parse_arguments, validate_single_skill, process_all_skills
-from main import main
+
+
 class TestSkillValidator:
     """Test validation module"""
 
@@ -51,32 +52,32 @@ userInvocable: true
 ---
 """
         result = validator.validate(valid_content)
-        assert result['validation_score'] == 1.0
-        assert len(result['issues']) == 0
-        assert result['passes_all'] == True
+        assert result["validation_score"] == 1.0
+        assert len(result["issues"]) == 0
+        assert result["passes_all"] == True
 
         # Invalid content (missing fields)
         invalid_content = "name: Test Skill\nversion: 1.0.0"
         result = validator.validate(invalid_content)
-        assert result['validation_score'] < 1.0
-        assert len(result['issues']) > 0
-        assert result['passes_all'] == False
+        assert result["validation_score"] < 1.0
+        assert len(result["issues"]) > 0
+        assert result["passes_all"] == False
 
     def test_stable_suffix_validator(self):
         """Test stable suffix validation"""
         validator = StableSuffixValidator()
 
         # Valid content
-        valid_content = "version: \"1.0.0-stable\""
+        valid_content = 'version: "1.0.0-stable"'
         result = validator.validate(valid_content)
-        assert result['has_stable_suffix'] == True
-        assert result['passes'] == True
+        assert result["has_stable_suffix"] == True
+        assert result["passes"] == True
 
         # Invalid content
-        invalid_content = "version: \"1.0.0\""
+        invalid_content = 'version: "1.0.0"'
         result = validator.validate(invalid_content)
-        assert result['has_stable_suffix'] == False
-        assert result['passes'] == False
+        assert result["has_stable_suffix"] == False
+        assert result["passes"] == False
 
     def test_skill_name_validator(self):
         """Test skill name extraction"""
@@ -85,14 +86,14 @@ userInvocable: true
         # Valid content
         content = "name: My Awesome Skill"
         result = validator.validate(content)
-        assert result['extracted_name'] == "My Awesome Skill"
-        assert result['has_name'] == True
+        assert result["extracted_name"] == "My Awesome Skill"
+        assert result["has_name"] == True
 
         # Invalid content
         content = "version: 1.0.0"
         result = validator.validate(content)
-        assert result['extracted_name'] == ""
-        assert result['has_name'] == False
+        assert result["extracted_name"] == ""
+        assert result["has_name"] == False
 
     def test_skill_validator_integration(self):
         """Test SkillValidator integration"""
@@ -110,11 +111,11 @@ userInvocable: true
 ---""")
 
             result = validator.validate_skill_file(skill_file)
-            assert result['name'] == "Integration Test"
-            assert result['status'] == "healthy"
-            assert result['validation_score'] == 1.0
-            assert result['has_stable_suffix'] == True
-            assert len(result['issues']) == 0
+            assert result["name"] == "Integration Test"
+            assert result["status"] == "healthy"
+            assert result["validation_score"] == 1.0
+            assert result["has_stable_suffix"] == True
+            assert len(result["issues"]) == 0
 
     def test_skill_validator_error_handling(self):
         """Test error handling in SkillValidator"""
@@ -123,8 +124,10 @@ userInvocable: true
         # Non-existent file
         non_existent = Path("/tmp/non_existent_skill.md")
         result = validator.validate_skill_file(non_existent)
-        assert result['status'] == "error"
-        assert len(result['issues']) > 0
+        assert result["status"] == "error"
+        assert len(result["issues"]) > 0
+
+
 class TestDiscoveryModule:
     """Test discovery module"""
 
@@ -143,6 +146,8 @@ class TestDiscoveryModule:
         for skill in skills:
             assert isinstance(skill, Path)
             assert (skill.parent / "SKILL.md").exists()
+
+
 class TestReportingModule:
     """Test reporting module"""
 
@@ -157,7 +162,7 @@ class TestReportingModule:
                 "has_stable_suffix": True,
                 "issues": [],
                 "last_modified": "2024-01-01T00:00:00",
-                "last_checked": "2024-01-01T00:00:00"
+                "last_checked": "2024-01-01T00:00:00",
             },
             {
                 "name": "Test Skill 2",
@@ -166,13 +171,13 @@ class TestReportingModule:
                 "has_stable_suffix": False,
                 "issues": ["Missing tools field"],
                 "last_modified": "2024-01-01T00:00:00",
-                "last_checked": "2024-01-01T00:00:00"
-            }
+                "last_checked": "2024-01-01T00:00:00",
+            },
         ]
 
     def test_generate_badges(self):
         """Test badges generation"""
-        os.environ['OMP_PROJECT_ROOT'] = self.temp_dir
+        os.environ["OMP_PROJECT_ROOT"] = self.temp_dir
 
         try:
             # Change to temp directory
@@ -194,11 +199,11 @@ class TestReportingModule:
 
         finally:
             os.chdir(original_cwd)
-            del os.environ['OMP_PROJECT_ROOT']
+            del os.environ["OMP_PROJECT_ROOT"]
 
     def test_generate_health_report(self):
         """Test health report generation"""
-        os.environ['OMP_PROJECT_ROOT'] = self.temp_dir
+        os.environ["OMP_PROJECT_ROOT"] = self.temp_dir
 
         try:
             original_cwd = os.getcwd()
@@ -212,18 +217,18 @@ class TestReportingModule:
             with open(health_file) as f:
                 report = json.load(f)
 
-            assert report['total_skills'] == 2
-            assert report['healthy_count'] == 1
-            assert report['needs_review_count'] == 1
-            assert report['error_count'] == 0
+            assert report["total_skills"] == 2
+            assert report["healthy_count"] == 1
+            assert report["needs_review_count"] == 1
+            assert report["error_count"] == 0
 
         finally:
             os.chdir(original_cwd)
-            del os.environ['OMP_PROJECT_ROOT']
+            del os.environ["OMP_PROJECT_ROOT"]
 
     def test_generate_processed_skills(self):
         """Test processed skills generation"""
-        os.environ['OMP_PROJECT_ROOT'] = self.temp_dir
+        os.environ["OMP_PROJECT_ROOT"] = self.temp_dir
 
         try:
             original_cwd = os.getcwd()
@@ -244,7 +249,9 @@ class TestReportingModule:
 
         finally:
             os.chdir(original_cwd)
-            del os.environ['OMP_PROJECT_ROOT']
+            del os.environ["OMP_PROJECT_ROOT"]
+
+
 class TestCLIModule:
     """Test CLI module"""
 
@@ -253,19 +260,19 @@ class TestCLIModule:
         # Test help flag
         original_argv = sys.argv
         try:
-            sys.argv = ['healthcheck.py', '--help']
+            sys.argv = ["healthcheck.py", "--help"]
             args = parse_arguments()
             assert args.help == True
             assert args.skill_name is None
             assert args.all == False
 
-            sys.argv = ['healthcheck.py', 'test_skill']
+            sys.argv = ["healthcheck.py", "test_skill"]
             args = parse_arguments()
             assert args.skill_name == "test_skill"
             assert args.help == False
             assert args.all == False
 
-            sys.argv = ['healthcheck.py', '--all']
+            sys.argv = ["healthcheck.py", "--all"]
             args = parse_arguments()
             assert args.all == True
             assert args.skill_name is None
@@ -278,20 +285,22 @@ class TestCLIModule:
         original_argv = sys.argv
         try:
             # Test no arguments
-            sys.argv = ['healthcheck.py']
+            sys.argv = ["healthcheck.py"]
             args = parse_arguments()
             assert args.skill_name is None
             assert args.all == False
             assert args.help == False
 
             # Test both skill name and --all (should prioritize skill name)
-            sys.argv = ['healthcheck.py', 'test_skill', '--all']
+            sys.argv = ["healthcheck.py", "test_skill", "--all"]
             args = parse_arguments()
             assert args.skill_name == "test_skill"
             assert args.all == True  # Both are set, --all takes effect
 
         finally:
             sys.argv = original_argv
+
+
 class TestIntegration:
     """Integration tests for modular healthcheck"""
 
@@ -304,7 +313,7 @@ class TestIntegration:
 
         # Create a temporary skill
         with tempfile.TemporaryDirectory() as tmpdir:
-            os.environ['OMP_PROJECT_ROOT'] = tmpdir
+            os.environ["OMP_PROJECT_ROOT"] = tmpdir
 
             try:
                 # Create a test skill directory
@@ -323,9 +332,9 @@ userInvocable: true
                 # Test validation
                 validator = SkillValidator()
                 result = validator.validate_skill_file(skill_file)
-                assert result['status'] == "healthy"
-                assert result['validation_score'] == 1.0
-                assert result['has_stable_suffix'] == True
+                assert result["status"] == "healthy"
+                assert result["validation_score"] == 1.0
+                assert result["has_stable_suffix"] == True
 
                 # Test skill discovery
                 skills = discover_skills()
@@ -346,10 +355,10 @@ userInvocable: true
                 # Verify report content
                 with open(health_file) as f:
                     report = json.load(f)
-                assert report['healthy_count'] == 1
+                assert report["healthy_count"] == 1
 
             finally:
-                del os.environ['OMP_PROJECT_ROOT']
+                del os.environ["OMP_PROJECT_ROOT"]
 
     def test_backward_compatibility(self):
         """Test that modular implementation maintains backward compatibility"""
@@ -361,14 +370,17 @@ userInvocable: true
         # We can't easily test the full execution without mocking,
         # but we can verify the import structure
         import importlib.util
-        spec = importlib.util.spec_from_file_location("healthcheck", str(original_healthcheck))
+
+        spec = importlib.util.spec_from_file_location(
+            "healthcheck", str(original_healthcheck)
+        )
         module = importlib.util.module_from_spec(spec)
 
         # Should not raise import errors
         spec.loader.exec_module(module)
 
         # Should have main function
-        assert hasattr(module, 'main')
+        assert hasattr(module, "main")
         assert callable(module.main)
 
     def test_modular_separation_of_concerns(self):
@@ -406,6 +418,8 @@ userInvocable: true
         # CLI should import the other modules
         cli_source = inspect.getsource(parse_arguments)
         assert "discovery" in cli_source or "from discovery" in cli_source
+
+
 class TestRequirementsCompliance:
     """Test compliance with modular decomposition requirements"""
 
@@ -419,7 +433,7 @@ class TestRequirementsCompliance:
             "discovery.py",
             "reporting.py",
             "cli.py",
-            "main.py"
+            "main.py",
         ]
 
         for module in required_modules:
@@ -444,15 +458,15 @@ class TestRequirementsCompliance:
         original_argv = sys.argv
         try:
             # Test original CLI patterns
-            sys.argv = ['healthcheck.py', 'my_skill']
+            sys.argv = ["healthcheck.py", "my_skill"]
             args = parse_arguments()
             assert args.skill_name == "my_skill"
 
-            sys.argv = ['healthcheck.py', '--all']
+            sys.argv = ["healthcheck.py", "--all"]
             args = parse_arguments()
             assert args.all == True
 
-            sys.argv = ['healthcheck.py', '--help']
+            sys.argv = ["healthcheck.py", "--help"]
             args = parse_arguments()
             assert args.help == True
 
@@ -462,7 +476,6 @@ class TestRequirementsCompliance:
     def test_requirements_3_single_batch_modes(self):
         """Test requirement 3: Single skill and batch processing modes"""
         # Should support both modes
-        from cli import validate_single_skill, process_all_skills
 
         # Both functions should exist
         assert callable(validate_single_skill)
@@ -480,15 +493,16 @@ class TestRequirementsCompliance:
         # Should be able to create new validators
         class TestValidator(ValidatorBase):
             def validate(self, content):
-                return {'test_score': 1.0, 'test_passed': True}
+                return {"test_score": 1.0, "test_passed": True}
 
         validator = TestValidator("test")
         result = validator.validate("test content")
-        assert result['test_score'] == 1.0
-        assert result['test_passed'] == True
+        assert result["test_score"] == 1.0
+        assert result["test_passed"] == True
 
         # Should support plugin architecture
         from cli import run_health_check
+
         assert callable(run_health_check)
 
     def test_requirements_5_technical_structure(self):
@@ -498,19 +512,15 @@ class TestRequirementsCompliance:
         # Each module should be independently importable
         import importlib.util
 
-        modules_to_test = [
-            "core.validation",
-            "discovery",
-            "reporting",
-            "cli",
-            "main"
-        ]
+        modules_to_test = ["core.validation", "discovery", "reporting", "cli", "main"]
 
         for module_name in modules_to_test:
             try:
                 # Try to import each module
                 module_path = skill_dir / f"{module_name.replace('.', '/')}.py"
-                spec = importlib.util.spec_from_file_location(module_name, str(module_path))
+                spec = importlib.util.spec_from_file_location(
+                    module_name, str(module_path)
+                )
                 module = importlib.util.module_from_spec(spec)
                 spec.loader.exec_module(module)
                 assert module is not None
@@ -523,11 +533,12 @@ class TestRequirementsCompliance:
 
         # Each module should be testable
         validator = SkillValidator()
-        assert hasattr(validator, 'validate_skill_file')
-        assert hasattr(validator, 'combine_validators_for_testing')
+        assert hasattr(validator, "validate_skill_file")
+        assert hasattr(validator, "combine_validators_for_testing")
 
         # Validation logic should be pure (no side effects)
         import inspect
+
         source = inspect.getsource(SkillValidator.validate_skill_file)
 
         # Should not modify file system during validation
@@ -537,6 +548,8 @@ class TestRequirementsCompliance:
         # Should not have external dependencies
         assert "os." not in source or "os.environ" not in source
         assert "sys." not in source or "sys.argv" not in source
+
+
 def run_all_tests():
     """Run all tests and report results"""
     print("Running modular healthcheck tests...")
@@ -549,7 +562,7 @@ def run_all_tests():
         TestReportingModule,
         TestCLIModule,
         TestIntegration,
-        TestRequirementsCompliance
+        TestRequirementsCompliance,
     ]
 
     total_tests = 0
@@ -561,7 +574,7 @@ def run_all_tests():
         test_instance = test_class()
 
         for method_name in dir(test_instance):
-            if method_name.startswith('test_'):
+            if method_name.startswith("test_"):
                 total_tests += 1
                 try:
                     method = getattr(test_instance, method_name)
@@ -576,11 +589,13 @@ def run_all_tests():
     print(f"Test Results: {passed_tests}/{total_tests} passed, {failed_tests} failed")
 
     if failed_tests > 0:
-        print(f"\nFAILED TESTS:")
+        print("\nFAILED TESTS:")
         return False
     else:
-        print(f"\nALL TESTS PASSED!")
+        print("\nALL TESTS PASSED!")
         return True
+
+
 if __name__ == "__main__":
     success = run_all_tests()
     sys.exit(0 if success else 1)

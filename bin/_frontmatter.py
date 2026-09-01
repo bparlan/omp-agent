@@ -36,7 +36,7 @@ def extract_frontmatter(filepath: str):
         return None
 
     # Strip UTF-8 BOM if present (\ufeff = \xef\xbb\xbf)
-    if content.startswith('\ufeff'):
+    if content.startswith("\ufeff"):
         content = content[1:]
 
     # Extract YAML frontmatter delimited by --- ... ---

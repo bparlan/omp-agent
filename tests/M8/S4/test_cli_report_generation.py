@@ -16,6 +16,8 @@ from unittest.mock import patch
 from pathlib import Path
 
 import pytest
+
+
 def _capture_stdout(func, *args, **kwargs):
     old = sys.stdout
     buf = StringIO()
@@ -25,6 +27,8 @@ def _capture_stdout(func, *args, **kwargs):
     finally:
         sys.stdout = old
     return result, buf.getvalue()
+
+
 def test_generate_all_reports_creates_files(tmp_path):
     """VI-6: All three report files are created in skills directory."""
     from cli import generate_all_reports
@@ -37,8 +41,20 @@ def test_generate_all_reports_creates_files(tmp_path):
             "name": "skill_alpha",
             "score": 0.95,
             "status": "PASS",
-            "fields_checked": ["name", "version", "description", "tools", "userInvocable"],
-            "field_results": {"name": True, "version": True, "description": True, "tools": True, "userInvocable": True},
+            "fields_checked": [
+                "name",
+                "version",
+                "description",
+                "tools",
+                "userInvocable",
+            ],
+            "field_results": {
+                "name": True,
+                "version": True,
+                "description": True,
+                "tools": True,
+                "userInvocable": True,
+            },
             "errors": [],
             "stable_suffix_detected": False,
         },
@@ -71,7 +87,11 @@ def test_generate_all_reports_creates_files(tmp_path):
     assert isinstance(health_data, dict), "health_check_report.json must be dict"
     processed_data = json.loads(processed_file.read_text())
     assert isinstance(processed_data, dict), "processed_skills.json must be dict"
-    assert len(processed_data) == len(results), "processed_skills.json key count mismatch"
+    assert len(processed_data) == len(
+        results
+    ), "processed_skills.json key count mismatch"
+
+
 def test_generate_all_reports_summary_counts():
     """VI-6: Summary block contains correct counts."""
     from cli import generate_all_reports
@@ -81,8 +101,20 @@ def test_generate_all_reports_summary_counts():
             "name": "skill_alpha",
             "score": 1.0,
             "status": "PASS",
-            "fields_checked": ["name", "version", "description", "tools", "userInvocable"],
-            "field_results": {"name": True, "version": True, "description": True, "tools": True, "userInvocable": True},
+            "fields_checked": [
+                "name",
+                "version",
+                "description",
+                "tools",
+                "userInvocable",
+            ],
+            "field_results": {
+                "name": True,
+                "version": True,
+                "description": True,
+                "tools": True,
+                "userInvocable": True,
+            },
             "errors": [],
             "stable_suffix_detected": False,
         },
@@ -105,5 +137,7 @@ def test_generate_all_reports_summary_counts():
     assert "Healthy: 1 (50.0%)" in stdout, "Healthy count mismatch"
     assert "Needs review: 1 (50.0%)" in stdout, "Needs review count mismatch"
     assert "Errors: 1 (50.0%)" in stdout, "Errors count mismatch"
+
+
 if __name__ == "__main__":
     pytest.main([__file__, "-v"])

@@ -1,6 +1,7 @@
 from dataclasses import dataclass, field
 from typing import Any, Dict, List, Optional
 
+
 @dataclass
 class AmbiguousResolutionError(Exception):
     """Raised when multiple artifacts match a resolution query."""
@@ -14,6 +15,7 @@ class AmbiguousResolutionError(Exception):
             f"AmbiguousResolutionError: {len(self.matching_artifacts)} artifacts matched "
             f"criteria {self.match_criteria}. {self.user_instruction}"
         )
+
 
 @dataclass
 class ValidationError(Exception):
@@ -32,6 +34,7 @@ class ValidationError(Exception):
         if self.errors:
             parts.append(f"errors={self.errors}")
         return ": ".join(parts)
+
 
 @dataclass
 class ArtifactNotFoundError(Exception):

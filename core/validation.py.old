@@ -16,6 +16,7 @@ from core.artifacts.metadata import extract_frontmatter
 @dataclass
 class ValidationResult:
     """M9S1 canonical artifact validation result."""
+
     valid: bool = True
     errors: List[str] = field(default_factory=list)
     missing_fields: List[str] = field(default_factory=list)
@@ -24,6 +25,7 @@ class ValidationResult:
 @dataclass
 class ArtifactValidationResult:
     """M9S1 artifact validation result (legacy compatibility)."""
+
     valid: bool = True
     errors: List[str] = field(default_factory=list)
     missing_fields: List[str] = field(default_factory=list)
@@ -31,13 +33,23 @@ class ArtifactValidationResult:
 
 class Validator:
     """Abstract base class for skill validation rules (M8S1 FR-VALIDATOR_BASE_CLASS)."""
+
     def validate(self, content: str) -> Dict[str, Any]:
         raise NotImplementedError
 
 
 def _required_artifact_keys() -> List[str]:
     """Return required artifact metadata keys per canonical contract."""
-    return ["id", "type", "title", "milestone_id", "status", "derived_from", "template_version", "metadata"]
+    return [
+        "id",
+        "type",
+        "title",
+        "milestone_id",
+        "status",
+        "derived_from",
+        "template_version",
+        "metadata",
+    ]
 
 
 def _required_metadata_keys() -> List[str]:
@@ -45,16 +57,26 @@ def _required_metadata_keys() -> List[str]:
     return ["created_at", "updated_at", "artifact_identity", "artifact_type"]
 
 
-def validate_metadata(artifact_path: str, schema: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+def validate_metadata(
+    artifact_path: str, schema: Optional[Dict[str, Any]] = None
+) -> Dict[str, Any]:
     """Validates artifact frontmatter and metadata against the Artifact Registry schema."""
 
     try:
         metadata = extract_frontmatter(artifact_path)
     except Exception as e:
-        return {"valid": False, "errors": [f"Could not read file: {e}"], "missing_fields": _required_artifact_keys()}
+        return {
+            "valid": False,
+            "errors": [f"Could not read file: {e}"],
+            "missing_fields": _required_artifact_keys(),
+        }
 
     if metadata is None:
-        return {"valid": False, "errors": ["No valid YAML frontmatter found"], "missing_fields": _required_artifact_keys()}
+        return {
+            "valid": False,
+            "errors": ["No valid YAML frontmatter found"],
+            "missing_fields": _required_artifact_keys(),
+        }
 
     required = _required_artifact_keys()
     missing = [field for field in required if field not in metadata]
@@ -84,7 +106,9 @@ def validate_metadata(artifact_path: str, schema: Optional[Dict[str, Any]] = Non
     return {"valid": valid, "errors": errors, "missing_fields": missing}
 
 
-def _validate_metadata_against_schema(metadata: Dict[str, Any], schema: Dict[str, Any]) -> List[str]:
+def _validate_metadata_against_schema(
+    metadata: Dict[str, Any], schema: Dict[str, Any]
+) -> List[str]:
     """Validate metadata against schema constraints."""
     errors = []
 
@@ -120,11 +144,15 @@ def _validate_field_type(value: Any, constraints: Dict[str, Any]) -> List[str]:
     # Get expected type
     expected_type = constraints.get("type")
     if expected_type and not _check_type(value, expected_type):
-        errors.append(f"Field '{constraints.get('description', '')}' expected type {expected_type}")
+        errors.append(
+            f"Field '{constraints.get('description', '')}' expected type {expected_type}"
+        )
 
     # Check pattern constraints
     if "pattern" in constraints and not _check_pattern(value, constraints["pattern"]):
-        errors.append(f"Field '{constraints.get('description', '')}' does not match pattern")
+        errors.append(
+            f"Field '{constraints.get('description', '')}' does not match pattern"
+        )
 
     return errors
 
@@ -143,10 +171,12 @@ def _check_type(value: Any, expected_type: str) -> bool:
 def _check_pattern(value: str, pattern: str) -> bool:
     """Check if value matches regex pattern."""
     import re
+
     return bool(re.match(pattern, value))
 
 
 # Project Configuration Validation Functions
+
 
 def validate_project_config(project_root: str) -> Dict[str, Any]:
     """Validate project configuration at the project root.
@@ -160,7 +190,11 @@ def validate_project_config(project_root: str) -> Dict[str, Any]:
 
     # Return early for missing configuration
     if not config_path.exists():
-        return {"valid": False, "errors": ["Project configuration file .omp/config.yml not found"], "missing_fields": ["project_id", "project_slug", "version"]}
+        return {
+            "valid": False,
+            "errors": ["Project configuration file .omp/config.yml not found"],
+            "missing_fields": ["project_id", "project_slug", "version"],
+        }
 
     # Use canonical validation API for schema validation
     project_config_schema = {
@@ -169,20 +203,20 @@ def validate_project_config(project_root: str) -> Dict[str, Any]:
         "properties": {
             "project_id": {
                 "type": "string",
-                "description": "Unique project identifier"
+                "description": "Unique project identifier",
             },
             "project_slug": {
                 "type": "string",
                 "pattern": "^[a-z0-9-]+$",
-                "description": "URL-safe name for the project"
+                "description": "URL-safe name for the project",
             },
             "version": {
                 "type": "string",
                 "pattern": "^\\d+\\.\\d+\\.\\d+(-stable)?$",
-                "description": "Semantic version of the project"
-            }
+                "description": "Semantic version of the project",
+            },
         },
-        "additionalProperties": False
+        "additionalProperties": False,
     }
 
     # Extract YAML content from .omp/config.yml
@@ -209,7 +243,11 @@ def validate_project_config(project_root: str) -> Dict[str, Any]:
                 yaml_content = {}
 
     except Exception as e:
-        return {"valid": False, "errors": [f"Could not read configuration file: {e}"], "missing_fields": ["project_id", "project_slug", "version"]}
+        return {
+            "valid": False,
+            "errors": [f"Could not read configuration file: {e}"],
+            "missing_fields": ["project_id", "project_slug", "version"],
+        }
 
     # Apply schema validation using existing validation functions
     errors = _validate_metadata_against_schema(yaml_content, project_config_schema)

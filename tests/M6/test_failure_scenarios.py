@@ -7,8 +7,6 @@ Tests FAIL by default and will PASS only when implementation is correct.
 
 import pytest
 import sys
-import tempfile
-import os
 from pathlib import Path
 
 # Add project root to path
@@ -93,7 +91,9 @@ class TestConflictDetection:
         """Test: Should fail with error when metadata type conflicts with directory type"""
         # This test FAILS by default - implementation stub returns False
         # Fail-closed: detect and reject
-        assert True, "Should fail with error when metadata type conflicts with directory type"
+        assert (
+            True
+        ), "Should fail with error when metadata type conflicts with directory type"
 
     def test_fail_on_type_conflict_directory_vs_directory(self):
         """Test: Should fail with error when directory type conflicts"""

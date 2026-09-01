@@ -9,6 +9,7 @@ import sys
 from pathlib import Path
 from datetime import datetime
 
+
 def main() -> int:
     """Main skill execution function"""
     print("=== Generate Tests Skill ===")
@@ -19,7 +20,7 @@ def main() -> int:
     skill_info = {
         "name": "generate-tests",
         "version": "3.7.0-stable",
-        "description": "Generate deterministic, executable tests strictly from a canonical verification contract"
+        "description": "Generate deterministic, executable tests strictly from a canonical verification contract",
     }
 
     print(f"Skill Info: {skill_info}")
@@ -52,7 +53,9 @@ def main() -> int:
         content = spec_file.read_text()
 
         # Check for testability (based on M13S5 spec content)
-        is_testable = "testable" in content.lower() and "verification" in content.lower()
+        is_testable = (
+            "testable" in content.lower() and "verification" in content.lower()
+        )
 
         # Create test files for M13S5 in the CORRECT location
         test_files = {
@@ -350,12 +353,12 @@ def test_isolation_no_unexpected_changes():
 
 if __name__ == "__main__":
     pytest.main([__file__, "-v"])
-'''
+''',
         }
 
         # Create test directory - generated test artifacts should be in milestones/M13/
         # Test implementations should be in tests/M13/S5/
-        tests_dir = Path(f"agent/tests/M13/S5")
+        tests_dir = Path("agent/tests/M13/S5")
         tests_dir.mkdir(parents=True, exist_ok=True)
 
         # Write M13S5 specific test files
@@ -367,7 +370,7 @@ if __name__ == "__main__":
             print(f"Successfully generated: {test_file_path}")
 
     # Create the test plan markdown file
-    test_plan_content = f'''---
+    test_plan_content = """---
 id: TSET-M13S5T1
 type: test_set
 title: "Test Plan for M13S5"
@@ -386,22 +389,23 @@ status: draft
 | tests/M13/S5/test_orchestration.py | V-FR-VALIDATION-ORCHESTRATION-CONTRACT | FR-VALIDATION-ORCHESTRATION-CONTRACT | IMPLEMENTATION_CHECK |
 | tests/M13/S5/test_determinism.py | V-NFR-TEST-DETERMINISM | NFR-TEST-DETERMINISM | INTEGRITY_TEST |
 | tests/M13/S5/test_isolation.py | V-NFR-TEST-SCOPE-ISOLATION | NFR-TEST-SCOPE-ISOLATION | INTEGRITY_TEST |
-'''
+"""
 
-    test_plan_md_path = milestone_dir / f"M13S5T1.md"
+    test_plan_md_path = milestone_dir / "M13S5T1.md"
     test_plan_md_path.write_text(test_plan_content)
     tests_generated.append(str(test_plan_md_path))
     print(f"Successfully generated: {test_plan_md_path}")
 
     print(f"  - Testable: {'✓' if is_testable else '✗'}")
 
-    print(f"\n=== Tests Generation Complete ===")
+    print("\n=== Tests Generation Complete ===")
     print(f"Test files generated: {len(tests_generated)}")
 
     for test_path in tests_generated:
         print(f"  - {test_path}")
 
     return 0
+
 
 if __name__ == "__main__":
     sys.exit(main())

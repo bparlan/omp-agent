@@ -12,7 +12,7 @@ import subprocess
 import sys
 import time
 from pathlib import Path
-from typing import Dict, Any, List, Optional
+from typing import Dict, Any
 
 
 def handle_env_detect(args):
@@ -20,7 +20,7 @@ def handle_env_detect(args):
     project_path = Path(args.project)
     runtime = args.runtime
     task_name = args.task
-    use_cache = getattr(args, 'cache', False)
+    use_cache = getattr(args, "cache", False)
 
     # Basic validation
     if not project_path.exists():
@@ -31,10 +31,14 @@ def handle_env_detect(args):
     cache_file = project_path / f".aef-env/cache/{runtime}_{task_name}.json"
     if use_cache and cache_file.exists():
         try:
-            with open(cache_file, 'r') as f:
+            with open(cache_file, "r") as f:
                 cached_result = json.load(f)
-            print(f"Using cached environment detection result for {runtime}/{task_name}")
-            output_detection_result(cached_result, output_json=getattr(args, 'json', False))
+            print(
+                f"Using cached environment detection result for {runtime}/{task_name}"
+            )
+            output_detection_result(
+                cached_result, output_json=getattr(args, "json", False)
+            )
             sys.exit(0)
         except Exception as e:
             print(f"Warning: Could not read cache: {e}", file=sys.stderr)
@@ -46,16 +50,16 @@ def handle_env_detect(args):
     if use_cache:
         cache_file.parent.mkdir(parents=True, exist_ok=True)
         try:
-            with open(cache_file, 'w') as f:
+            with open(cache_file, "w") as f:
                 json.dump(detection_result, f, indent=2)
         except Exception as e:
             print(f"Warning: Could not write to cache: {e}", file=sys.stderr)
 
     # Output result
-    output_detection_result(detection_result, output_json=getattr(args, 'json', False))
+    output_detection_result(detection_result, output_json=getattr(args, "json", False))
 
     # Exit based on detection success
-    if detection_result.get('success', False):
+    if detection_result.get("success", False):
         sys.exit(0)
     else:
         sys.exit(1)
@@ -77,7 +81,7 @@ def handle_env_status(args):
 
     if status_file.exists():
         try:
-            with open(status_file, 'r') as f:
+            with open(status_file, "r") as f:
                 status_result = json.load(f)
             print(f"Environment status for {runtime} in {project_path}")
             print(json.dumps(status_result, indent=2))
@@ -125,7 +129,9 @@ def handle_env_refresh(args):
     sys.exit(0)
 
 
-def perform_environment_detection(project_path: Path, runtime: str, task_name: str) -> Dict[str, Any]:
+def perform_environment_detection(
+    project_path: Path, runtime: str, task_name: str
+) -> Dict[str, Any]:
     """Perform the actual environment detection."""
     result = {
         "project_path": str(project_path),
@@ -151,16 +157,20 @@ def perform_environment_detection(project_path: Path, runtime: str, task_name: s
     )
 
     # Step 5: Setup workspace isolation
-    result["details"]["isolation_setup"] = setup_workspace_isolation(project_path, runtime)
+    result["details"]["isolation_setup"] = setup_workspace_isolation(
+        project_path, runtime
+    )
 
     # Determine overall success
-    result["success"] = all([
-        result["details"]["project_structure"]["valid"],
-        result["details"]["runtime_detection"]["detected"],
-        result["details"]["tool_availability"]["sufficient"],
-        result["details"]["compatibility_validation"]["compatible"],
-        result["details"]["isolation_setup"]["success"],
-    ])
+    result["success"] = all(
+        [
+            result["details"]["project_structure"]["valid"],
+            result["details"]["runtime_detection"]["detected"],
+            result["details"]["tool_availability"]["sufficient"],
+            result["details"]["compatibility_validation"]["compatible"],
+            result["details"]["isolation_setup"]["success"],
+        ]
+    )
 
     return result
 
@@ -239,7 +249,11 @@ def detect_runtime(runtime: str) -> Dict[str, Any]:
             detection["detected"] = True
             detection["version"] = output
             detection["confidence"] = 0.95
-        except (subprocess.CalledProcessError, subprocess.TimeoutExpired, FileNotFoundError):
+        except (
+            subprocess.CalledProcessError,
+            subprocess.TimeoutExpired,
+            FileNotFoundError,
+        ):
             detection["detected"] = False
             detection["confidence"] = 0.0
 
@@ -292,7 +306,11 @@ def check_tool_availability(runtime: str) -> Dict[str, Any]:
                 "version": result.stdout.strip(),
                 "confidence": 0.9,
             }
-        except (subprocess.CalledProcessError, subprocess.TimeoutExpired, FileNotFoundError):
+        except (
+            subprocess.CalledProcessError,
+            subprocess.TimeoutExpired,
+            FileNotFoundError,
+        ):
             tool_status[tool] = {
                 "available": False,
                 "version": None,
@@ -312,7 +330,9 @@ def check_tool_availability(runtime: str) -> Dict[str, Any]:
     }
 
 
-def validate_compatibility(runtime_detection: Dict[str, Any], tool_availability: Dict[str, Any]) -> Dict[str, Any]:
+def validate_compatibility(
+    runtime_detection: Dict[str, Any], tool_availability: Dict[str, Any]
+) -> Dict[str, Any]:
     """Validate compatibility between detected runtime and available tools."""
     compatibility = {
         "compatible": False,
@@ -348,15 +368,22 @@ def setup_workspace_isolation(project_path: Path, runtime: str) -> Dict[str, Any
 
     try:
         # Create workspace directory
-        workspace_dir = project_path / ".aef-env" / "workspaces" / f"proj_{project_path.name}_{runtime}"
+        workspace_dir = (
+            project_path
+            / ".aef-env"
+            / "workspaces"
+            / f"proj_{project_path.name}_{runtime}"
+        )
         workspace_dir.mkdir(parents=True, exist_ok=True)
 
         # Create environment file
         env_file = workspace_dir / ".env"
-        with open(env_file, 'w') as f:
+        with open(env_file, "w") as f:
             f.write(f"AEF_RUNTIME={runtime}\n")
             f.write(f"AEF_PROJECT_PATH={project_path}\n")
-            f.write(f"AEF_TIMESTAMP={time.strftime('%Y-%m-%dT%H:%M:%SZ', time.gmtime())}\n")
+            f.write(
+                f"AEF_TIMESTAMP={time.strftime('%Y-%m-%dT%H:%M:%SZ', time.gmtime())}\n"
+            )
 
         isolation["workspace_path"] = str(workspace_dir)
         isolation["success"] = True
@@ -373,14 +400,14 @@ def output_detection_result(result: Dict[str, Any], output_json: bool = False):
     if output_json:
         print(json.dumps(result, indent=2))
     else:
-        print(f"Environment Detection Results")
+        print("Environment Detection Results")
         print(f"Project: {result['project_path']}")
         print(f"Runtime: {result['runtime']}")
         print(f"Task: {result['task_name']}")
         print(f"Status: {'SUCCESS' if result['success'] else 'FAILED'}")
         print(f"Timestamp: {result['timestamp']}")
 
-        if 'details' in result:
-            print(f"\nDetails:")
+        if "details" in result:
+            print("\nDetails:")
             for category, data in result["details"].items():
                 print(f"  {category}: {data}")

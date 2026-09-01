@@ -116,14 +116,14 @@ for phase in expected_phases:
     if phase not in ledger_phases:
         print(f'FAIL: Phase {phase} missing from ledger')
         sys.exit(1)
-    
+
     ledger_team = ledger_phases[phase]
     expected_team = expected_phases[phase]
-    
+
     if len(ledger_team) != len(expected_team):
         print(f'FAIL: Phase {phase} team size mismatch: {len(ledger_team)} vs {len(expected_team)}')
         sys.exit(1)
-    
+
     # Check members are in the correct order
     if ledger_team != expected_team:
         print(f'FAIL: Phase {phase} team members mismatch: {ledger_team} vs {expected_team}')

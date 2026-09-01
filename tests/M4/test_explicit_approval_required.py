@@ -1,7 +1,5 @@
 """Test that explicit approval is required before implementation."""
 
-import pytest
-
 
 def test_explicit_approval_required():
     """

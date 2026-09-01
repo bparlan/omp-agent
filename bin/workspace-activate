@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 """Workspace activation command for AEF Environment Layer"""
+
 import sys
 import json
 import subprocess
@@ -8,10 +9,11 @@ from pathlib import Path
 import argparse
 import time
 
+
 def workspace_activate(project_path, runtime):
     """Activate workspace isolation"""
 
-    print(f"Activating workspace isolation")
+    print("Activating workspace isolation")
     print(f"Project: {project_path}")
     print(f"Runtime: {runtime}")
     print("=" * 50)
@@ -48,13 +50,13 @@ def workspace_activate(project_path, runtime):
                 "mode": "workspace_per_project",
                 "shared_base": "mise_global_cache",
                 "cross_contamination_prevention": True,
-                "workspace_prefix": ".aef-env"
-            }
+                "workspace_prefix": ".aef-env",
+            },
         }
 
         # Write workspace configuration
         config_file = workspace_dir / "workspace.json"
-        with open(config_file, 'w') as f:
+        with open(config_file, "w") as f:
             json.dump(workspace_config, f, indent=2)
 
         # Create runtime markers
@@ -62,7 +64,7 @@ def workspace_activate(project_path, runtime):
             "runtime.txt": runtime,
             "project.txt": project_path,
             "status.txt": "active",
-            "created.txt": str(time.time())
+            "created.txt": str(time.time()),
         }
 
         for filename, content in markers.items():
@@ -78,10 +80,10 @@ def workspace_activate(project_path, runtime):
         "runtime": runtime,
         "project_path": project_path,
         "activated_at": time.time(),
-        "status": "active"
+        "status": "active",
     }
 
-    with open(activation_file, 'w') as f:
+    with open(activation_file, "w") as f:
         for key, value in activation_data.items():
             f.write(f"{key}={value}\n")
 
@@ -97,27 +99,28 @@ def workspace_activate(project_path, runtime):
             ["mise", "env", "use", runtime, str(workspace_dir)],
             capture_output=True,
             text=True,
-            check=False
+            check=False,
         )
         if result.returncode == 0:
-            print(f"✓ Mise environment activated")
+            print("✓ Mise environment activated")
         else:
-            print(f"Note: Mise activation failed (may not be available)")
+            print("Note: Mise activation failed (may not be available)")
     except (subprocess.CalledProcessError, FileNotFoundError):
-        print(f"Note: Mise tool not available for environment activation")
+        print("Note: Mise tool not available for environment activation")
 
     # Verify activation
-    print(f"\nActivation Results:")
+    print("\nActivation Results:")
     print(f"  Runtime: {runtime}")
     print(f"  Workspace: {workspace_dir}")
-    print(f"  Status: ACTIVE")
-    print(f"  Environment variables set:")
+    print("  Status: ACTIVE")
+    print("  Environment variables set:")
     print(f"    - AEF_RUNTIME={runtime}")
     print(f"    - AEF_WORKSPACE={workspace_dir}")
     print(f"    - AEF_PROJECT={project_path}")
-    print(f"    - AEF_ISOLATION=true")
+    print("    - AEF_ISOLATION=true")
 
     return True
+
 
 def main():
     parser = argparse.ArgumentParser(description="Activate workspace isolation")
@@ -140,8 +143,8 @@ def main():
                 "AEF_RUNTIME": args.runtime,
                 "AEF_WORKSPACE": f".aef-env/proj_{os.path.basename(args.project)}/{args.runtime}",
                 "AEF_PROJECT": args.project,
-                "AEF_ISOLATION": "true"
-            }
+                "AEF_ISOLATION": "true",
+            },
         }
 
         print(json.dumps(result, indent=2))
@@ -150,6 +153,7 @@ def main():
     except Exception as e:
         print(f"ERROR: {e}")
         return 1
+
 
 if __name__ == "__main__":
     sys.exit(main())

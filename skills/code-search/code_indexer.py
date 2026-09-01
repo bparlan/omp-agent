@@ -3,13 +3,11 @@
 Oh My Pi Code Search Backend + Skeleton Generator
 """
 
-import json
 import os
 import tree_sitter_language_pack
 import sqlite3
 import sys
 from pathlib import Path
-from typing import Dict, List
 
 # ========================= CONFIG =========================
 EMBEDDING_MODEL = "nomic-embed-text"
@@ -33,12 +31,16 @@ SUPPORTED_EXTS = {".py", ".js", ".ts", ".tsx", ".go", ".rs"}
 PY_LANGUAGE = None
 parser = None
 
+
 def _init_python_parser():
     global PY_LANGUAGE, parser
     if PY_LANGUAGE is None:
-        from tree_sitter import Language, Parser
+        from tree_sitter import Parser
+
         PY_LANGUAGE = tree_sitter_language_pack.get_language("python")
         parser = Parser(PY_LANGUAGE)
+
+
 # =======================================================
 
 
@@ -89,7 +91,9 @@ def _extract_python_skeleton(filepath: Path) -> str | None:
                 node_text = code_bytes[node.start_byte : node.end_byte].decode(
                     "utf-8", errors="ignore"
                 )
-                skeleton_lines.append(node_text.splitlines()[0] if node_text.splitlines() else "")
+                skeleton_lines.append(
+                    node_text.splitlines()[0] if node_text.splitlines() else ""
+                )
 
                 if node.type == "class_definition":
                     for child in node.children:
@@ -123,13 +127,39 @@ def _extract_generic_skeleton(filepath: Path) -> str | None:
         # Extract imports, exports, declarations
         for line in lines:
             stripped = line.strip()
-            if stripped.startswith(("import ", "export ", "from ", "const ", "function ", "class ", "type ", "interface ", "enum ", "namespace ", "var ", "let ")):
+            if stripped.startswith(
+                (
+                    "import ",
+                    "export ",
+                    "from ",
+                    "const ",
+                    "function ",
+                    "class ",
+                    "type ",
+                    "interface ",
+                    "enum ",
+                    "namespace ",
+                    "var ",
+                    "let ",
+                )
+            ):
                 skeleton_lines.append(stripped)
 
         # Also extract standalone declarations
         for line in lines:
             stripped = line.strip()
-            if any(stripped.startswith(prefix) for prefix in ["function ", "const ", "class ", "interface ", "type ", "enum ", "namespace "]):
+            if any(
+                stripped.startswith(prefix)
+                for prefix in [
+                    "function ",
+                    "const ",
+                    "class ",
+                    "interface ",
+                    "type ",
+                    "enum ",
+                    "namespace ",
+                ]
+            ):
                 if stripped not in skeleton_lines:
                     skeleton_lines.append(stripped)
 
@@ -231,7 +261,6 @@ def index_project():
             if not skeleton:
                 continue
 
-
             # Embed each line of skeleton
             for line in skeleton.splitlines():
                 if not line.strip():
@@ -243,7 +272,7 @@ def index_project():
                     embedding_blob = sqlite_vec.serialize_float32(embedding)
                     cursor.execute(
                         "INSERT INTO code_vec(filepath, chunk, embedding) VALUES (?, ?, ?)",
-                        (str(filepath), line, embedding_blob)
+                        (str(filepath), line, embedding_blob),
                     )
                     count += 1
                 except Exception as e:
@@ -252,6 +281,7 @@ def index_project():
     conn.commit()
     conn.close()
     print(f"✅ Indexed {count} chunks from {db_path}")
+
 
 def search(query: str, limit: int = 10):
     """Search indexed code using vector similarity"""
@@ -264,7 +294,7 @@ def search(query: str, limit: int = 10):
 
     db_path = get_db_path()
     if not db_path.exists():
-        print(f"⚠️  No index found. Run --refresh first.")
+        print("⚠️  No index found. Run --refresh first.")
         return []
 
     conn = sqlite3.connect(str(db_path))
@@ -279,14 +309,16 @@ def search(query: str, limit: int = 10):
 
     # Vector search with cosine similarity
     query_blob = sqlite_vec.serialize_float32(query_embedding)
-    cursor.execute("""
+    cursor.execute(
+        """
         SELECT filepath, chunk, distance
         FROM code_vec
         WHERE embedding MATCH ?
         ORDER BY distance ASC
         LIMIT ?
-    """, (query_blob, limit))
-
+    """,
+        (query_blob, limit),
+    )
 
     results = []
     for row in cursor.fetchall():

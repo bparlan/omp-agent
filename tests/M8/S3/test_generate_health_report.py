@@ -58,7 +58,8 @@ def test_generate_health_report_creates_file():
     # Create temporary skills directory for testing
     with tempfile.TemporaryDirectory() as temp_dir:
         from unittest.mock import patch
-        with patch('reporting.get_skills_directory') as mock_get_dir:
+
+        with patch("reporting.get_skills_directory") as mock_get_dir:
             mock_skills_dir = Path(temp_dir) / "skills"
             mock_skills_dir.mkdir(parents=True)
             mock_get_dir.return_value = mock_skills_dir
@@ -68,7 +69,9 @@ def test_generate_health_report_creates_file():
 
             # Verify the file was created
             output_path = mock_skills_dir / "health_check_report.json"
-            assert output_path.exists(), f"health_check_report.json not created at {output_path}"
+            assert (
+                output_path.exists()
+            ), f"health_check_report.json not created at {output_path}"
 
             # Read and parse JSON
             content = output_path.read_text(encoding="utf-8")
@@ -76,8 +79,13 @@ def test_generate_health_report_creates_file():
 
             # Verify required keys
             required_keys = [
-                "timestamp", "total_skills", "healthy_count", "needs_review_count",
-                "error_count", "skipped_count", "skills"
+                "timestamp",
+                "total_skills",
+                "healthy_count",
+                "needs_review_count",
+                "error_count",
+                "skipped_count",
+                "skills",
             ]
             for key in required_keys:
                 assert key in report_data, f"Missing required key: {key}"
@@ -89,23 +97,32 @@ def test_generate_health_report_creates_file():
                 pytest.fail(f"Invalid timestamp format: {report_data['timestamp']}")
 
             # Verify counts are correct
-            assert report_data["total_skills"] == len(results), "Incorrect total_skills count"
+            assert report_data["total_skills"] == len(
+                results
+            ), "Incorrect total_skills count"
             assert report_data["healthy_count"] == 1, "Incorrect healthy_count"
-            assert report_data["needs_review_count"] == 1, "Incorrect needs_review_count"
+            assert (
+                report_data["needs_review_count"] == 1
+            ), "Incorrect needs_review_count"
             assert report_data["error_count"] == 1, "Incorrect error_count"
             assert report_data["skipped_count"] == 1, "Incorrect skipped_count"
 
             # Verify skills array preserves order and content
-            assert len(report_data["skills"]) == len(results), "Skills array length mismatch"
+            assert len(report_data["skills"]) == len(
+                results
+            ), "Skills array length mismatch"
             for i, (expected, actual) in enumerate(zip(results, report_data["skills"])):
-                assert expected["name"] == actual["name"], f"Skill name mismatch at index {i}"
+                assert (
+                    expected["name"] == actual["name"]
+                ), f"Skill name mismatch at index {i}"
 
 
 def test_generate_health_report_empty_results():
     """VI-3 edge case: empty results produces all-zero counts."""
     with tempfile.TemporaryDirectory() as temp_dir:
         from unittest.mock import patch
-        with patch('reporting.get_skills_directory') as mock_get_dir:
+
+        with patch("reporting.get_skills_directory") as mock_get_dir:
             mock_skills_dir = Path(temp_dir) / "skills"
             mock_skills_dir.mkdir(parents=True)
             mock_get_dir.return_value = mock_skills_dir
@@ -115,7 +132,9 @@ def test_generate_health_report_empty_results():
 
             # Verify the file was created
             output_path = mock_skills_dir / "health_check_report.json"
-            assert output_path.exists(), "health_check_report.json not created for empty results"
+            assert (
+                output_path.exists()
+            ), "health_check_report.json not created for empty results"
 
             # Read and parse JSON
             content = output_path.read_text(encoding="utf-8")
@@ -124,7 +143,9 @@ def test_generate_health_report_empty_results():
             # Verify all counts are zero
             assert report_data["total_skills"] == 0, "total_skills should be 0"
             assert report_data["healthy_count"] == 0, "healthy_count should be 0"
-            assert report_data["needs_review_count"] == 0, "needs_review_count should be 0"
+            assert (
+                report_data["needs_review_count"] == 0
+            ), "needs_review_count should be 0"
             assert report_data["error_count"] == 0, "error_count should be 0"
             assert report_data["skipped_count"] == 0, "skipped_count should be 0"
 

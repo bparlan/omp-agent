@@ -13,7 +13,6 @@ Exit codes:
 
 import sys
 import subprocess
-import os
 from pathlib import Path
 
 EXIT_VALID = 0
@@ -25,13 +24,16 @@ def check_bash_syntax(filepath: Path) -> tuple:
     """Check bash syntax using `bash -n`. Returns (exit_code, error_msg)."""
     try:
         result = subprocess.run(
-            ["bash", "-n", str(filepath)],
-            capture_output=True, text=True, timeout=10
+            ["bash", "-n", str(filepath)], capture_output=True, text=True, timeout=10
         )
         if result.returncode == 0:
             return (EXIT_VALID, None)
         else:
-            error = result.stderr.strip() or result.stdout.strip() or "Unknown bash syntax error"
+            error = (
+                result.stderr.strip()
+                or result.stdout.strip()
+                or "Unknown bash syntax error"
+            )
             return (EXIT_TEST_INVALID, error)
     except FileNotFoundError:
         return (EXIT_TOOLING_FAILURE, "bash interpreter not found")
@@ -44,12 +46,18 @@ def check_python_syntax(filepath: Path) -> tuple:
     try:
         result = subprocess.run(
             ["python3", "-m", "py_compile", str(filepath)],
-            capture_output=True, text=True, timeout=10
+            capture_output=True,
+            text=True,
+            timeout=10,
         )
         if result.returncode == 0:
             return (EXIT_VALID, None)
         else:
-            error = result.stderr.strip() or result.stdout.strip() or "Unknown Python syntax error"
+            error = (
+                result.stderr.strip()
+                or result.stdout.strip()
+                or "Unknown Python syntax error"
+            )
             return (EXIT_TEST_INVALID, error)
     except FileNotFoundError:
         return (EXIT_TOOLING_FAILURE, "python3 interpreter not found")
@@ -75,7 +83,10 @@ def validate_file(filepath: Path) -> tuple:
 
 def main():
     if len(sys.argv) < 2:
-        print("Usage: python3 bin/omp-verify-test-syntax <test_file> [test_file2 ...]", file=sys.stderr)
+        print(
+            "Usage: python3 bin/omp-verify-test-syntax <test_file> [test_file2 ...]",
+            file=sys.stderr,
+        )
         print("Validates syntax of .sh and .py test files.", file=sys.stderr)
         sys.exit(EXIT_TOOLING_FAILURE)
 
@@ -107,5 +118,5 @@ def main():
         sys.exit(EXIT_VALID)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

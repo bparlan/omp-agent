@@ -5,9 +5,7 @@
     "confidence_score": 0.9,
     "last_modified": "2026-08-25T15:49:13.485953",
     "last_processed": "2026-08-26T22:08:11.963119",
-    "issues": [
-      "Duplicate section headers found"
-    ],
+    "issues": ["Duplicate section headers found"],
     "suggestions": [],
     "validation_score": 0.0
   },
@@ -27,9 +25,7 @@
     "confidence_score": 0.9,
     "last_modified": "2026-08-25T11:07:54.502635",
     "last_processed": "2026-08-26T22:08:11.963632",
-    "issues": [
-      "Unclosed code blocks detected"
-    ],
+    "issues": ["Unclosed code blocks detected"],
     "suggestions": [],
     "validation_score": 0.0
   },
@@ -39,9 +35,7 @@
     "confidence_score": 0.9,
     "last_modified": "2026-08-25T15:24:12.921245",
     "last_processed": "2026-08-26T22:08:11.963275",
-    "issues": [
-      "Missing section headers (###)"
-    ],
+    "issues": ["Missing section headers (###)"],
     "suggestions": [],
     "validation_score": 0.0
   },

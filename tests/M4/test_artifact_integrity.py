@@ -1,7 +1,5 @@
 """Test artifact integrity validation returns correct state for each case."""
 
-import pytest
-
 
 def test_artifact_state_missing():
     """

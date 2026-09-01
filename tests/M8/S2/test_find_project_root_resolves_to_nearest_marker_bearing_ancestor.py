@@ -5,7 +5,6 @@
 
 import pytest
 import tempfile
-import os
 from pathlib import Path
 
 
@@ -77,22 +76,35 @@ def test_find_project_root_default_argument_resolves_to_absolute_path_cwd():
     result_none_args = find_project_root(None)
 
     # Verify both return the same absolute path
-    import os
     expected_cwd = Path.cwd().resolve()
 
-    assert isinstance(result_no_args, Path), f"Expected Path, got {type(result_no_args)}"
-    assert isinstance(result_none_args, Path), f"Expected Path, got {type(result_none_args)}"
+    assert isinstance(
+        result_no_args, Path
+    ), f"Expected Path, got {type(result_no_args)}"
+    assert isinstance(
+        result_none_args, Path
+    ), f"Expected Path, got {type(result_none_args)}"
 
     assert result_no_args.is_absolute(), f"Expected absolute path, got {result_no_args}"
-    assert result_none_args.is_absolute(), f"Expected absolute path, got {result_none_args}"
+    assert (
+        result_none_args.is_absolute()
+    ), f"Expected absolute path, got {result_none_args}"
 
     # Verify both equal the expected CWD
-    assert result_no_args == expected_cwd, f"Expected {expected_cwd}, got {result_no_args}"
-    assert result_none_args == expected_cwd, f"Expected {expected_cwd}, got {result_none_args}"
+    assert (
+        result_no_args == expected_cwd
+    ), f"Expected {expected_cwd}, got {result_no_args}"
+    assert (
+        result_none_args == expected_cwd
+    ), f"Expected {expected_cwd}, got {result_none_args}"
 
     # Verify both are Path instances
-    assert isinstance(result_no_args, Path), f"Expected Path, got {type(result_no_args)}"
-    assert isinstance(result_none_args, Path), f"Expected Path, got {type(result_none_args)}"
+    assert isinstance(
+        result_no_args, Path
+    ), f"Expected Path, got {type(result_no_args)}"
+    assert isinstance(
+        result_none_args, Path
+    ), f"Expected Path, got {type(result_none_args)}"
 
 
 if __name__ == "__main__":

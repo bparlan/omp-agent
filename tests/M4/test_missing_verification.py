@@ -1,7 +1,5 @@
 """Test that implementation is blocked when verification is missing."""
 
-import pytest
-
 
 def test_missing_verification_blocks_implementation():
     """

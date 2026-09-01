@@ -26,14 +26,18 @@ get_artifact_type("test_id")
 extract_frontmatter("milestones/SPEC-M13S5.md")
 create_artifact("test_name", "test_content", "test_type", {{"key": "value"}})
 
+
 def test_isolation_allowed_directories():
     """Test that tests only modify allowed directories"""
     # Simple check: after running skills, files should only exist in allowed locations
     # According to M13S5 constraints, only milestones/M13/, tests/M13/S5/, and the two skills should exist
 
     # Run generate-tests skill
-    result = subprocess.run([sys.executable, "skills/generate-tests/__init__.py"],
-                          capture_output=True, text=True)
+    result = subprocess.run(
+        [sys.executable, "skills/generate-tests/__init__.py"],
+        capture_output=True,
+        text=True,
+    )
 
     assert result.returncode == 0, "generate-tests failed"
 
@@ -49,44 +53,47 @@ def test_isolation_allowed_directories():
 
     # List all Python files in the repo
     python_files = []
-    for root, dirs, files in os.walk('.'):
+    for root, dirs, files in os.walk("."):
         # Skip hidden directories
-        dirs[:] = [d for d in dirs if not d.startswith('.')]
+        dirs[:] = [d for d in dirs if not d.startswith(".")]
 
         # Skip directories outside allowed paths
-        if any(allowed in root for allowed in ['milestones/M13', 'skills', 'tests/M13/S5']):
+        if any(
+            allowed in root for allowed in ["milestones/M13", "skills", "tests/M13/S5"]
+        ):
             for file in files:
-                if file.endswith('.py'):
+                if file.endswith(".py"):
                     python_files.append(os.path.join(root, file))
 
     # All Python files should be in allowed locations
     for file_path in python_files:
         # Check if file is in allowed directory
         is_allowed = False
-        for allowed_path in ['milestones/M13', 'skills', 'tests/M13/S5']:
-            if file_path.startswith(allowed_path + '/'):
+        for allowed_path in ["milestones/M13", "skills", "tests/M13/S5"]:
+            if file_path.startswith(allowed_path + "/"):
                 is_allowed = True
                 break
 
         assert is_allowed, f"Found Python file outside allowed scope: {file_path}"
 
+
 def test_isolation_no_unexpected_changes():
     """Test that tests don't create unexpected file structures"""
     # Get list of allowed paths
     allowed_paths = [
-        'milestones/M13/',
-        'skills/generate-tests/',
-        'skills/evaluate-tests/',
-        'tests/M13/S5/'
+        "milestones/M13/",
+        "skills/generate-tests/",
+        "skills/evaluate-tests/",
+        "tests/M13/S5/",
     ]
 
     # List all files and directories in the repo
     all_files = []
     all_dirs = []
 
-    for root, dirs, files in os.walk('.'):
+    for root, dirs, files in os.walk("."):
         # Skip hidden directories
-        dirs[:] = [d for d in dirs if not d.startswith('.')]
+        dirs[:] = [d for d in dirs if not d.startswith(".")]
         all_dirs.extend([os.path.join(root, d) for d in dirs])
         all_files.extend([os.path.join(root, f) for f in files])
 
@@ -97,9 +104,10 @@ def test_isolation_no_unexpected_changes():
 
     # Check that all Python files are in allowed locations
     for file_path in all_files:
-        if file_path.endswith('.py'):
+        if file_path.endswith(".py"):
             is_allowed = any(file_path.startswith(allowed) for allowed in allowed_paths)
             assert is_allowed, f"Found Python file outside allowed scope: {file_path}"
+
 
 if __name__ == "__main__":
     pytest.main([__file__, "-v"])

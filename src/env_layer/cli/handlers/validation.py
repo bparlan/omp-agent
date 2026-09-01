@@ -9,7 +9,7 @@ Implements the observable contracts for:
 import json
 import sys
 from pathlib import Path
-from typing import Dict, Any, List
+from typing import Dict, Any
 
 
 def handle_validate_schema(args):
@@ -26,7 +26,7 @@ def handle_validate_schema(args):
     validation_result = validate_schema_by_type(schema_type, input_path)
 
     # Output results
-    output_json = getattr(args, 'json', False)
+    output_json = getattr(args, "json", False)
     if output_json:
         print(json.dumps(validation_result, indent=2))
     else:
@@ -34,17 +34,17 @@ def handle_validate_schema(args):
         print(f"Input file: {input_path}")
         print(f"Status: {'VALID' if validation_result['valid'] else 'INVALID'}")
 
-        if 'errors' in validation_result:
+        if "errors" in validation_result:
             print(f"Errors ({len(validation_result['errors'])}):")
-            for error in validation_result['errors']:
+            for error in validation_result["errors"]:
                 print(f"  ✗ {error}")
 
-        if 'warnings' in validation_result:
+        if "warnings" in validation_result:
             print(f"Warnings ({len(validation_result['warnings'])}):")
-            for warning in validation_result['warnings']:
+            for warning in validation_result["warnings"]:
                 print(f"  ⚠ {warning}")
 
-    sys.exit(0 if validation_result['valid'] else 1)
+    sys.exit(0 if validation_result["valid"] else 1)
 
 
 def handle_validate_fixtures(args):
@@ -60,24 +60,24 @@ def handle_validate_fixtures(args):
     fixture_result = validate_fixture_file(fixture_path)
 
     # Output results
-    output_json = getattr(args, 'json', False)
+    output_json = getattr(args, "json", False)
     if output_json:
         print(json.dumps(fixture_result, indent=2))
     else:
         print(f"Fixture validation for {fixture_path.name}")
         print(f"Status: {'VALID' if fixture_result['valid'] else 'INVALID'}")
 
-        if 'errors' in fixture_result:
+        if "errors" in fixture_result:
             print(f"Errors ({len(fixture_result['errors'])}):")
-            for error in fixture_result['errors']:
+            for error in fixture_result["errors"]:
                 print(f"  ✗ {error}")
 
-        if 'warnings' in fixture_result:
+        if "warnings" in fixture_result:
             print(f"Warnings ({len(fixture_result['warnings'])}):")
-            for warning in fixture_result['warnings']:
+            for warning in fixture_result["warnings"]:
                 print(f"  ⚠ {warning}")
 
-    sys.exit(0 if fixture_result['valid'] else 1)
+    sys.exit(0 if fixture_result["valid"] else 1)
 
 
 def validate_schema_by_type(schema_type: str, input_path: Path) -> Dict[str, Any]:
@@ -91,7 +91,7 @@ def validate_schema_by_type(schema_type: str, input_path: Path) -> Dict[str, Any
     }
 
     try:
-        with open(input_path, 'r') as f:
+        with open(input_path, "r") as f:
             content = f.read()
 
         # Parse JSON content
@@ -148,7 +148,11 @@ def validate_environment_schema(data: Dict[str, Any]) -> Dict[str, Any]:
     # Validate isolation section
     if "isolation" in data:
         isolation = data["isolation"]
-        required_isolation_fields = ["mode", "shared_base", "cross_contamination_prevention"]
+        required_isolation_fields = [
+            "mode",
+            "shared_base",
+            "cross_contamination_prevention",
+        ]
 
         for field in required_isolation_fields:
             if field not in isolation:
@@ -196,9 +200,12 @@ def validate_mise_schema(data: Dict[str, Any]) -> Dict[str, Any]:
             else:
                 # Validate version format
                 import re
-                version_pattern = r'^([0-9]+)\\.([0-9]+)\\.([0-9]+)([-+][a-zA-Z0-9]+)?$'
+
+                version_pattern = r"^([0-9]+)\\.([0-9]+)\\.([0-9]+)([-+][a-zA-Z0-9]+)?$"
                 if not re.match(version_pattern, env["version"]):
-                    result["warnings"].append(f"Version '{env['version']}' doesn't match semantic version pattern")
+                    result["warnings"].append(
+                        f"Version '{env['version']}' doesn't match semantic version pattern"
+                    )
 
     return result
 
@@ -268,7 +275,11 @@ def validate_workspace_schema(data: Dict[str, Any]) -> Dict[str, Any]:
         result["valid"] = False
     else:
         structure = workspace["structure"]
-        required_structure_fields = ["base_path", "project_prefix", "runtime_subdirectory"]
+        required_structure_fields = [
+            "base_path",
+            "project_prefix",
+            "runtime_subdirectory",
+        ]
 
         for field in required_structure_fields:
             if field not in structure:
@@ -288,7 +299,9 @@ def validate_workspace_schema(data: Dict[str, Any]) -> Dict[str, Any]:
     else:
         protection = workspace["protection"]
         if "prevent_cross_contamination" not in protection:
-            result["warnings"].append("Missing prevent_cross_contamination in protection")
+            result["warnings"].append(
+                "Missing prevent_cross_contamination in protection"
+            )
 
     return result
 
@@ -310,7 +323,9 @@ def validate_runtime_schema(data: Dict[str, Any]) -> Dict[str, Any]:
 
     # Validate runtime_switching section
     if "runtime_switching" not in cross_lang:
-        result["warnings"].append("Missing runtime_switching in cross_language_management")
+        result["warnings"].append(
+            "Missing runtime_switching in cross_language_management"
+        )
     else:
         runtime_switching = cross_lang["runtime_switching"]
 
@@ -331,11 +346,15 @@ def validate_runtime_schema(data: Dict[str, Any]) -> Dict[str, Any]:
 
             for transition in expected_transitions:
                 if transition not in transitions:
-                    result["warnings"].append(f"Missing supported transition: {transition}")
+                    result["warnings"].append(
+                        f"Missing supported transition: {transition}"
+                    )
 
     # Validate execution_context section
     if "execution_context" not in cross_lang:
-        result["warnings"].append("Missing execution_context in cross_language_management")
+        result["warnings"].append(
+            "Missing execution_context in cross_language_management"
+        )
     else:
         execution_context = cross_lang["execution_context"]
         required_context_fields = [
@@ -363,11 +382,12 @@ def validate_fixture_file(fixture_path: Path) -> Dict[str, Any]:
     }
 
     try:
-        with open(fixture_path, 'r') as f:
+        with open(fixture_path, "r") as f:
             content = f.read()
 
         # Try to parse as YAML
         import yaml
+
         try:
             fixture_data = yaml.safe_load(content)
         except yaml.YAMLError as e:
@@ -383,15 +403,31 @@ def validate_fixture_file(fixture_path: Path) -> Dict[str, Any]:
         if "env_detection" in fixture_data:
             result.update(validate_env_detection_fixture(fixture_data["env_detection"]))
         elif "mise_config_validation" in fixture_data:
-            result.update(validate_mise_config_fixture(fixture_data["mise_config_validation"]))
+            result.update(
+                validate_mise_config_fixture(fixture_data["mise_config_validation"])
+            )
         elif "env_detection_pre_task" in fixture_data:
-            result.update(validate_env_detection_pre_task_fixture(fixture_data["env_detection_pre_task"]))
+            result.update(
+                validate_env_detection_pre_task_fixture(
+                    fixture_data["env_detection_pre_task"]
+                )
+            )
         elif "workspace_isolation" in fixture_data:
-            result.update(validate_workspace_isolation_fixture(fixture_data["workspace_isolation"]))
+            result.update(
+                validate_workspace_isolation_fixture(
+                    fixture_data["workspace_isolation"]
+                )
+            )
         elif "cross_language_runtime" in fixture_data:
-            result.update(validate_cross_language_runtime_fixture(fixture_data["cross_language_runtime"]))
+            result.update(
+                validate_cross_language_runtime_fixture(
+                    fixture_data["cross_language_runtime"]
+                )
+            )
         else:
-            result["errors"].append("Unknown fixture format - no recognized top-level key")
+            result["errors"].append(
+                "Unknown fixture format - no recognized top-level key"
+            )
 
     except Exception as e:
         result["errors"].append(f"Fixture validation error: {e}")
@@ -424,7 +460,13 @@ def validate_env_detection_fixture(fixture_data: Dict[str, Any]) -> Dict[str, An
         }
 
         # Required fields for environment detection
-        required_fields = ["name", "project", "expected_runtime", "expected_tools", "threshold"]
+        required_fields = [
+            "name",
+            "project",
+            "expected_runtime",
+            "expected_tools",
+            "threshold",
+        ]
 
         for field in required_fields:
             if field not in test_case:
@@ -434,12 +476,20 @@ def validate_env_detection_fixture(fixture_data: Dict[str, Any]) -> Dict[str, An
         # Validate threshold range
         if "threshold" in test_case:
             threshold = test_case["threshold"]
-            if not isinstance(threshold, (int, float)) or threshold < 0 or threshold > 1:
-                case_result["errors"].append(f"Invalid threshold value: {threshold}. Must be between 0 and 1")
+            if (
+                not isinstance(threshold, (int, float))
+                or threshold < 0
+                or threshold > 1
+            ):
+                case_result["errors"].append(
+                    f"Invalid threshold value: {threshold}. Must be between 0 and 1"
+                )
                 case_result["valid"] = False
 
         # Validate expected_tools is a list
-        if "expected_tools" in test_case and not isinstance(test_case["expected_tools"], list):
+        if "expected_tools" in test_case and not isinstance(
+            test_case["expected_tools"], list
+        ):
             case_result["errors"].append("expected_tools must be a list")
             case_result["valid"] = False
 
@@ -498,7 +548,9 @@ def validate_mise_config_fixture(fixture_data: Dict[str, Any]) -> Dict[str, Any]
                 case_result["valid"] = False
 
         # Validate should_pass is boolean
-        if "should_pass" in test_case and not isinstance(test_case["should_pass"], bool):
+        if "should_pass" in test_case and not isinstance(
+            test_case["should_pass"], bool
+        ):
             case_result["errors"].append("should_pass must be a boolean")
             case_result["valid"] = False
 
@@ -511,7 +563,9 @@ def validate_mise_config_fixture(fixture_data: Dict[str, Any]) -> Dict[str, Any]
     return result
 
 
-def validate_env_detection_pre_task_fixture(fixture_data: Dict[str, Any]) -> Dict[str, Any]:
+def validate_env_detection_pre_task_fixture(
+    fixture_data: Dict[str, Any],
+) -> Dict[str, Any]:
     """Validate environment detection pre-task fixture."""
     result = {
         "valid": True,
@@ -536,7 +590,13 @@ def validate_env_detection_pre_task_fixture(fixture_data: Dict[str, Any]) -> Dic
         }
 
         # Required fields for pre-task detection
-        required_fields = ["name", "project", "runtime", "expected_detection_result", "should_pass"]
+        required_fields = [
+            "name",
+            "project",
+            "runtime",
+            "expected_detection_result",
+            "should_pass",
+        ]
 
         for field in required_fields:
             if field not in test_case:
@@ -555,16 +615,24 @@ def validate_env_detection_pre_task_fixture(fixture_data: Dict[str, Any]) -> Dic
 
             for field in required_result_fields:
                 if field not in expected_result:
-                    case_result["errors"].append(f"Missing expected_detection_result field: {field}")
+                    case_result["errors"].append(
+                        f"Missing expected_detection_result field: {field}"
+                    )
                     case_result["valid"] = False
 
             # Validate types
-            if "tools_found" in expected_result and not isinstance(expected_result["tools_found"], list):
-                case_result["errors"].append("expected_detection_result.tools_found must be a list")
+            if "tools_found" in expected_result and not isinstance(
+                expected_result["tools_found"], list
+            ):
+                case_result["errors"].append(
+                    "expected_detection_result.tools_found must be a list"
+                )
                 case_result["valid"] = False
 
         # Validate should_pass is boolean
-        if "should_pass" in test_case and not isinstance(test_case["should_pass"], bool):
+        if "should_pass" in test_case and not isinstance(
+            test_case["should_pass"], bool
+        ):
             case_result["errors"].append("should_pass must be a boolean")
             case_result["valid"] = False
 
@@ -577,7 +645,9 @@ def validate_env_detection_pre_task_fixture(fixture_data: Dict[str, Any]) -> Dic
     return result
 
 
-def validate_workspace_isolation_fixture(fixture_data: Dict[str, Any]) -> Dict[str, Any]:
+def validate_workspace_isolation_fixture(
+    fixture_data: Dict[str, Any],
+) -> Dict[str, Any]:
     """Validate workspace isolation fixture."""
     result = {
         "valid": True,
@@ -628,7 +698,9 @@ def validate_workspace_isolation_fixture(fixture_data: Dict[str, Any]) -> Dict[s
 
             for field in required_config_fields:
                 if field not in config:
-                    case_result["errors"].append(f"Missing workspace_config field: {field}")
+                    case_result["errors"].append(
+                        f"Missing workspace_config field: {field}"
+                    )
                     case_result["valid"] = False
 
         # Validate expected_isolation_result
@@ -643,11 +715,15 @@ def validate_workspace_isolation_fixture(fixture_data: Dict[str, Any]) -> Dict[s
 
             for field in required_result_fields:
                 if field not in expected_result:
-                    case_result["errors"].append(f"Missing expected_isolation_result field: {field}")
+                    case_result["errors"].append(
+                        f"Missing expected_isolation_result field: {field}"
+                    )
                     case_result["valid"] = False
 
         # Validate should_pass is boolean
-        if "should_pass" in test_case and not isinstance(test_case["should_pass"], bool):
+        if "should_pass" in test_case and not isinstance(
+            test_case["should_pass"], bool
+        ):
             case_result["errors"].append("should_pass must be a boolean")
             case_result["valid"] = False
 
@@ -660,7 +736,9 @@ def validate_workspace_isolation_fixture(fixture_data: Dict[str, Any]) -> Dict[s
     return result
 
 
-def validate_cross_language_runtime_fixture(fixture_data: Dict[str, Any]) -> Dict[str, Any]:
+def validate_cross_language_runtime_fixture(
+    fixture_data: Dict[str, Any],
+) -> Dict[str, Any]:
     """Validate cross-language runtime fixture."""
     result = {
         "valid": True,
@@ -712,7 +790,9 @@ def validate_cross_language_runtime_fixture(fixture_data: Dict[str, Any]) -> Dic
 
             for field in required_config_fields:
                 if field not in config:
-                    case_result["errors"].append(f"Missing runtime_config field: {field}")
+                    case_result["errors"].append(
+                        f"Missing runtime_config field: {field}"
+                    )
                     case_result["valid"] = False
 
             # Validate types
@@ -720,28 +800,47 @@ def validate_cross_language_runtime_fixture(fixture_data: Dict[str, Any]) -> Dic
                 case_result["errors"].append("runtime_config.tool_chain must be a list")
                 case_result["valid"] = False
 
-            if "fallback_strategies" in config and not isinstance(config["fallback_strategies"], list):
-                case_result["errors"].append("runtime_config.fallback_strategies must be a list")
+            if "fallback_strategies" in config and not isinstance(
+                config["fallback_strategies"], list
+            ):
+                case_result["errors"].append(
+                    "runtime_config.fallback_strategies must be a list"
+                )
                 case_result["valid"] = False
 
-            if "shared_components" in config and not isinstance(config["shared_components"], list):
-                case_result["errors"].append("runtime_config.shared_components must be a list")
+            if "shared_components" in config and not isinstance(
+                config["shared_components"], list
+            ):
+                case_result["errors"].append(
+                    "runtime_config.shared_components must be a list"
+                )
                 case_result["valid"] = False
 
         # Validate expected_switch_result
         if "expected_switch_result" in test_case:
             expected_result = test_case["expected_switch_result"]
             # These should be boolean values or booleans
-            for field in ["switch_successful", "runtime_available", "tool_compatibility_confirmed", "isolation_preserved"]:
+            for field in [
+                "switch_successful",
+                "runtime_available",
+                "tool_compatibility_confirmed",
+                "isolation_preserved",
+            ]:
                 if field not in expected_result:
-                    case_result["errors"].append(f"Missing expected_switch_result field: {field}")
+                    case_result["errors"].append(
+                        f"Missing expected_switch_result field: {field}"
+                    )
                     case_result["valid"] = False
                 elif not isinstance(expected_result[field], bool):
-                    case_result["errors"].append(f"expected_switch_result.{field} must be a boolean")
+                    case_result["errors"].append(
+                        f"expected_switch_result.{field} must be a boolean"
+                    )
                     case_result["valid"] = False
 
         # Validate should_pass is boolean
-        if "should_pass" in test_case and not isinstance(test_case["should_pass"], bool):
+        if "should_pass" in test_case and not isinstance(
+            test_case["should_pass"], bool
+        ):
             case_result["errors"].append("should_pass must be a boolean")
             case_result["valid"] = False
 

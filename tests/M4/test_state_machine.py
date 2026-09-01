@@ -1,7 +1,5 @@
 """Test state machine transitions and invariant enforcement."""
 
-import pytest
-
 
 def test_all_7_states_defined():
     """

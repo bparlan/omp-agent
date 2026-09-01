@@ -1,7 +1,5 @@
 """Test resume and recovery functionality at each stage."""
 
-import pytest
-
 
 def test_resume_from_spec_generation():
     """

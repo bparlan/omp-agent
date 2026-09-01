@@ -3,6 +3,7 @@ import sys
 import re
 from pathlib import Path
 
+
 def sanitize_test_file(filepath: Path) -> bool:
     try:
         content = filepath.read_text(encoding="utf-8")
@@ -19,7 +20,12 @@ def sanitize_test_file(filepath: Path) -> bool:
         modified = False
         for pattern in patterns:
             if re.search(pattern, content, re.DOTALL | re.IGNORECASE):
-                content = re.sub(pattern, "# Sanitized: Pre-flight existence trap removed for TDD compatibility", content, flags=re.DOTALL | re.IGNORECASE)
+                content = re.sub(
+                    pattern,
+                    "# Sanitized: Pre-flight existence trap removed for TDD compatibility",
+                    content,
+                    flags=re.DOTALL | re.IGNORECASE,
+                )
                 modified = True
 
         if modified and content != original:
@@ -31,6 +37,7 @@ def sanitize_test_file(filepath: Path) -> bool:
     except Exception as e:
         print(f"Error sanitizing {filepath.name}: {e}", file=sys.stderr)
         return False
+
 
 def prune_stale_ledger_rows(ledger_path: Path) -> int:
     if not ledger_path.exists():
@@ -48,7 +55,9 @@ def prune_stale_ledger_rows(ledger_path: Path) -> int:
                     test_file_path = Path(parts[0])
                     # If the file does not physically exist, prune the row
                     if not test_file_path.exists():
-                        print(f"[Pruned] Stale ledger row for missing file: {test_file_path}")
+                        print(
+                            f"[Pruned] Stale ledger row for missing file: {test_file_path}"
+                        )
                         pruned += 1
                         continue
             new_lines.append(line)
@@ -58,6 +67,7 @@ def prune_stale_ledger_rows(ledger_path: Path) -> int:
     except Exception as e:
         print(f"Error pruning ledger {ledger_path}: {e}", file=sys.stderr)
         return 0
+
 
 def main():
     target_dir = Path("tests")
@@ -96,6 +106,7 @@ def main():
 
     print("Scan complete.")
     sys.exit(0)
+
 
 if __name__ == "__main__":
     main()

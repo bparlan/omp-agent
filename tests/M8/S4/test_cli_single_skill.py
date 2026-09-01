@@ -82,7 +82,9 @@ def test_validate_single_skill_valid_returns_result_dict():
     assert isinstance(result["fields_checked"], list), "fields_checked must be list"
     assert isinstance(result["field_results"], dict), "field_results must be dict"
     assert isinstance(result["errors"], list), "errors must be list"
-    assert isinstance(result["stable_suffix_detected"], bool), "stable_suffix_detected must be bool"
+    assert isinstance(
+        result["stable_suffix_detected"], bool
+    ), "stable_suffix_detected must be bool"
 
 
 def test_validate_single_skill_valid_prints_status_line():

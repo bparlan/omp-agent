@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 """Traceability verification CLI: validates relationship fields against canonical model."""
+
 import re
 import sys
 from pathlib import Path
@@ -7,12 +8,19 @@ from pathlib import Path
 import yaml
 
 
-ALLOWED_RELATIONSHIPS = {"derived_from", "verifies", "tests", "implements", "evaluates", "reviews"}
+ALLOWED_RELATIONSHIPS = {
+    "derived_from",
+    "verifies",
+    "tests",
+    "implements",
+    "evaluates",
+    "reviews",
+}
 IDENTITY_PATTERN = re.compile(r"^[A-Z0-9_-]+$")
 
 
 def _load_frontmatter(path: Path) -> dict:
-    content = path.read_text(encoding='utf-8')
+    content = path.read_text(encoding="utf-8")
     match = re.match(r"\A---\s*$(.*?)^---\s*$", content, re.DOTALL | re.MULTILINE)
     if not match:
         return {}
@@ -22,20 +30,29 @@ def _load_frontmatter(path: Path) -> dict:
 
 def validate(path: Path) -> bool:
     frontmatter = _load_frontmatter(path)
-    relationships = frontmatter.get('relationships')
+    relationships = frontmatter.get("relationships")
     if not isinstance(relationships, dict):
         print(f"INVALID: missing relationships object in {path}", file=sys.stderr)
         return False
     for rel_type, values in relationships.items():
         if rel_type not in ALLOWED_RELATIONSHIPS:
-            print(f"INVALID: unknown relationship type {rel_type} in {path}", file=sys.stderr)
+            print(
+                f"INVALID: unknown relationship type {rel_type} in {path}",
+                file=sys.stderr,
+            )
             return False
         if not isinstance(values, list):
-            print(f"INVALID: relationship {rel_type} is not an array in {path}", file=sys.stderr)
+            print(
+                f"INVALID: relationship {rel_type} is not an array in {path}",
+                file=sys.stderr,
+            )
             return False
         for value in values:
             if not isinstance(value, str) or not IDENTITY_PATTERN.match(value):
-                print(f"INVALID: relationship {rel_type} contains invalid identity {value} in {path}", file=sys.stderr)
+                print(
+                    f"INVALID: relationship {rel_type} contains invalid identity {value} in {path}",
+                    file=sys.stderr,
+                )
                 return False
     print("VALID")
     return True
@@ -52,5 +69,5 @@ def main(argv: list[str]) -> int:
     return 0 if validate(path) else 1
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     sys.exit(main(sys.argv))

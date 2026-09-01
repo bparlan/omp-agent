@@ -181,9 +181,11 @@ class TestCanonicalTypeDefinitions:
             "investigation": "INV-{N}",
             "evaluation": "EVAL-{N}",
             "review": "REVIEW-{N}",
-            "audit": "AUDIT-{N}"
+            "audit": "AUDIT-{N}",
         }
-        assert len(canonical_types) == 8, f"Should define exactly 8 canonical types, got {len(canonical_types)}"
+        assert (
+            len(canonical_types) == 8
+        ), f"Should define exactly 8 canonical types, got {len(canonical_types)}"
 
     def test_canonical_type_format_milestone(self):
         """Test: Milestone canonical type has correct format M{N}"""

@@ -56,7 +56,8 @@ def test_generate_badges_creates_file():
     # Create temporary skills directory for testing
     with tempfile.TemporaryDirectory() as temp_dir:
         from unittest.mock import patch
-        with patch('reporting.get_skills_directory') as mock_get_dir:
+
+        with patch("reporting.get_skills_directory") as mock_get_dir:
             mock_skills_dir = Path(temp_dir) / "skills"
             mock_skills_dir.mkdir(parents=True)
             mock_get_dir.return_value = mock_skills_dir
@@ -66,30 +67,44 @@ def test_generate_badges_creates_file():
 
             # Verify the file was created
             output_path = mock_skills_dir / "health_badges.md"
-            assert output_path.exists(), f"health_badges.md not created at {output_path}"
+            assert (
+                output_path.exists()
+            ), f"health_badges.md not created at {output_path}"
 
             # Read and verify the content
             content = output_path.read_text(encoding="utf-8")
 
             # Check header
-            assert content.startswith("# Skill Health Check Badges"), "Incorrect file header"
+            assert content.startswith(
+                "# Skill Health Check Badges"
+            ), "Incorrect file header"
 
             # Check table structure
             lines = content.splitlines()
-            assert len(lines) >= 4, "File should have at least header, separator, and header row"
+            assert (
+                len(lines) >= 4
+            ), "File should have at least header, separator, and header row"
 
             # Check header row
-            assert lines[2] == "| Skill Name | Status | Last Checked | Validation Score | Has Stable Suffix |", "Incorrect table header"
+            assert (
+                lines[2]
+                == "| Skill Name | Status | Last Checked | Validation Score | Has Stable Suffix |"
+            ), "Incorrect table header"
 
             # Check separator row
-            assert lines[3] == "|------------|--------|--------------|------------------|-------------------|", "Incorrect table separator"
+            assert (
+                lines[3]
+                == "|------------|--------|--------------|------------------|-------------------|"
+            ), "Incorrect table separator"
 
             # Check alphabetical sorting (alpha-skill should be first)
             assert "alpha-skill" in lines[4], "Skills not sorted alphabetically"
 
             # Check all skill names are present
             for skill in SYNTHETIC_RESULTS:
-                assert skill["name"] in content, f"Skill {skill['name']} not found in output"
+                assert (
+                    skill["name"] in content
+                ), f"Skill {skill['name']} not found in output"
 
             # Check score formatting (2 decimal places)
             assert "0.95" in content, "Score not formatted to 2 decimal places"
@@ -105,7 +120,8 @@ def test_generate_badges_empty_results():
     """VI-2 edge case: empty results list produces header-only table."""
     with tempfile.TemporaryDirectory() as temp_dir:
         from unittest.mock import patch
-        with patch('reporting.get_skills_directory') as mock_get_dir:
+
+        with patch("reporting.get_skills_directory") as mock_get_dir:
             mock_skills_dir = Path(temp_dir) / "skills"
             mock_skills_dir.mkdir(parents=True)
             mock_get_dir.return_value = mock_skills_dir
@@ -115,17 +131,24 @@ def test_generate_badges_empty_results():
 
             # Verify the file was created
             output_path = mock_skills_dir / "health_badges.md"
-            assert output_path.exists(), "health_badges.md not created for empty results"
+            assert (
+                output_path.exists()
+            ), "health_badges.md not created for empty results"
 
             # Read content
             content = output_path.read_text(encoding="utf-8")
 
             # Should only contain header and table structure, no data rows
             lines = content.splitlines()
-            assert len(lines) == 3, f"Expected 3 lines for empty results, got {len(lines)}: {lines}"
+            assert (
+                len(lines) == 3
+            ), f"Expected 3 lines for empty results, got {len(lines)}: {lines}"
             assert lines[0] == "# Skill Health Check Badges", "Incorrect header"
             assert lines[1] == "", "Missing empty line after header"
-            assert lines[2] == "| Skill Name | Status | Last Checked | Validation Score | Has Stable Suffix |", "Incorrect header row for empty results"
+            assert (
+                lines[2]
+                == "| Skill Name | Status | Last Checked | Validation Score | Has Stable Suffix |"
+            ), "Incorrect header row for empty results"
 
 
 if __name__ == "__main__":

@@ -12,14 +12,13 @@ import json
 import subprocess
 import sys
 from pathlib import Path
-from typing import Dict, Any, List
 
 
 def handle_env_check(args):
     """Implement env-check --project <project_path> --runtime <runtime> [--validate]."""
     project_path = Path(args.project)
     runtime = args.runtime
-    validate = getattr(args, 'validate', False)
+    validate = getattr(args, "validate", False)
 
     # Basic validation
     if not project_path.exists():
@@ -29,7 +28,9 @@ def handle_env_check(args):
     # Check if .mise.toml exists
     mise_toml = project_path / ".mise.toml"
     if not mise_toml.exists():
-        print(f"Warning: .mise.toml not found in project: {project_path}", file=sys.stderr)
+        print(
+            f"Warning: .mise.toml not found in project: {project_path}", file=sys.stderr
+        )
 
     # Determine available tools based on runtime
     tools_map = {
@@ -54,7 +55,11 @@ def handle_env_check(args):
                 check=True,
             )
             tool_status[tool] = {"available": True, "version": result.stdout.strip()}
-        except (subprocess.CalledProcessError, subprocess.TimeoutExpired, FileNotFoundError):
+        except (
+            subprocess.CalledProcessError,
+            subprocess.TimeoutExpired,
+            FileNotFoundError,
+        ):
             tool_status[tool] = {"available": False, "version": None}
 
     # Build response
@@ -65,28 +70,34 @@ def handle_env_check(args):
         "tools_status": tool_status,
         "summary": {
             "total_tools": len(available_tools),
-            "available_tools": sum(1 for tool in tool_status.values() if tool["available"]),
-            "missing_tools": [tool for tool, status in tool_status.items() if not status["available"]],
-        }
+            "available_tools": sum(
+                1 for tool in tool_status.values() if tool["available"]
+            ),
+            "missing_tools": [
+                tool for tool, status in tool_status.items() if not status["available"]
+            ],
+        },
     }
 
     # Output based on format preference
-    if hasattr(args, 'json') and args.json:
+    if hasattr(args, "json") and args.json:
         print(json.dumps(response, indent=2))
     else:
         print(f"Environment Check Results for {project_path}")
         print(f"Runtime: {runtime}")
-        print(f"Tools Status:")
+        print("Tools Status:")
         for tool, status in tool_status.items():
             status_icon = "✓" if status["available"] else "✗"
             version_info = f" ({status['version']})" if status["available"] else ""
             print(f"  {status_icon} {tool}{version_info}")
-        print(f"Summary: {response['summary']['available_tools']}/{response['summary']['total_tools']} tools available")
+        print(
+            f"Summary: {response['summary']['available_tools']}/{response['summary']['total_tools']} tools available"
+        )
 
     # Exit with appropriate code
-    if response['summary']['available_tools'] == 0:
+    if response["summary"]["available_tools"] == 0:
         sys.exit(1)
-    elif validate and response['summary']['missing_tools']:
+    elif validate and response["summary"]["missing_tools"]:
         sys.exit(2)
     else:
         sys.exit(0)
@@ -114,12 +125,12 @@ def handle_env_setup(args):
     if mise_toml.exists():
         # Read existing config
         try:
-            with open(mise_toml, 'r') as f:
+            with open(mise_toml, "r") as f:
                 content = f.read()
                 # Simple parsing - in production would use proper TOML parser
                 if "environment =" in content:
                     # Extract existing environment section
-                    lines = content.split('\n')
+                    lines = content.split("\n")
                     env_start = None
                     for i, line in enumerate(lines):
                         if "environment =" in line and "{" in line:
@@ -129,14 +140,14 @@ def handle_env_setup(args):
                         # Find the end of environment section
                         brace_count = 0
                         for i in range(env_start, len(lines)):
-                            brace_count += lines[i].count('{')
-                            brace_count -= lines[i].count('}')
+                            brace_count += lines[i].count("{")
+                            brace_count -= lines[i].count("}")
                             if brace_count == 0:
                                 env_end = i
                                 break
                         # Keep the rest of the file
-                        config_lines = lines[:env_start] + lines[env_end + 1:]
-                        config_content = '\n'.join(config_lines)
+                        config_lines = lines[:env_start] + lines[env_end + 1 :]
+                        config_content = "\n".join(config_lines)
                     else:
                         config_content = content
                 else:
@@ -148,8 +159,10 @@ def handle_env_setup(args):
         config_content = ""
 
     # Build new environment section
-    new_env_section = f"environment = {{ runtime = \"{runtime}\", version = \"{version}\" }}\n"
-    new_tools_section = f"tools = [{{ name = \"{tool_name}\", version = \"{version}\" }}]\n"
+    new_env_section = (
+        f'environment = {{ runtime = "{runtime}", version = "{version}" }}\n'
+    )
+    new_tools_section = f'tools = [{{ name = "{tool_name}", version = "{version}" }}]\n'
 
     # Combine config
     if config_content:
@@ -162,7 +175,7 @@ def handle_env_setup(args):
         config_content = f"{new_env_section}{new_tools_section}\n"
 
     # Write back
-    with open(mise_toml, 'w') as f:
+    with open(mise_toml, "w") as f:
         f.write(config_content)
 
     print(f"Environment setup completed for {project_path}")
@@ -176,8 +189,8 @@ def handle_env_setup(args):
 def handle_env_list(args):
     """Implement env-list --runtime <runtime> --all [--json]."""
     runtime = args.runtime
-    all_runtimes = getattr(args, 'all', False)
-    output_json = getattr(args, 'json', False)
+    all_runtimes = getattr(args, "all", False)
+    output_json = getattr(args, "json", False)
 
     # Available runtimes and their tools
     runtimes_info = {
@@ -225,7 +238,9 @@ def handle_env_list(args):
     if output_json:
         print(json.dumps(result, indent=2))
     else:
-        print(f"Available {runtime if not all_runtimes else 'all'} runtime information:")
+        print(
+            f"Available {runtime if not all_runtimes else 'all'} runtime information:"
+        )
         for rt, info in result.items():
             print(f"\n{rt.upper()}:")
             print(f"  Description: {info['description']}")
@@ -238,7 +253,7 @@ def handle_env_list(args):
 def handle_env_diagnose(args):
     """Implement env-diagnose --project <project_path> [--output <format>]."""
     project_path = Path(args.project)
-    output_format = getattr(args, 'output', 'text')
+    output_format = getattr(args, "output", "text")
 
     # Basic validation
     if not project_path.exists():
@@ -265,7 +280,9 @@ def handle_env_diagnose(args):
     has_source_files = any(project_path.glob(f"*.[{''.join(source_extensions)}]"))
 
     if not has_source_files:
-        diagnostics["warnings"].append("Project directory appears to be empty or lacks source files")
+        diagnostics["warnings"].append(
+            "Project directory appears to be empty or lacks source files"
+        )
         diagnostics["status"] = "warning"
 
     # Check runtime compatibility (simplified)
@@ -273,8 +290,11 @@ def handle_env_diagnose(args):
 
     # Check for environment variables that might indicate runtime issues
     import os
+
     if "PYTHONPATH" in os.environ and runtime not in ["python"]:
-        diagnostics["warnings"].append("PYTHONPATH environment variable set but runtime is not Python")
+        diagnostics["warnings"].append(
+            "PYTHONPATH environment variable set but runtime is not Python"
+        )
         diagnostics["status"] = "warning"
 
     # Build detailed diagnosis
@@ -294,7 +314,9 @@ def handle_env_diagnose(args):
         else:
             print("  None")
 
-        print(f"\nOverall Health: {'✅ HEALTHY' if diagnostics['status'] == 'healthy' else '⚠️ WARNING' if diagnostics['status'] == 'warning' else '❌ HEALTHY'}")
+        print(
+            f"\nOverall Health: {'✅ HEALTHY' if diagnostics['status'] == 'healthy' else '⚠️ WARNING' if diagnostics['status'] == 'warning' else '❌ HEALTHY'}"
+        )
 
     # Exit based on status
     if diagnostics["status"] == "healthy":

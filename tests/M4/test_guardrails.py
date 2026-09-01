@@ -1,7 +1,5 @@
 """Test all 14 negative guardrails are enforced."""
 
-import pytest
-
 
 def test_guardrail_1_implement_without_tests():
     """

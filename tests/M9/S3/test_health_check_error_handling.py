@@ -6,17 +6,18 @@
 import sys
 from pathlib import Path
 import subprocess
-import os
-import shutil
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(REPO_ROOT))
+
 
 def test_error_handling_batch_processing():
     """Test that batch processing gracefully handles individual skill failures."""
 
     # Use fixture skill directory
-    error_skill_path = REPO_ROOT / "tests" / "fixtures" / "skills" / "example_skill_noncompliant"
+    error_skill_path = (
+        REPO_ROOT / "tests" / "fixtures" / "skills" / "example_skill_noncompliant"
+    )
     good_skill_path = REPO_ROOT / "tests" / "fixtures" / "skills" / "example_skill"
 
     if not error_skill_path.exists():
@@ -53,6 +54,7 @@ def test_error_handling_batch_processing():
         # Cleanup already handled by test framework
         pass
 
+
 def main():
     """Main test execution."""
     success = test_error_handling_batch_processing()
@@ -63,6 +65,7 @@ def main():
     else:
         print("FAIL: Error handling test failed")
         sys.exit(1)
+
 
 if __name__ == "__main__":
     main()

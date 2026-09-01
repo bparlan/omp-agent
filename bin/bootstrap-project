@@ -6,13 +6,11 @@ Creates project structure and configuration based on mode.
 Implements contract: bootstrap-project --mode <framework|application>
 """
 
-import os
 import sys
-import json
 import argparse
 from pathlib import Path
 
-from core.config import create_default_config, save_project_config, load_project_config
+from core.config import create_default_config, save_project_config
 from core.errors import ConfigurationError
 
 
@@ -78,17 +76,15 @@ def main() -> None:
         "--mode",
         choices=["framework", "application"],
         required=True,
-        help="Project mode: framework or application"
+        help="Project mode: framework or application",
     )
 
     parser.add_argument(
-        "--project-id",
-        help="Project identifier (defaults to directory name)"
+        "--project-id", help="Project identifier (defaults to directory name)"
     )
 
     parser.add_argument(
-        "--project-slug",
-        help="Project slug (defaults to directory name)"
+        "--project-slug", help="Project slug (defaults to directory name)"
     )
 
     args = parser.parse_args()

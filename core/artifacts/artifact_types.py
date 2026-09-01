@@ -1,6 +1,7 @@
 from dataclasses import dataclass
 from typing import Dict, Any, List, Optional
 
+
 @dataclass
 class CanonicalArtifactType:
     machine_identifier: str
@@ -14,6 +15,7 @@ class CanonicalArtifactType:
     lifecycle_states: List[str]
     allowed_relationships: List[str]
 
+
 _RAW_ARTIFACT_TYPE_DEFINITIONS = {
     "specification": {
         "machine_identifier": "specification",
@@ -22,10 +24,26 @@ _RAW_ARTIFACT_TYPE_DEFINITIONS = {
         "producer_skills": ["generate-spec", "generate-verification"],
         "consumer_skills": ["implement-specification", "evaluate-implementation"],
         "canonical_storage_location": "<M_ID>/specifications/<SPEC_ID>.md",
-        "required_metadata": ["created_at", "updated_at", "artifact_identity", "artifact_type"],
+        "required_metadata": [
+            "created_at",
+            "updated_at",
+            "artifact_identity",
+            "artifact_type",
+        ],
         "optional_metadata": ["version", "producer_skill"],
-        "lifecycle_states": ["draft", "proposed", "implemented", "reviewed", "archived"],
-        "allowed_relationships": ["derived_from", "verifies", "implements", "evaluates"]
+        "lifecycle_states": [
+            "draft",
+            "proposed",
+            "implemented",
+            "reviewed",
+            "archived",
+        ],
+        "allowed_relationships": [
+            "derived_from",
+            "verifies",
+            "implements",
+            "evaluates",
+        ],
     },
     "verification": {
         "machine_identifier": "verification",
@@ -34,10 +52,21 @@ _RAW_ARTIFACT_TYPE_DEFINITIONS = {
         "producer_skills": ["generate-verification"],
         "consumer_skills": ["evaluate-implementation", "review-implementation"],
         "canonical_storage_location": "<M_ID>/verifications/<SPEC_ID>.md",
-        "required_metadata": ["created_at", "updated_at", "artifact_identity", "artifact_type"],
+        "required_metadata": [
+            "created_at",
+            "updated_at",
+            "artifact_identity",
+            "artifact_type",
+        ],
         "optional_metadata": ["version"],
-        "lifecycle_states": ["draft", "proposed", "implemented", "reviewed", "archived"],
-        "allowed_relationships": ["derived_from", "tests", "evaluates", "implements"]
+        "lifecycle_states": [
+            "draft",
+            "proposed",
+            "implemented",
+            "reviewed",
+            "archived",
+        ],
+        "allowed_relationships": ["derived_from", "tests", "evaluates", "implements"],
     },
     "test": {
         "machine_identifier": "test",
@@ -46,10 +75,21 @@ _RAW_ARTIFACT_TYPE_DEFINITIONS = {
         "producer_skills": [],
         "consumer_skills": ["evaluate-implementation"],
         "canonical_storage_location": "<M_ID>/tests/<SPEC_ID>.md",
-        "required_metadata": ["created_at", "updated_at", "artifact_identity", "artifact_type"],
+        "required_metadata": [
+            "created_at",
+            "updated_at",
+            "artifact_identity",
+            "artifact_type",
+        ],
         "optional_metadata": ["version"],
-        "lifecycle_states": ["draft", "proposed", "implemented", "reviewed", "archived"],
-        "allowed_relationships": ["derived_from", "tests", "implements", "evaluates"]
+        "lifecycle_states": [
+            "draft",
+            "proposed",
+            "implemented",
+            "reviewed",
+            "archived",
+        ],
+        "allowed_relationships": ["derived_from", "tests", "implements", "evaluates"],
     },
     "implementation": {
         "machine_identifier": "implementation",
@@ -58,10 +98,26 @@ _RAW_ARTIFACT_TYPE_DEFINITIONS = {
         "producer_skills": ["implement-specification"],
         "consumer_skills": ["evaluate-implementation"],
         "canonical_storage_location": "<M_ID>/implementations/<SPEC_ID>.md",
-        "required_metadata": ["created_at", "updated_at", "artifact_identity", "artifact_type"],
+        "required_metadata": [
+            "created_at",
+            "updated_at",
+            "artifact_identity",
+            "artifact_type",
+        ],
         "optional_metadata": ["version", "commit_hash"],
-        "lifecycle_states": ["draft", "proposed", "implemented", "reviewed", "archived"],
-        "allowed_relationships": ["derived_from", "implements", "evaluates", "verifies"]
+        "lifecycle_states": [
+            "draft",
+            "proposed",
+            "implemented",
+            "reviewed",
+            "archived",
+        ],
+        "allowed_relationships": [
+            "derived_from",
+            "implements",
+            "evaluates",
+            "verifies",
+        ],
     },
     "milestone": {
         "machine_identifier": "milestone",
@@ -70,10 +126,28 @@ _RAW_ARTIFACT_TYPE_DEFINITIONS = {
         "producer_skills": [],
         "consumer_skills": ["manage-roadmap"],
         "canonical_storage_location": "<M_ID>/<M_ID>.md",
-        "required_metadata": ["created_at", "updated_at", "artifact_identity", "artifact_type"],
+        "required_metadata": [
+            "created_at",
+            "updated_at",
+            "artifact_identity",
+            "artifact_type",
+        ],
         "optional_metadata": ["version"],
-        "lifecycle_states": ["draft", "approved", "implemented", "reviewed", "archived"],
-        "allowed_relationships": ["derived_from", "verifies", "evaluates", "reviews", "implements", "tests"]
+        "lifecycle_states": [
+            "draft",
+            "approved",
+            "implemented",
+            "reviewed",
+            "archived",
+        ],
+        "allowed_relationships": [
+            "derived_from",
+            "verifies",
+            "evaluates",
+            "reviews",
+            "implements",
+            "tests",
+        ],
     },
     "review": {
         "machine_identifier": "review",
@@ -82,10 +156,15 @@ _RAW_ARTIFACT_TYPE_DEFINITIONS = {
         "producer_skills": [],
         "consumer_skills": [],
         "canonical_storage_location": "<M_ID>/reviews/<SPEC_ID>.md",
-        "required_metadata": ["created_at", "updated_at", "artifact_identity", "artifact_type"],
+        "required_metadata": [
+            "created_at",
+            "updated_at",
+            "artifact_identity",
+            "artifact_type",
+        ],
         "optional_metadata": ["version"],
         "lifecycle_states": ["draft", "proposed", "completed", "archived"],
-        "allowed_relationships": ["derived_from", "reviews", "evaluates"]
+        "allowed_relationships": ["derived_from", "reviews", "evaluates"],
     },
     "evaluation": {
         "machine_identifier": "evaluation",
@@ -94,10 +173,15 @@ _RAW_ARTIFACT_TYPE_DEFINITIONS = {
         "producer_skills": ["evaluate-implementation"],
         "consumer_skills": [],
         "canonical_storage_location": "<M_ID>/evaluations/<SPEC_ID>.md",
-        "required_metadata": ["created_at", "updated_at", "artifact_identity", "artifact_type"],
+        "required_metadata": [
+            "created_at",
+            "updated_at",
+            "artifact_identity",
+            "artifact_type",
+        ],
         "optional_metadata": ["version"],
         "lifecycle_states": ["draft", "proposed", "completed", "archived"],
-        "allowed_relationships": ["derived_from", "evaluates"]
+        "allowed_relationships": ["derived_from", "evaluates"],
     },
     "documentation": {
         "machine_identifier": "documentation",
@@ -106,22 +190,43 @@ _RAW_ARTIFACT_TYPE_DEFINITIONS = {
         "producer_skills": [],
         "consumer_skills": [],
         "canonical_storage_location": "<M_ID>/documentation/<DOC_ID>.md",
-        "required_metadata": ["created_at", "updated_at", "artifact_identity", "artifact_type"],
+        "required_metadata": [
+            "created_at",
+            "updated_at",
+            "artifact_identity",
+            "artifact_type",
+        ],
         "optional_metadata": ["version"],
         "lifecycle_states": ["draft", "reviewed", "published", "archived"],
-        "allowed_relationships": ["derived_from"]
+        "allowed_relationships": ["derived_from"],
     },
     "team-consolidation": {
         "machine_identifier": "team-consolidation",
         "human_readable_name": "Team Consolidation Report",
         "purpose": "Captures phase-boundary team commentary, dual recommendations, and consensus for SDD pipeline decisions",
         "producer_skills": ["manage-development"],
-        "consumer_skills": ["manage-development", "review-implementation", "close-spec"],
+        "consumer_skills": [
+            "manage-development",
+            "review-implementation",
+            "close-spec",
+        ],
         "canonical_storage_location": "<M_ID>/team_consolidations/<SPEC_ID>TC-{N}.md",
-        "required_metadata": ["created_at", "updated_at", "artifact_identity", "artifact_type", "phase", "team_members"],
-        "optional_metadata": ["primary_recommendation", "second_best_option", "consensus_count", "derived_from"],
+        "required_metadata": [
+            "created_at",
+            "updated_at",
+            "artifact_identity",
+            "artifact_type",
+            "phase",
+            "team_members",
+        ],
+        "optional_metadata": [
+            "primary_recommendation",
+            "second_best_option",
+            "consensus_count",
+            "derived_from",
+        ],
         "lifecycle_states": ["draft", "proposed", "completed", "archived"],
-        "allowed_relationships": ["derived_from", "reviews", "evaluates"]
+        "allowed_relationships": ["derived_from", "reviews", "evaluates"],
     },
     "operations-consolidation": {
         "machine_identifier": "operations-consolidation",
@@ -130,10 +235,22 @@ _RAW_ARTIFACT_TYPE_DEFINITIONS = {
         "producer_skills": ["manage-docs"],
         "consumer_skills": ["manage-docs", "close-milestone", "sync-documentation"],
         "canonical_storage_location": "<M_ID>/operations_consolidations/<SPEC_ID>OPS-C-{N}.md",
-        "required_metadata": ["created_at", "updated_at", "artifact_identity", "artifact_type", "scope", "classification"],
-        "optional_metadata": ["intake_buffer_status", "folder_migration_plan", "event_watch_state", "derived_from"],
+        "required_metadata": [
+            "created_at",
+            "updated_at",
+            "artifact_identity",
+            "artifact_type",
+            "scope",
+            "classification",
+        ],
+        "optional_metadata": [
+            "intake_buffer_status",
+            "folder_migration_plan",
+            "event_watch_state",
+            "derived_from",
+        ],
         "lifecycle_states": ["draft", "proposed", "completed", "archived"],
-        "allowed_relationships": ["derived_from", "reviews", "evaluates", "implements"]
+        "allowed_relationships": ["derived_from", "reviews", "evaluates", "implements"],
     },
     "health-check": {
         "machine_identifier": "health-check",
@@ -142,10 +259,24 @@ _RAW_ARTIFACT_TYPE_DEFINITIONS = {
         "producer_skills": ["healthcenter"],
         "consumer_skills": ["manage-development", "evaluate-implementation"],
         "canonical_storage_location": "{milestone_id}/health-checks/{skill_id}-HC-{N}.md",
-        "required_metadata": ["id", "type", "milestone_id", "skill_id", "validation_score", "status", "timestamp", "insights"],
-        "optional_metadata": ["version", "recommendations", "failed_validations", "passed_validations"],
+        "required_metadata": [
+            "id",
+            "type",
+            "milestone_id",
+            "skill_id",
+            "validation_score",
+            "status",
+            "timestamp",
+            "insights",
+        ],
+        "optional_metadata": [
+            "version",
+            "recommendations",
+            "failed_validations",
+            "passed_validations",
+        ],
         "lifecycle_states": ["draft", "completed", "archived"],
-        "allowed_relationships": ["derived_from", "evaluates", "implements"]
+        "allowed_relationships": ["derived_from", "evaluates", "implements"],
     },
     "project-config": {
         "machine_identifier": "project-config",
@@ -154,10 +285,21 @@ _RAW_ARTIFACT_TYPE_DEFINITIONS = {
         "producer_skills": ["bootstrap-project", "manage-roadmap"],
         "consumer_skills": ["validate", "healthcenter", "manage-development"],
         "canonical_storage_location": ".omp/config.yml",
-        "required_metadata": ["created_at", "updated_at", "artifact_identity", "artifact_type"],
+        "required_metadata": [
+            "created_at",
+            "updated_at",
+            "artifact_identity",
+            "artifact_type",
+        ],
         "optional_metadata": ["version", "producer_skill"],
-        "lifecycle_states": ["draft", "proposed", "implemented", "reviewed", "archived"],
-        "allowed_relationships": ["derived_from", "evaluates", "implements", "tests"]
+        "lifecycle_states": [
+            "draft",
+            "proposed",
+            "implemented",
+            "reviewed",
+            "archived",
+        ],
+        "allowed_relationships": ["derived_from", "evaluates", "implements", "tests"],
     },
     "closure": {
         "machine_identifier": "closure",
@@ -166,12 +308,16 @@ _RAW_ARTIFACT_TYPE_DEFINITIONS = {
         "producer_skills": ["close-milestone", "manage-development"],
         "consumer_skills": ["close-milestone", "review-implementation"],
         "canonical_storage_location": "<M_ID>/closures/<CLOSE_ID>.md",
-        "required_metadata": ["created_at", "updated_at", "artifact_identity", "artifact_type"],
+        "required_metadata": [
+            "created_at",
+            "updated_at",
+            "artifact_identity",
+            "artifact_type",
+        ],
         "optional_metadata": ["version"],
         "lifecycle_states": ["draft", "completed", "archived"],
-        "allowed_relationships": ["derived_from", "reviews", "implements"]
-    }
-
+        "allowed_relationships": ["derived_from", "reviews", "implements"],
+    },
 }
 # Canonical type definitions for AEF artifact system
 _ARTIFACT_TYPE_DEFINITIONS: Dict[str, CanonicalArtifactType] = {}
@@ -190,13 +336,13 @@ def get_artifact_type(identifier: str) -> Optional[CanonicalArtifactType]:
     """
     # Pattern-based mapping for M13 pipeline naming conventions
     pattern_map = {
-        'SPEC-': 'specification',
-        'VER-': 'verification',
-        'TEST-': 'test',
-        'TSET-': 'test',
-        'EVA-': 'evaluation',
-        'REV-': 'review',
-        'CLOSE-': 'closure',
+        "SPEC-": "specification",
+        "VER-": "verification",
+        "TEST-": "test",
+        "TSET-": "test",
+        "EVA-": "evaluation",
+        "REV-": "review",
+        "CLOSE-": "closure",
     }
 
     # Check if identifier matches a naming pattern prefix
@@ -213,6 +359,7 @@ def get_artifact_type(identifier: str) -> Optional[CanonicalArtifactType]:
             return artifact_type
 
     return None
+
 
 def get_all_artifact_types() -> List[CanonicalArtifactType]:
     """Returns a list of all defined canonical artifact types."""

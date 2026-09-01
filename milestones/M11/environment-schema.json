@@ -12,20 +12,23 @@
           "type": "object",
           "required": ["method", "supported_languages"],
           "properties": {
-            "method": {"type": "string", "enum": ["mise"]},
-            "supported_languages": {"type": "array", "items": {"type": "string"}},
+            "method": { "type": "string", "enum": ["mise"] },
+            "supported_languages": {
+              "type": "array",
+              "items": { "type": "string" }
+            },
             "validation": {
               "type": "object",
               "properties": {
-                "strict": {"type": "boolean"},
-                "enforce_constraints": {"type": "boolean"}
+                "strict": { "type": "boolean" },
+                "enforce_constraints": { "type": "boolean" }
               }
             }
           }
         },
         "tools": {
           "type": "object",
-          "additionalProperties": {"type": "string"}
+          "additionalProperties": { "type": "string" }
         }
       }
     }

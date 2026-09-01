@@ -30,7 +30,7 @@ class ConfigurationError(Exception):
     invalid_values: Dict[str, Any] = field(default_factory=dict)
 
     def __str__(self) -> str:
-        parts = [f"ConfigurationError"]
+        parts = ["ConfigurationError"]
         if self.missing_fields:
             parts.append(f"missing_fields={self.missing_fields}")
         if self.invalid_values:

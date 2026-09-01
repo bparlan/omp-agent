@@ -15,8 +15,10 @@ import pytest
 from unittest.mock import patch
 
 from reporting import (
-    generate_badges, generate_health_report, generate_processed_skills,
-    generate_skills_summary
+    generate_badges,
+    generate_health_report,
+    generate_processed_skills,
+    generate_skills_summary,
 )
 
 SYNTHETIC_RESULTS = [
@@ -64,10 +66,10 @@ def test_deterministic_output():
 
     # Create temporary skills directory for testing
     with tempfile.TemporaryDirectory() as temp_dir:
-        with patch('reporting.datetime') as mock_datetime:
+        with patch("reporting.datetime") as mock_datetime:
             mock_datetime.now.return_value = fixed_now
             mock_datetime.fromisoformat = real_datetime.fromisoformat
-            with patch('reporting.get_skills_directory') as mock_get_dir:
+            with patch("reporting.get_skills_directory") as mock_get_dir:
                 mock_skills_dir = Path(temp_dir) / "skills"
                 mock_skills_dir.mkdir(parents=True)
                 mock_get_dir.return_value = mock_skills_dir
@@ -79,9 +81,19 @@ def test_deterministic_output():
                 summary1 = generate_skills_summary(results)
 
                 # Read first-invocation outputs before cleanup
-                badges_content1 = (mock_skills_dir / "health_badges.md").read_text(encoding="utf-8")
-                health_content1 = json.loads((mock_skills_dir / "health_check_report.json").read_text(encoding="utf-8"))
-                processed_content1 = json.loads((mock_skills_dir / "processed_skills.json").read_text(encoding="utf-8"))
+                badges_content1 = (mock_skills_dir / "health_badges.md").read_text(
+                    encoding="utf-8"
+                )
+                health_content1 = json.loads(
+                    (mock_skills_dir / "health_check_report.json").read_text(
+                        encoding="utf-8"
+                    )
+                )
+                processed_content1 = json.loads(
+                    (mock_skills_dir / "processed_skills.json").read_text(
+                        encoding="utf-8"
+                    )
+                )
 
                 # Clean up for second invocation
                 for file in mock_skills_dir.glob("*"):
@@ -95,21 +107,39 @@ def test_deterministic_output():
                 summary2 = generate_skills_summary(results)
 
                 # Read second-invocation outputs
-                badges_content2 = (mock_skills_dir / "health_badges.md").read_text(encoding="utf-8")
-                health_content2 = json.loads((mock_skills_dir / "health_check_report.json").read_text(encoding="utf-8"))
-                processed_content2 = json.loads((mock_skills_dir / "processed_skills.json").read_text(encoding="utf-8"))
+                badges_content2 = (mock_skills_dir / "health_badges.md").read_text(
+                    encoding="utf-8"
+                )
+                health_content2 = json.loads(
+                    (mock_skills_dir / "health_check_report.json").read_text(
+                        encoding="utf-8"
+                    )
+                )
+                processed_content2 = json.loads(
+                    (mock_skills_dir / "processed_skills.json").read_text(
+                        encoding="utf-8"
+                    )
+                )
 
                 # Verify badges content is identical
-                assert badges_content1 == badges_content2, "health_badges.md content differs between invocations"
+                assert (
+                    badges_content1 == badges_content2
+                ), "health_badges.md content differs between invocations"
 
                 # Verify health report content is identical
-                assert health_content1 == health_content2, "health_check_report.json content differs between invocations"
+                assert (
+                    health_content1 == health_content2
+                ), "health_check_report.json content differs between invocations"
 
                 # Verify processed skills content is identical
-                assert processed_content1 == processed_content2, "processed_skills.json content differs between invocations"
+                assert (
+                    processed_content1 == processed_content2
+                ), "processed_skills.json content differs between invocations"
 
                 # Verify skills summary return value is identical
-                assert summary1 == summary2, "generate_skills_summary return value differs between invocations"
+                assert (
+                    summary1 == summary2
+                ), "generate_skills_summary return value differs between invocations"
 
                 # Note: Timestamps are frozen via mock, so all content should be byte-identical
 

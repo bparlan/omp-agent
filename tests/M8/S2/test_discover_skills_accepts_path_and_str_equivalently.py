@@ -24,7 +24,9 @@ def test_discover_skills_accepts_path_and_str_equivalently():
     str_result = discover_skills(str(fixture_root))
 
     # Verify both invocations return equal lists
-    assert path_result == str_result, f"Path result {path_result} differs from str result {str_result}"
+    assert (
+        path_result == str_result
+    ), f"Path result {path_result} differs from str result {str_result}"
 
 
 if __name__ == "__main__":

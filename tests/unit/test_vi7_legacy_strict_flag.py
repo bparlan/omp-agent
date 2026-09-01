@@ -35,6 +35,7 @@ def test_legacy_strict_flag() -> int:
         try:
             # Monkeypatch the base dir to a temp milestones structure
             import core.artifacts.resolution as resolution_mod
+
             resolution_mod.ARTIFACTS_BASE_DIR = os.path.join(tmpdir, "milestones")
             os.makedirs(resolution_mod.ARTIFACTS_BASE_DIR)
 
@@ -43,7 +44,7 @@ def test_legacy_strict_flag() -> int:
             os.makedirs(canonical_dir)
             canonical_path = os.path.join(canonical_dir, "canonical_m9.md")
 
-            with open(canonical_path, 'w', encoding='utf-8') as f:
+            with open(canonical_path, "w", encoding="utf-8") as f:
                 f.write("---\n")
                 f.write("id: canonical_m9\n")
                 f.write("type: test\n")
@@ -55,7 +56,7 @@ def test_legacy_strict_flag() -> int:
             os.makedirs(legacy_dir)
             legacy_path = os.path.join(legacy_dir, "legacy_m9.md")
 
-            with open(legacy_path, 'w', encoding='utf-8') as f:
+            with open(legacy_path, "w", encoding="utf-8") as f:
                 f.write("---\n")
                 f.write("type: test\n")
                 f.write("---\n")
@@ -63,33 +64,59 @@ def test_legacy_strict_flag() -> int:
 
             # Test 1: strict=True should resolve canonical artifact but skip legacy
             print("Testing strict=True with canonical artifact...")
-            canonical_strict_result = resolve_artifact(identity="canonical_m9", strict=True)
+            canonical_strict_result = resolve_artifact(
+                identity="canonical_m9", strict=True
+            )
 
-            if not isinstance(canonical_strict_result, dict) or canonical_strict_result.get("resolved") is not True:
-                print(f"FAIL: strict=True should resolve canonical artifact, but got: {canonical_strict_result}")
+            if (
+                not isinstance(canonical_strict_result, dict)
+                or canonical_strict_result.get("resolved") is not True
+            ):
+                print(
+                    f"FAIL: strict=True should resolve canonical artifact, but got: {canonical_strict_result}"
+                )
                 return 1
 
             print("Testing strict=True with legacy artifact (should not resolve)...")
             legacy_strict_result = resolve_artifact(identity="legacy_m9", strict=True)
 
-            if isinstance(legacy_strict_result, dict) and legacy_strict_result.get("resolved") is not False:
-                print(f"FAIL: strict=True should NOT resolve legacy artifact, but got: {legacy_strict_result}")
+            if (
+                isinstance(legacy_strict_result, dict)
+                and legacy_strict_result.get("resolved") is not False
+            ):
+                print(
+                    f"FAIL: strict=True should NOT resolve legacy artifact, but got: {legacy_strict_result}"
+                )
                 return 1
 
             # Test 2: strict=False should resolve both canonical and legacy
             print("Testing strict=False with canonical artifact...")
-            canonical_lenient_result = resolve_artifact(identity="canonical_m9", strict=False)
+            canonical_lenient_result = resolve_artifact(
+                identity="canonical_m9", strict=False
+            )
 
-            if not isinstance(canonical_lenient_result, dict) or canonical_lenient_result.get("resolved") is not True:
-                print(f"FAIL: strict=False should resolve canonical artifact, but got: {canonical_lenient_result}")
+            if (
+                not isinstance(canonical_lenient_result, dict)
+                or canonical_lenient_result.get("resolved") is not True
+            ):
+                print(
+                    f"FAIL: strict=False should resolve canonical artifact, but got: {canonical_lenient_result}"
+                )
                 return 1
 
-            print("Testing strict=False with legacy artifact (should resolve by path)...")
+            print(
+                "Testing strict=False with legacy artifact (should resolve by path)..."
+            )
             # With strict=False, legacy should be resolved by path (filename)
             legacy_lenient_result = resolve_artifact(identity="legacy_m9", strict=False)
 
-            if not isinstance(legacy_lenient_result, dict) or legacy_lenient_result.get("resolved") is not True:
-                print(f"FAIL: strict=False should resolve legacy artifact, but got: {legacy_lenient_result}")
+            if (
+                not isinstance(legacy_lenient_result, dict)
+                or legacy_lenient_result.get("resolved") is not True
+            ):
+                print(
+                    f"FAIL: strict=False should resolve legacy artifact, but got: {legacy_lenient_result}"
+                )
                 return 1
 
         finally:

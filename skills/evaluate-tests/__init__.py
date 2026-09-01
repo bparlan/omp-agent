@@ -14,9 +14,11 @@ from dataclasses import dataclass
 import yaml
 import re
 
+
 @dataclass
 class TestResult:
     """Test execution result."""
+
     test_name: str
     status: str
     artifact_validation: Dict[str, Any]
@@ -24,9 +26,11 @@ class TestResult:
     error_details: Optional[str] = None
     execution_time: float = 0.0
 
+
 @dataclass
 class EvaluationReport:
     """Evaluation report structure."""
+
     spec_id: str
     timestamp: str
     milestone_id: str
@@ -37,6 +41,8 @@ class EvaluationReport:
     blocking_issues: List[str]
     status: str
     template_version: str = "1.3.0"
+
+
 class TestOrchestrator:
     """Orchestrates test execution and produces evaluation artifacts."""
 
@@ -46,8 +52,8 @@ class TestOrchestrator:
     def discover_tests_for_spec(self, spec_id: str) -> List[Dict[str, Any]]:
         """Discover and analyze test files for a specification."""
         test_infos = []
-        tests_dir = Path(f"tests/M13/S5")
-        
+        tests_dir = Path("tests/M13/S5")
+
         if not tests_dir.exists():
             return test_infos
 
@@ -65,7 +71,7 @@ class TestOrchestrator:
                     "full_name": test_file.name,
                     "size": test_file.stat().st_size,
                     "modified": test_file.stat().st_mtime,
-                    "valid": self._analyze_test_validity(test_file)
+                    "valid": self._analyze_test_validity(test_file),
                 }
                 test_infos.append(test_info)
 
@@ -80,7 +86,7 @@ class TestOrchestrator:
                         "full_name": test_file.name,
                         "size": test_file.stat().st_size,
                         "modified": test_file.stat().st_mtime,
-                        "valid": self._analyze_test_validity(test_file)
+                        "valid": self._analyze_test_validity(test_file),
                     }
                     test_infos.append(test_info)
 
@@ -94,12 +100,12 @@ class TestOrchestrator:
             "warnings": [],
             "requirements": [],
             "fr_traceability": [],
-            "test_type": ""
+            "test_type": "",
         }
 
         try:
             content = test_file.read_text()
-            
+
             # Check for shebang
             if not content.startswith("#!/usr/bin/env python3"):
                 analysis["errors"].append("Missing shebang")
@@ -109,20 +115,32 @@ class TestOrchestrator:
                 analysis["warnings"].append("Missing pytest import")
 
             # Check for validation imports
-            if "from core/validation import" not in content and "from core.validation" not in content:
+            if (
+                "from core/validation import" not in content
+                and "from core.validation" not in content
+            ):
                 analysis["warnings"].append("Missing core.validation import")
 
-            if "from core/artifacts/registry import" not in content and "from core/artifacts.registry" not in content:
+            if (
+                "from core/artifacts/registry import" not in content
+                and "from core/artifacts.registry" not in content
+            ):
                 analysis["warnings"].append("Missing core/artifacts.registry import")
 
-            if "from core/artifacts/metadata import" not in content and "from core/artifacts.metadata" not in content:
+            if (
+                "from core/artifacts/metadata import" not in content
+                and "from core/artifacts.metadata" not in content
+            ):
                 analysis["warnings"].append("Missing core/artifacts.metadata import")
 
-            if "from core/artifacts/creation import" not in content and "from core/artifacts.creation" not in content:
+            if (
+                "from core/artifacts/creation import" not in content
+                and "from core/artifacts.creation" not in content
+            ):
                 analysis["warnings"].append("Missing core/artifacts.creation import")
 
             # Check for FR references
-            fr_matches = re.findall(r'FR-[A-Z0-9]+', content)
+            fr_matches = re.findall(r"FR-[A-Z0-9]+", content)
             analysis["fr_traceability"].extend(fr_matches)
 
             # Check test type
@@ -136,11 +154,16 @@ class TestOrchestrator:
                 analysis["test_type"] = "ENVIRONMENT_CHECK"
 
             # Check for validation calls
-            validation_calls = re.findall(r'validate_metadata|get_artifact_type|extract_frontmatter|create_artifact', content)
+            validation_calls = re.findall(
+                r"validate_metadata|get_artifact_type|extract_frontmatter|create_artifact",
+                content,
+            )
             analysis["requirements"].extend(validation_calls)
 
             # If all basic checks pass, mark as valid
-            if len(analysis["errors"]) == 0 and len(validation_calls) >= 2:  # At least 2 validation calls
+            if (
+                len(analysis["errors"]) == 0 and len(validation_calls) >= 2
+            ):  # At least 2 validation calls
                 analysis["valid"] = True
 
         except Exception as e:
@@ -161,7 +184,7 @@ class TestOrchestrator:
             artifact_validation={},
             contract_compliance={},
             error_details=None,
-            execution_time=0.0
+            execution_time=0.0,
         )
 
         try:
@@ -174,19 +197,31 @@ class TestOrchestrator:
 
             # Read and analyze the test file
             content = test_path.read_text()
-            
+
             # Check for required imports
             imports_ok = True
-            if "from core/validation import" not in content and "from core.validation" not in content:
+            if (
+                "from core/validation import" not in content
+                and "from core.validation" not in content
+            ):
                 imports_ok = False
-            
-            if "from core/artifacts/registry import" not in content and "from core/artifacts.registry" not in content:
+
+            if (
+                "from core/artifacts/registry import" not in content
+                and "from core/artifacts.registry" not in content
+            ):
                 imports_ok = False
-                
-            if "from core/artifacts/metadata import" not in content and "from core/artifacts.metadata" not in content:
+
+            if (
+                "from core/artifacts/metadata import" not in content
+                and "from core/artifacts.metadata" not in content
+            ):
                 imports_ok = False
-                
-            if "from core/artifacts/creation import" not in content and "from core/artifacts.creation" not in content:
+
+            if (
+                "from core/artifacts/creation import" not in content
+                and "from core/artifacts.creation" not in content
+            ):
                 imports_ok = False
 
             # Check for validation calls
@@ -194,21 +229,21 @@ class TestOrchestrator:
                 "validate_metadata(",
                 "get_artifact_type(",
                 "extract_frontmatter(",
-                "create_artifact("
+                "create_artifact(",
             ]
-            
+
             calls_found = [call for call in validation_calls if call in content]
-            
+
             if imports_ok and len(calls_found) >= 2:  # At least 2 validation calls
                 test_result.artifact_validation = {
                     "spec_compliance": True,
                     "frontmatter_extraction": True,
                     "type_resolution": True,
-                    "artifact_creation": True
+                    "artifact_creation": True,
                 }
                 test_result.contract_compliance = {
                     "interface_contracts": "implemented",
-                    "observable_behavior": "verified"
+                    "observable_behavior": "verified",
                 }
             else:
                 test_result.status = "failed"
@@ -223,8 +258,13 @@ class TestOrchestrator:
 
         return test_result
 
-    def generate_evaluation_report(self, spec_id: str, test_infos: List[Dict[str, Any]],
-                                 analysis_results: List[Dict[str, Any]], test_results: List[TestResult]) -> Dict[str, Any]:
+    def generate_evaluation_report(
+        self,
+        spec_id: str,
+        test_infos: List[Dict[str, Any]],
+        analysis_results: List[Dict[str, Any]],
+        test_results: List[TestResult],
+    ) -> Dict[str, Any]:
         """Generate evaluation report."""
         passed_tests = sum(1 for tr in test_results if tr.status == "passed")
         total_tests = len(test_results)
@@ -238,9 +278,14 @@ class TestOrchestrator:
                 "total_tests": total_tests,
                 "passed_tests": passed_tests,
                 "failed_tests": total_tests - passed_tests,
-                "success_rate": (passed_tests / total_tests) * 100 if total_tests > 0 else 0,
+                "success_rate": (passed_tests / total_tests) * 100
+                if total_tests > 0
+                else 0,
                 "valid_tests": sum(1 for ar in analysis_results if ar["valid"]),
-                "avg_execution_time": sum(tr.execution_time for tr in test_results) / total_tests if total_tests > 0 else 0
+                "avg_execution_time": sum(tr.execution_time for tr in test_results)
+                / total_tests
+                if total_tests > 0
+                else 0,
             },
             "test_results": [
                 {
@@ -249,19 +294,24 @@ class TestOrchestrator:
                     "artifact_validation": tr.artifact_validation,
                     "contract_compliance": tr.contract_compliance,
                     "error_details": tr.error_details,
-                    "execution_time": tr.execution_time
-                } for tr in test_results
+                    "execution_time": tr.execution_time,
+                }
+                for tr in test_results
             ],
             "issues": [],
             "blocking_issues": [],
             "status": "passed" if passed_tests == total_tests else "failed",
-            "template_version": "1.3.0"
+            "template_version": "1.3.0",
         }
 
         return report
 
-    def write_evaluation_report(self, report: Dict[str, Any], test_infos: List[Dict[str, Any]],
-                               analysis_results: List[Dict[str, Any]]) -> str:
+    def write_evaluation_report(
+        self,
+        report: Dict[str, Any],
+        test_infos: List[Dict[str, Any]],
+        analysis_results: List[Dict[str, Any]],
+    ) -> str:
         """Write evaluation report to file."""
         reports_dir = Path(f"milestones/{self.milestone}")
         reports_dir.mkdir(parents=True, exist_ok=True)
@@ -283,8 +333,8 @@ class TestOrchestrator:
             "template_version": "1.3.0",
             "derived_from": [
                 f"TEST-{self.milestone}S5T1",
-                "skills/evaluate-tests/__init__.py"
-            ]
+                "skills/evaluate-tests/__init__.py",
+            ],
         }
 
         # Convert report to YAML
@@ -311,10 +361,14 @@ class TestOrchestrator:
             markdown_content += f"### {status_icon} {test_result['test_name']}\n\n"
             markdown_content += f"- **Status**: {test_result['status']}\n"
             markdown_content += f"- **Artifact Validation**: {len(test_result['artifact_validation'])} checks\n"
-            markdown_content += f"- **Contract Compliance**: {test_result['contract_compliance']}\n"
+            markdown_content += (
+                f"- **Contract Compliance**: {test_result['contract_compliance']}\n"
+            )
             if test_result["error_details"]:
                 markdown_content += f"- **Error**: {test_result['error_details']}\n"
-            markdown_content += f"- **Execution Time**: {test_result['execution_time']:.3f}s\n\n"
+            markdown_content += (
+                f"- **Execution Time**: {test_result['execution_time']:.3f}s\n\n"
+            )
 
         # Write complete file
         full_content = f"---\n{yaml_content}---\n\n{markdown_content}"
@@ -332,7 +386,7 @@ class TestOrchestrator:
         skill_info = {
             "name": "evaluate-tests",
             "version": "3.7.0-stable",
-            "description": "Evaluate generated test suites and produce validation artifacts"
+            "description": "Evaluate generated test suites and produce validation artifacts",
         }
 
         print(f"Skill Info: {skill_info}")
@@ -364,19 +418,22 @@ class TestOrchestrator:
             test_results.append(test_result)
 
         # Generate evaluation report
-        report = self.generate_evaluation_report(spec_id, test_infos, analysis_results, test_results)
+        report = self.generate_evaluation_report(
+            spec_id, test_infos, analysis_results, test_results
+        )
 
         # Write evaluation report
         report_file = self.write_evaluation_report(report, test_infos, analysis_results)
 
-        print(f"\n=== Test Evaluation Complete ===")
+        print("\n=== Test Evaluation Complete ===")
         print(f"Evaluation report written: {report_file}")
         print(f"Total tests: {report['summary']['total_tests']}")
         print(f"Passed tests: {report['summary']['passed_tests']}")
         print(f"Failed tests: {report['summary']['failed_tests']}")
         print(f"Success rate: {report['summary']['success_rate']:.1f}%")
 
-        return 0 if report['status'] == 'passed' else 1
+        return 0 if report["status"] == "passed" else 1
+
 
 if __name__ == "__main__":
     orchestrator = TestOrchestrator()

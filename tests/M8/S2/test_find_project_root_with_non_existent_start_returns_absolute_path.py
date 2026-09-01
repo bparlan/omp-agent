@@ -4,7 +4,6 @@
 # Test Type: IMPLEMENTATION_CHECK
 
 import pytest
-import tempfile
 from pathlib import Path
 
 
@@ -15,7 +14,9 @@ def test_find_project_root_with_non_existent_start_returns_absolute_path():
     from discovery import find_project_root
 
     # Create a non-existent path
-    non_existent_path = Path("/nonexistent/path/that/does/not/exist/anywhere/unique-marker-xyz")
+    non_existent_path = Path(
+        "/nonexistent/path/that/does/not/exist/anywhere/unique-marker-xyz"
+    )
 
     # Run the function under test
     result = find_project_root(non_existent_path)

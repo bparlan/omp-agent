@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 """mise-validate command for FR-1.2 .mise.toml Configuration Schema validation"""
+
 import sys
 import json
 import argparse
@@ -8,10 +9,12 @@ import re
 from pathlib import Path
 from typing import Dict, Any, List
 
+
 def validate_version_format(version: str) -> bool:
     """Validate version format using the regex from specification"""
-    pattern = r'^([0-9]+)\.([0-9]+)\.([0-9]+)([-+][a-zA-Z0-9]+)?$'
+    pattern = r"^([0-9]+)\.([0-9]+)\.([0-9]+)([-+][a-zA-Z0-9]+)?$"
     return re.match(pattern, version) is not None
+
 
 def validate_inner_config(config: Dict[str, Any]) -> List[str]:
     """Validate a config object that is missing the outer wrapper (schema_version, mise_config)"""
@@ -54,7 +57,9 @@ def validate_inner_config(config: Dict[str, Any]) -> List[str]:
         if not isinstance(workspace, dict):
             errors.append("workspace must be an object")
         else:
-            if "isolation" in workspace and not isinstance(workspace["isolation"], bool):
+            if "isolation" in workspace and not isinstance(
+                workspace["isolation"], bool
+            ):
                 errors.append("workspace.isolation must be a boolean")
             if "path" in workspace and not isinstance(workspace["path"], str):
                 errors.append("workspace.path must be a string")
@@ -64,7 +69,9 @@ def validate_inner_config(config: Dict[str, Any]) -> List[str]:
                 else:
                     for i, perm in enumerate(workspace["permissions"]):
                         if not isinstance(perm, str):
-                            errors.append(f"workspace.permissions[{i}] must be a string")
+                            errors.append(
+                                f"workspace.permissions[{i}] must be a string"
+                            )
 
     # Validate cross_language (optional)
     if "cross_language" in config:
@@ -72,7 +79,9 @@ def validate_inner_config(config: Dict[str, Any]) -> List[str]:
         if not isinstance(cross_lang, dict):
             errors.append("cross_language must be an object")
         else:
-            if "compatibility_mode" in cross_lang and not isinstance(cross_lang["compatibility_mode"], bool):
+            if "compatibility_mode" in cross_lang and not isinstance(
+                cross_lang["compatibility_mode"], bool
+            ):
                 errors.append("cross_language.compatibility_mode must be a boolean")
             if "fallback_strategies" in cross_lang:
                 if not isinstance(cross_lang["fallback_strategies"], list):
@@ -80,16 +89,21 @@ def validate_inner_config(config: Dict[str, Any]) -> List[str]:
                 else:
                     for i, strat in enumerate(cross_lang["fallback_strategies"]):
                         if not isinstance(strat, str):
-                            errors.append(f"cross_language.fallback_strategies[{i}] must be a string")
+                            errors.append(
+                                f"cross_language.fallback_strategies[{i}] must be a string"
+                            )
             if "shared_components" in cross_lang:
                 if not isinstance(cross_lang["shared_components"], list):
                     errors.append("cross_language.shared_components must be an array")
                 else:
                     for i, comp in enumerate(cross_lang["shared_components"]):
                         if not isinstance(comp, str):
-                            errors.append(f"cross_language.shared_components[{i}] must be a string")
+                            errors.append(
+                                f"cross_language.shared_components[{i}] must be a string"
+                            )
 
     return errors
+
 
 def validate_mise_config(config: Dict[str, Any]) -> List[str]:
     """Validate a complete mise config with schema_version wrapper"""
@@ -118,20 +132,13 @@ def validate_mise_config(config: Dict[str, Any]) -> List[str]:
 
     return errors
 
+
 def main():
     parser = argparse.ArgumentParser(
         description="Validate .mise.toml configuration against schema"
     )
-    parser.add_argument(
-        "--config",
-        required=True,
-        help="Path to config file"
-    )
-    parser.add_argument(
-        "--schema",
-        default="1.0.0",
-        help="Schema version"
-    )
+    parser.add_argument("--config", required=True, help="Path to config file")
+    parser.add_argument("--schema", default="1.0.0", help="Schema version")
 
     args = parser.parse_args()
 
@@ -144,14 +151,14 @@ def main():
 
         # Try to parse as YAML first (mise uses YAML-like format)
         try:
-            with open(config_path_obj, 'r') as f:
+            with open(config_path_obj, "r") as f:
                 content = f.read()
             config = yaml.safe_load(content)
             if config is None:
                 raise ValueError("Empty configuration file")
         except yaml.YAMLError:
             # Fall back to JSON
-            with open(config_path_obj, 'r') as f:
+            with open(config_path_obj, "r") as f:
                 config = json.load(f)
 
         # Validate the loaded config
@@ -163,21 +170,22 @@ def main():
                 print(f"  - {error}")
             print(f"\nConfig file: {args.config}")
             print(f"Schema version: {args.schema}")
-            print(f"Status: INVALID")
+            print("Status: INVALID")
             sys.exit(1)
         else:
             print("Configuration validated successfully")
             print(f"Config file: {args.config}")
             print(f"Schema version: {args.schema}")
-            print(f"Status: VALID")
+            print("Status: VALID")
             sys.exit(0)
 
     except Exception as e:
         print(f"Error: {str(e)}")
         print(f"Config file: {args.config}")
         print(f"Schema version: {args.schema}")
-        print(f"Status: ERROR")
+        print("Status: ERROR")
         sys.exit(1)
+
 
 if __name__ == "__main__":
     main()

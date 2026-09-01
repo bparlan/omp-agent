@@ -2,6 +2,7 @@
 Environment Layer CLI Interface
 Main entry point for all environment layer commands
 """
+
 import sys
 from pathlib import Path
 
@@ -10,6 +11,7 @@ sys.path.insert(0, str(Path(__file__).parent.parent))
 
 from .env_check import main as env_check_main
 from .env_detect import main as env_detect_main
+
 
 def main():
     """Main CLI entry point"""

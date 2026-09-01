@@ -1,67 +1,70 @@
 #!/usr/bin/env python3
 """Generate skeleton.md from Python source files."""
+
 import re
 import sys
 from pathlib import Path
-from typing import Dict, List, Tuple
+from typing import List, Tuple
+
 
 def extract_symbols(filepath: Path) -> Tuple[List[str], List[Tuple[str, str, int]]]:
     """Extract function and class definitions from a Python file."""
     symbols = []
     imports = []
 
-    with open(filepath, 'r', encoding='utf-8') as f:
+    with open(filepath, "r", encoding="utf-8") as f:
         lines = f.readlines()
 
     for i, line in enumerate(lines, 1):
         stripped = line.strip()
 
         # Skip comments and empty lines
-        if not stripped or stripped.startswith('#'):
+        if not stripped or stripped.startswith("#"):
             continue
 
         # Extract imports
-        if stripped.startswith('import '):
-            imports.append(('import', stripped))
+        if stripped.startswith("import "):
+            imports.append(("import", stripped))
             continue
 
-        if stripped.startswith('from '):
+        if stripped.startswith("from "):
             # Parse: from module import name
-            match = re.match(r'from\s+(\S+)\s+import\s+(.+)', stripped)
+            match = re.match(r"from\s+(\S+)\s+import\s+(.+)", stripped)
             if match:
                 module = match.group(1)
-                names = match.group(2).split(',')
+                names = match.group(2).split(",")
                 for name in names:
                     name = name.strip()
-                    if name not in ['*', '_']:
-                        imports.append(('from', f'from {module} import {name}'))
+                    if name not in ["*", "_"]:
+                        imports.append(("from", f"from {module} import {name}"))
             continue
 
         # Extract class definitions
-        if stripped.startswith('class '):
-            match = re.match(r'class\s+(\S+)', stripped)
+        if stripped.startswith("class "):
+            match = re.match(r"class\s+(\S+)", stripped)
             if match:
                 class_name = match.group(1)
-                symbols.append((class_name, 'class', i))
+                symbols.append((class_name, "class", i))
             continue
 
         # Extract async functions
-        if stripped.startswith('async def '):
-            match = re.match(r'async def\s+(\w+)', stripped)
+        if stripped.startswith("async def "):
+            match = re.match(r"async def\s+(\w+)", stripped)
             if match:
                 func_name = match.group(1)
-                symbols.append((func_name, 'async def', i))
+                symbols.append((func_name, "async def", i))
             continue
 
         # Extract regular functions
-        if stripped.startswith('def '):
-            match = re.match(r'def\s+(\w+)', stripped)
+        if stripped.startswith("def "):
+            match = re.match(r"def\s+(\w+)", stripped)
             if match:
                 func_name = match.group(1)
-                symbols.append((func_name, 'def', i))
+                symbols.append((func_name, "def", i))
             continue
 
     return imports, symbols
+
 
 def generate_skeleton(files: List[Path], output_path: Path) -> None:
     """Generate skeleton.md from Python source files."""
@@ -78,13 +81,15 @@ def generate_skeleton(files: List[Path], output_path: Path) -> None:
         # Get all imports and symbols
         imports, symbols = extract_symbols(filepath)
 
-        files_data.append({
-            'path': str(rel_path),
-            'name': filepath.name,
-            'language': 'python',
-            'symbols': symbols,
-            'imports': imports
-        })
+        files_data.append(
+            {
+                "path": str(rel_path),
+                "name": filepath.name,
+                "language": "python",
+                "symbols": symbols,
+                "imports": imports,
+            }
+        )
 
         all_imports.extend(imports)
 
@@ -97,48 +102,49 @@ def generate_skeleton(files: List[Path], output_path: Path) -> None:
             unique_imports.append(imp)
 
     # Build skeleton.md content
-    lines = ['files:']
+    lines = ["files:"]
     for f in files_data:
         lines.append(f'  - path: {f["path"]}')
         lines.append(f'    name: {f["name"]}')
         lines.append(f'    language: {f["language"]}')
-        lines.append('    symbols:')
-        for name, kind, line in f['symbols']:
-            lines.append(f'      - name: {name}')
-            lines.append(f'        kind: {kind}')
-            lines.append(f'        line: {line}')
-        lines.append('    imports:')
-        for from_str, imp_str in f['imports']:
-            lines.append(f'      - from: {from_str}')
-            lines.append(f'        to: {imp_str}')
-        lines.append('    unresolved_imports:')
-        lines.append('      []')
-        lines.append('')
+        lines.append("    symbols:")
+        for name, kind, line in f["symbols"]:
+            lines.append(f"      - name: {name}")
+            lines.append(f"        kind: {kind}")
+            lines.append(f"        line: {line}")
+        lines.append("    imports:")
+        for from_str, imp_str in f["imports"]:
+            lines.append(f"      - from: {from_str}")
+            lines.append(f"        to: {imp_str}")
+        lines.append("    unresolved_imports:")
+        lines.append("      []")
+        lines.append("")
 
-    lines.append('imports:')
-    lines.append('# All imports across files (deduplicated)')
-    lines.append('# Generated by tools/generate_skeleton_from_python.py')
+    lines.append("imports:")
+    lines.append("# All imports across files (deduplicated)")
+    lines.append("# Generated by tools/generate_skeleton_from_python.py")
 
     # Write to file
-    output_path.write_text('\n'.join(lines))
-    print(f'Generated skeleton.md at {output_path}')
-    print(f'  Files: {len(files_data)}')
+    output_path.write_text("\n".join(lines))
+    print(f"Generated skeleton.md at {output_path}")
+    print(f"  Files: {len(files_data)}")
     print(f'  Symbols: {sum(len(f["symbols"]) for f in files_data)}')
-    print(f'  Imports: {len(unique_imports)}')
+    print(f"  Imports: {len(unique_imports)}")
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     if len(sys.argv) < 3:
-        print(f'Usage: {sys.argv[0]} <python_source_dir> <output_skeleton.md>')
+        print(f"Usage: {sys.argv[0]} <python_source_dir> <output_skeleton.md>")
         sys.exit(1)
 
     source_dir = Path(sys.argv[1])
     output_path = Path(sys.argv[2])
 
     # Find all Python files
-    files = sorted(source_dir.rglob('*.py'))
+    files = sorted(source_dir.rglob("*.py"))
 
     if not files:
-        print('No Python files found')
+        print("No Python files found")
         sys.exit(1)
 
     generate_skeleton(files, output_path)

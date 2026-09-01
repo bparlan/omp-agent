@@ -35,7 +35,9 @@ class TestValidateProjectConfigFunction(unittest.TestCase):
         os.makedirs(omp_dir, exist_ok=True)
         config_path = os.path.join(omp_dir, "config.yml")
         with open(config_path, "w") as f:
-            f.write("project_id: test-1\nproject_slug: test-project\nversion: 1.0.0-stable\n")
+            f.write(
+                "project_id: test-1\nproject_slug: test-project\nversion: 1.0.0-stable\n"
+            )
         result = validate_project_config(self.test_dir)
         self.assertTrue(result["valid"])
         self.assertEqual(result["errors"], [])

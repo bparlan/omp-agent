@@ -15,13 +15,21 @@ from core.artifacts.metadata import extract_frontmatter
 
 
 def run_healthcenter():
-    cmd = [os.path.join(REPO_ROOT, "skills", "healthcenter", "healthcenter.py"), "--skill", "example_skill"]
-    proc = subprocess.run(cmd, cwd=REPO_ROOT, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    cmd = [
+        os.path.join(REPO_ROOT, "skills", "healthcenter", "healthcenter.py"),
+        "--skill",
+        "example_skill",
+    ]
+    proc = subprocess.run(
+        cmd, cwd=REPO_ROOT, stdout=subprocess.PIPE, stderr=subprocess.PIPE
+    )
     return proc.returncode, proc.stdout.decode(), proc.stderr.decode()
 
 
 def main():
-    ARTIFACT = os.path.join(REPO_ROOT, "milestones", "M9", "M9-health-check-example_skill.md")
+    ARTIFACT = os.path.join(
+        REPO_ROOT, "milestones", "M9", "M9-health-check-example_skill.md"
+    )
     os.makedirs(os.path.dirname(ARTIFACT), exist_ok=True)
     if os.path.exists(ARTIFACT):
         os.remove(ARTIFACT)
@@ -45,7 +53,14 @@ def main():
         print("FAIL: Artifact missing parseable YAML frontmatter")
         sys.exit(1)
 
-    required = ["id", "type", "milestone_id", "template_version", "derived_from", "metadata"]
+    required = [
+        "id",
+        "type",
+        "milestone_id",
+        "template_version",
+        "derived_from",
+        "metadata",
+    ]
     missing = [key for key in required if key not in metadata]
     if missing:
         print(f"FAIL: Artifact missing required frontmatter keys: {missing}")

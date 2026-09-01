@@ -4,7 +4,6 @@
 # Test Type: IMPLEMENTATION_CHECK
 
 import pytest
-from pathlib import Path
 
 
 def test_DiscoveryError_exception_subclass():
@@ -14,10 +13,14 @@ def test_DiscoveryError_exception_subclass():
     from discovery import DiscoveryError
 
     # Verify the class is importable
-    assert isinstance(DiscoveryError, type), f"Expected class type, got {type(DiscoveryError)}"
+    assert isinstance(
+        DiscoveryError, type
+    ), f"Expected class type, got {type(DiscoveryError)}"
 
     # Verify it's a subclass of Exception
-    assert issubclass(DiscoveryError, Exception), f"DiscoveryError should be a subclass of Exception"
+    assert issubclass(
+        DiscoveryError, Exception
+    ), "DiscoveryError should be a subclass of Exception"
 
 
 if __name__ == "__main__":

@@ -31,9 +31,9 @@ def test_generic_exception_caught_returns_empty_list():
 
     assert isinstance(results, list), f"Expected list, got {type(results)}"
     assert len(results) == 0, f"Expected empty list on error, got {results}"
-    assert "test error" in stderr_buf.getvalue(), (
-        f"stderr missing error message: {stderr_buf.getvalue()}"
-    )
+    assert (
+        "test error" in stderr_buf.getvalue()
+    ), f"stderr missing error message: {stderr_buf.getvalue()}"
 
 
 def test_keyboard_interrupt_handled():
@@ -52,9 +52,9 @@ def test_keyboard_interrupt_handled():
                 sys.stderr = old_stderr
 
     assert isinstance(results, list), f"Expected list, got {type(results)}"
-    assert "Operation interrupted by user" in stderr_buf.getvalue(), (
-        f"stderr missing interrupt message: {stderr_buf.getvalue()}"
-    )
+    assert (
+        "Operation interrupted by user" in stderr_buf.getvalue()
+    ), f"stderr missing interrupt message: {stderr_buf.getvalue()}"
 
 
 if __name__ == "__main__":

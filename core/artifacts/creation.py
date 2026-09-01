@@ -51,12 +51,16 @@ def _assign_identity(
 
     registry = get_registry()
     if artifact_type not in registry.list_types():
-        raise ValueError(f"Cannot assign identity for unregistered artifact type: {artifact_type}")
+        raise ValueError(
+            f"Cannot assign identity for unregistered artifact type: {artifact_type}"
+        )
 
     base = artifact_type[:4].upper()
     candidate = f"{base}-{milestone_id}"
     if _artifact_identity({"id": candidate}) != candidate:
-        raise ValueError(f"Generated canonical identity '{candidate}' is not canonical.")
+        raise ValueError(
+            f"Generated canonical identity '{candidate}' is not canonical."
+        )
     return candidate
 
 
@@ -81,7 +85,9 @@ def _build_frontmatter(
         "template_version": template_version,
         "metadata": metadata,
     }
-    yaml_block = yaml.safe_dump(frontmatter, default_flow_style=False, sort_keys=False).strip()
+    yaml_block = yaml.safe_dump(
+        frontmatter, default_flow_style=False, sort_keys=False
+    ).strip()
     return f"---\n{yaml_block}\n---\n"
 
 
@@ -212,7 +218,9 @@ def create_artifact(
 
     # Step 5: resolve canonical storage path
     try:
-        relative_path = construct_canonical_path(milestone_id, artifact_type, assigned_identity, extension=extension)
+        relative_path = construct_canonical_path(
+            milestone_id, artifact_type, assigned_identity, extension=extension
+        )
     except ValueError as e:
         return {
             "created": False,
@@ -230,7 +238,9 @@ def create_artifact(
     try:
         with open(tmp_path, "w", encoding="utf-8") as f:
             f.write(body)
-        validation_result = validate_metadata(tmp_path, schema=registry.get_schema(artifact_type))
+        validation_result = validate_metadata(
+            tmp_path, schema=registry.get_schema(artifact_type)
+        )
     except Exception as e:
         try:
             os.remove(tmp_path)

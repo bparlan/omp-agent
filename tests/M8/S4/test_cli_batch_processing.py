@@ -60,8 +60,12 @@ def test_process_all_skills_returns_correct_length():
     from cli import process_all_skills
 
     skill_names = [
-        "skill_alpha", "skill_beta", "skill_gamma",
-        "skill_delta", "skill_epsilon", "skill_zeta",
+        "skill_alpha",
+        "skill_beta",
+        "skill_gamma",
+        "skill_delta",
+        "skill_epsilon",
+        "skill_zeta",
     ]
 
     open_impl = _make_open_impl(skill_names)
@@ -70,9 +74,9 @@ def test_process_all_skills_returns_correct_length():
             results, _ = _capture_stdout(process_all_skills)
 
     assert isinstance(results, list)
-    assert len(results) == len(skill_names), (
-        f"Expected {len(skill_names)} results, got {len(results)}"
-    )
+    assert len(results) == len(
+        skill_names
+    ), f"Expected {len(skill_names)} results, got {len(results)}"
 
 
 def test_process_all_skills_batch_headers_in_order():
@@ -80,8 +84,12 @@ def test_process_all_skills_batch_headers_in_order():
     from cli import process_all_skills
 
     skill_names = [
-        "skill_alpha", "skill_beta", "skill_gamma",
-        "skill_delta", "skill_epsilon", "skill_zeta",
+        "skill_alpha",
+        "skill_beta",
+        "skill_gamma",
+        "skill_delta",
+        "skill_epsilon",
+        "skill_zeta",
     ]
 
     open_impl = _make_open_impl(skill_names)
@@ -95,9 +103,7 @@ def test_process_all_skills_batch_headers_in_order():
     assert pos1 != -1, "Missing BATCH 1 header"
     assert pos2 != -1, "Missing BATCH 2 header"
     assert pos3 != -1, "Missing BATCH 3 header"
-    assert pos1 < pos2 < pos3, (
-        f"Batch headers out of order: {pos1}, {pos2}, {pos3}"
-    )
+    assert pos1 < pos2 < pos3, f"Batch headers out of order: {pos1}, {pos2}, {pos3}"
 
 
 def test_process_all_skills_preserves_ordering():
@@ -105,8 +111,12 @@ def test_process_all_skills_preserves_ordering():
     from cli import process_all_skills
 
     skill_names = [
-        "skill_alpha", "skill_beta", "skill_gamma",
-        "skill_delta", "skill_epsilon", "skill_zeta",
+        "skill_alpha",
+        "skill_beta",
+        "skill_gamma",
+        "skill_delta",
+        "skill_epsilon",
+        "skill_zeta",
     ]
 
     open_impl = _make_open_impl(skill_names)
@@ -115,9 +125,9 @@ def test_process_all_skills_preserves_ordering():
             results, _ = _capture_stdout(process_all_skills)
 
     names_in_order = [r.get("name", "") for r in results]
-    assert names_in_order == skill_names, (
-        f"Ordering mismatch: {names_in_order} != {skill_names}"
-    )
+    assert (
+        names_in_order == skill_names
+    ), f"Ordering mismatch: {names_in_order} != {skill_names}"
 
 
 def test_process_all_skills_summary_counts():
@@ -125,8 +135,12 @@ def test_process_all_skills_summary_counts():
     from cli import process_all_skills
 
     skill_names = [
-        "skill_alpha", "skill_beta", "skill_gamma",
-        "skill_delta", "skill_epsilon", "skill_zeta",
+        "skill_alpha",
+        "skill_beta",
+        "skill_gamma",
+        "skill_delta",
+        "skill_epsilon",
+        "skill_zeta",
     ]
 
     open_impl = _make_open_impl(skill_names)
@@ -135,9 +149,9 @@ def test_process_all_skills_summary_counts():
             results, stdout = _capture_stdout(process_all_skills)
 
     total_count = len(results)
-    assert "Total:" in stdout or "total" in stdout.lower(), (
-        "Summary block missing total count"
-    )
+    assert (
+        "Total:" in stdout or "total" in stdout.lower()
+    ), "Summary block missing total count"
 
 
 if __name__ == "__main__":

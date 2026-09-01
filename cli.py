@@ -21,10 +21,8 @@ Key constraints:
 import argparse
 import sys
 from typing import List, Dict, Any, Optional
-from pathlib import Path
 
 # Module-level imports - strictly controlled by NFR-CLI_FILE_SCOPE
-import discovery
 from skills.healthcheck.core.validation import SkillValidator
 import reporting
 from discovery import discover_skills as _discover_skills
@@ -42,6 +40,8 @@ __all__ = (
     "print_help",
     "generate_all_reports",
 )
+
+
 def parse_arguments() -> argparse.Namespace:
     """
     Parses command line arguments.
@@ -56,28 +56,22 @@ def parse_arguments() -> argparse.Namespace:
     - Maintains backward compatibility with existing CLI interface
     """
     parser = argparse.ArgumentParser(
-        description="HealthCheck Skill CLI",
-        add_help=False
+        description="HealthCheck Skill CLI", add_help=False
     )
-    parser.add_argument(
-        "skill_name",
-        nargs="?",
-        help="Specific skill name to check"
-    )
+    parser.add_argument("skill_name", nargs="?", help="Specific skill name to check")
     parser.add_argument(
         "--all",
         dest="all_flag",
         action="store_true",
-        help="Process all skills in 3 batches"
+        help="Process all skills in 3 batches",
     )
     parser.add_argument(
-        "--help",
-        dest="help_flag",
-        action="store_true",
-        help="Show help text"
+        "--help", dest="help_flag", action="store_true", help="Show help text"
     )
 
     return parser.parse_args()
+
+
 def validate_single_skill(skill_name: str) -> Optional[Dict[str, Any]]:
     """
     Validates a single skill by name.
@@ -125,6 +119,8 @@ def validate_single_skill(skill_name: str) -> Optional[Dict[str, Any]]:
     except Exception as e:
         print(f"Error validating skill '{skill_name}': {e}", file=sys.stderr)
         return None
+
+
 def process_all_skills() -> List[Dict[str, Any]]:
     """
     Process all skills in 3 batches.
@@ -154,7 +150,11 @@ def process_all_skills() -> List[Dict[str, Any]]:
         # Process each batch
         results = []
 
-        for batch_name, batch_skills in [("Batch 1", batch1), ("Batch 2", batch2), ("Batch 3", batch3)]:
+        for batch_name, batch_skills in [
+            ("Batch 1", batch1),
+            ("Batch 2", batch2),
+            ("Batch 3", batch3),
+        ]:
             for skill_name in batch_skills:
                 result = validate_single_skill(skill_name)
                 if result:
@@ -166,7 +166,11 @@ def process_all_skills() -> List[Dict[str, Any]]:
     except Exception as e:
         print(f"Error processing all skills: {e}", file=sys.stderr)
         return []
-def run_health_check(skill_name: Optional[str] = None, all_flag: bool = False) -> List[Dict[str, Any]]:
+
+
+def run_health_check(
+    skill_name: Optional[str] = None, all_flag: bool = False
+) -> List[Dict[str, Any]]:
     """
     Mode dispatch for health check operations.
 
@@ -202,6 +206,8 @@ def run_health_check(skill_name: Optional[str] = None, all_flag: bool = False) -
     except Exception as e:
         print(f"Error in run_health_check: {e}", file=sys.stderr)
         return []
+
+
 def print_help() -> None:
     """
     Show help text.
@@ -257,6 +263,8 @@ NOTES:
     """
 
     print(help_text)
+
+
 def generate_all_reports(results: List[Dict[str, Any]]) -> None:
     """
     Report generation orchestration.

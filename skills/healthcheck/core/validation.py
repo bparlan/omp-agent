@@ -9,10 +9,13 @@ import re
 from datetime import datetime
 from pathlib import Path
 from dataclasses import dataclass
-from typing import List, Dict, Any
+from typing import List
+
+
 @dataclass
 class ValidationResult:
     """Model for validation results"""
+
     name: str
     status: str  # "healthy", "needs_review", "error"
     validation_score: float
@@ -20,12 +23,16 @@ class ValidationResult:
     issues: List[str]
     last_modified: str
     last_checked: str
+
+
 class Validator:
     """Base validator class for skill validation rules"""
 
     def validate(self, content: str, skill_path: Path) -> ValidationResult:
         """Validate skill content - to be implemented by subclasses"""
         raise NotImplementedError
+
+
 class RequiredFieldsValidator(Validator):
     """Validates required fields in SKILL.md file"""
 
@@ -62,15 +69,17 @@ class RequiredFieldsValidator(Validator):
             has_stable_suffix="-stable" in content.lower(),
             issues=issues,
             last_modified="",
-            last_checked=""
+            last_checked="",
         )
+
+
 class VersionValidator(Validator):
     """Validates version information and -stable suffix"""
 
     def validate(self, content: str, skill_path: Path) -> ValidationResult:
         """Validate version and stable suffix"""
         # Extract version using regex
-        version_match = re.search(r'version:\s*([^\n]+)', content, re.IGNORECASE)
+        version_match = re.search(r"version:\s*([^\n]+)", content, re.IGNORECASE)
         version = version_match.group(1) if version_match else None
 
         # Check for -stable suffix in version field
@@ -83,15 +92,19 @@ class VersionValidator(Validator):
             has_stable_suffix=has_stable_suffix,
             issues=[],
             last_modified="",
-            last_checked=""
+            last_checked="",
         )
+
+
 class NameValidator(Validator):
     """Validates skill name extraction"""
 
     def validate(self, content: str, skill_path: Path) -> ValidationResult:
         """Extract and validate skill name"""
-        name_match = re.search(r'name:\s*([^\n]+)', content, re.IGNORECASE)
-        skill_name = name_match.group(1).strip() if name_match else skill_path.parent.name
+        name_match = re.search(r"name:\s*([^\n]+)", content, re.IGNORECASE)
+        skill_name = (
+            name_match.group(1).strip() if name_match else skill_path.parent.name
+        )
 
         return ValidationResult(
             name=skill_name,
@@ -100,8 +113,10 @@ class NameValidator(Validator):
             has_stable_suffix=False,
             issues=[],
             last_modified="",
-            last_checked=""
+            last_checked="",
         )
+
+
 class ValidationOrchestrator:
     """Orchestrates validation using multiple validators"""
 
@@ -122,7 +137,7 @@ class ValidationOrchestrator:
             has_stable_suffix=False,
             issues=[],
             last_modified="",
-            last_checked=""
+            last_checked="",
         )
 
         # Run all validators
@@ -131,13 +146,13 @@ class ValidationOrchestrator:
                 validation_result = validator.validate(content, skill_path)
 
                 # Merge results
-                if hasattr(validation_result, 'validation_score'):
+                if hasattr(validation_result, "validation_score"):
                     result.validation_score = validation_result.validation_score
                     result.issues = validation_result.issues
                     result.has_stable_suffix = validation_result.has_stable_suffix
-                elif hasattr(validation_result, 'has_stable_suffix'):
+                elif hasattr(validation_result, "has_stable_suffix"):
                     result.has_stable_suffix = validation_result.has_stable_suffix
-                elif hasattr(validation_result, 'skill_name'):
+                elif hasattr(validation_result, "skill_name"):
                     result.name = validation_result.skill_name
 
             except Exception as e:
@@ -148,9 +163,13 @@ class ValidationOrchestrator:
 
         # Determine status based on score
         if result.status != "error":
-            result.status = "healthy" if result.validation_score >= 0.8 else "needs_review"
+            result.status = (
+                "healthy" if result.validation_score >= 0.8 else "needs_review"
+            )
 
         return result
+
+
 def validate_skill_file(skill_path: Path) -> dict:
     """
     Legacy function for backward compatibility.

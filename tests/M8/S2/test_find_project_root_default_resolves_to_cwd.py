@@ -22,14 +22,24 @@ def test_find_project_root_default_resolves_to_cwd():
     # Verify both return the same absolute path
     expected_cwd = Path.cwd().resolve()
 
-    assert isinstance(result_no_args, Path), f"Expected Path, got {type(result_no_args)}"
-    assert isinstance(result_none_args, Path), f"Expected Path, got {type(result_none_args)}"
+    assert isinstance(
+        result_no_args, Path
+    ), f"Expected Path, got {type(result_no_args)}"
+    assert isinstance(
+        result_none_args, Path
+    ), f"Expected Path, got {type(result_none_args)}"
 
     assert result_no_args.is_absolute(), f"Expected absolute path, got {result_no_args}"
-    assert result_none_args.is_absolute(), f"Expected absolute path, got {result_none_args}"
+    assert (
+        result_none_args.is_absolute()
+    ), f"Expected absolute path, got {result_none_args}"
 
-    assert result_no_args == expected_cwd, f"Expected {expected_cwd}, got {result_no_args}"
-    assert result_none_args == expected_cwd, f"Expected {expected_cwd}, got {result_none_args}"
+    assert (
+        result_no_args == expected_cwd
+    ), f"Expected {expected_cwd}, got {result_no_args}"
+    assert (
+        result_none_args == expected_cwd
+    ), f"Expected {expected_cwd}, got {result_none_args}"
 
 
 if __name__ == "__main__":

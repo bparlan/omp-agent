@@ -44,12 +44,14 @@ class LegacyCompatibilityTest:
             artifact_path = self.test_dir / artifact_name
 
             # Create a simple legacy artifact
-            content = f"# Legacy Artifact: {artifact_name}\n\nThis is a legacy artifact.\n"
-            artifact_path.write_text(content, encoding='utf-8')
+            content = (
+                f"# Legacy Artifact: {artifact_name}\n\nThis is a legacy artifact.\n"
+            )
+            artifact_path.write_text(content, encoding="utf-8")
 
             # Check if accessible (readable)
             try:
-                artifact_path.read_text(encoding='utf-8')
+                artifact_path.read_text(encoding="utf-8")
                 print(f"  ✓ PASS: {artifact_name} is accessible")
             except Exception as e:
                 print(f"  ✗ FAIL: {artifact_name} is not accessible: {e}")
@@ -82,7 +84,7 @@ class LegacyCompatibilityTest:
             elif expected_type == "verification":
                 content += "\n# Verification\n"
 
-            artifact_path.write_text(content, encoding='utf-8')
+            artifact_path.write_text(content, encoding="utf-8")
 
             # Simulate classification using multiple sources
             # 1. Directory location (if any)
@@ -95,7 +97,9 @@ class LegacyCompatibilityTest:
             if classified_as == expected_type:
                 print(f"  ✓ PASS: {artifact_name} classified as '{expected_type}'")
             else:
-                print(f"  ✗ FAIL: {artifact_name} classified as '{classified_as}', expected '{expected_type}'")
+                print(
+                    f"  ✗ FAIL: {artifact_name} classified as '{classified_as}', expected '{expected_type}'"
+                )
                 all_correctly_classified = False
 
         return all_correctly_classified
@@ -157,7 +161,7 @@ status: proposed
 # Canonical Investigation
 """
 
-        canonical_path.write_text(canonical_content, encoding='utf-8')
+        canonical_path.write_text(canonical_content, encoding="utf-8")
 
         # Create legacy artifacts
         legacy_path = self.test_dir / "M5S1I1.md"
@@ -166,18 +170,18 @@ status: proposed
 This is a legacy artifact.
 """
 
-        legacy_path.write_text(legacy_content, encoding='utf-8')
+        legacy_path.write_text(legacy_content, encoding="utf-8")
 
         # Test that both types can be accessed
         try:
-            canonical_read = canonical_path.read_text(encoding='utf-8')
-            legacy_read = legacy_path.read_text(encoding='utf-8')
+            canonical_read = canonical_path.read_text(encoding="utf-8")
+            legacy_read = legacy_path.read_text(encoding="utf-8")
 
             if canonical_read and legacy_read:
-                print(f"  ✓ PASS: Both canonical and legacy artifacts accessible")
+                print("  ✓ PASS: Both canonical and legacy artifacts accessible")
                 return True
             else:
-                print(f"  ✗ FAIL: One or both artifacts not readable")
+                print("  ✗ FAIL: One or both artifacts not readable")
                 return False
         except Exception as e:
             print(f"  ✗ FAIL: Error accessing artifacts: {e}")
@@ -195,11 +199,11 @@ This is a legacy artifact.
         investigation_path = self.test_dir / "INVESTIGATION.md"
 
         if not investigation_path.exists():
-            print(f"  ⚠ WARNING: Investigation report not found")
-            print(f"  This is expected during test creation")
+            print("  ⚠ WARNING: Investigation report not found")
+            print("  This is expected during test creation")
             return True
 
-        content = investigation_path.read_text(encoding='utf-8')
+        content = investigation_path.read_text(encoding="utf-8")
         migration_keywords = [
             "controlled migration",
             "migration strategy",
@@ -209,18 +213,17 @@ This is a legacy artifact.
         ]
 
         has_migration_docs = any(
-            keyword in content.lower()
-            for keyword in migration_keywords
+            keyword in content.lower() for keyword in migration_keywords
         )
 
         if has_migration_docs:
-            print(f"  ✓ PASS: Migration documentation found in investigation report")
+            print("  ✓ PASS: Migration documentation found in investigation report")
             return True
         else:
-            print(f"  ✗ FAIL: Migration documentation not found")
+            print("  ✗ FAIL: Migration documentation not found")
         if not investigation_path.exists():
-            print(f"  ⚠ WARNING: Investigation report not found")
-            print(f"  This is expected during test creation")
+            print("  ⚠ WARNING: Investigation report not found")
+            print("  This is expected during test creation")
             return True
         print("\n[TEST] No Automatic Migration Without Planning")
 
@@ -228,11 +231,11 @@ This is a legacy artifact.
         investigation_path = self.test_dir / "INVESTIGATION.md"
 
         if not investigation_path.exists():
-            print(f"  ⚠ WARNING: Investigation report not found")
-            print(f"  This is expected during test creation")
+            print("  ⚠ WARNING: Investigation report not found")
+            print("  This is expected during test creation")
             return False
 
-        content = investigation_path.read_text(encoding='utf-8')
+        content = investigation_path.read_text(encoding="utf-8")
 
         # Check for statements against automatic migration
         anti_auto_migration_keywords = [
@@ -244,16 +247,16 @@ This is a legacy artifact.
         ]
 
         has_anti_auto = any(
-            keyword in content.lower()
-            for keyword in anti_auto_migration_keywords
+            keyword in content.lower() for keyword in anti_auto_migration_keywords
         )
 
         if has_anti_auto:
-            print(f"  ✓ PASS: Documentation prevents automatic migration")
+            print("  ✓ PASS: Documentation prevents automatic migration")
             return True
         else:
-            print(f"  ✗ FAIL: Documentation does not prevent automatic migration")
+            print("  ✗ FAIL: Documentation does not prevent automatic migration")
             return False
+
     def test_multiple_classification_sources(self):
         """Test that classification uses multiple sources."""
         print("\n[TEST] Multiple Classification Sources")
@@ -270,7 +273,7 @@ this is actually an investigation.
 """
 
         artifact_path = self.test_dir / "M5S1I1.md"
-        artifact_path.write_text(artifact_content, encoding='utf-8')
+        artifact_path.write_text(artifact_content, encoding="utf-8")
 
         # Test classification using multiple sources
         classified = self._classify_legacy_artifact(artifact_path, artifact_content)
@@ -279,10 +282,10 @@ this is actually an investigation.
 
         # Should use explicit Document Type field as primary source
         if classified == "specification":
-            print(f"  ✓ PASS: Classification uses explicit Document Type field")
+            print("  ✓ PASS: Classification uses explicit Document Type field")
             return True
         else:
-            print(f"  ✗ FAIL: Classification did not use explicit Document Type field")
+            print("  ✗ FAIL: Classification did not use explicit Document Type field")
             return False
 
     def test_existing_milestones_still_work(self):
@@ -311,7 +314,9 @@ this is actually an investigation.
                     print(f"  ✗ FAIL: Milestone {milestone} is not accessible: {e}")
                     all_exist = False
             else:
-                print(f"  ⚠ INFO: Milestone {milestone} does not exist (may not have been created yet)")
+                print(
+                    f"  ⚠ INFO: Milestone {milestone} does not exist (may not have been created yet)"
+                )
                 # Don't fail, just info
 
         return all_exist

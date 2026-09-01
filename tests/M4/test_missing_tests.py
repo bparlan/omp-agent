@@ -1,7 +1,5 @@
 """Test that implementation is blocked when tests are missing."""
 
-import pytest
-
 
 def test_missing_tests_blocks_implementation():
     """

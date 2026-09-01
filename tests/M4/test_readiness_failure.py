@@ -1,7 +1,5 @@
 """Test readiness validation failure scenarios."""
 
-import pytest
-
 
 def test_readiness_validation_returns_exact_strings():
     """

@@ -1,0 +1,36 @@
+# .pre-commit-config.yaml — repo root
+repos:
+  # Universal, language-agnostic hygiene — safe for every repo
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v5.0.0
+    hooks:
+      - id: trailing-whitespace
+        exclude: '\.md$' # markdown artifacts (your milestone docs) often have intentional trailing spaces (line breaks)
+      - id: end-of-file-fixer
+      - id: check-added-large-files
+        args: ["--maxkb=1000"]
+      - id: check-merge-conflict
+      - id: check-yaml
+      - id: check-toml
+      - id: mixed-line-ending
+
+  # Python — ruff replaces black+flake8+isort in one fast tool
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.8.0
+    hooks:
+      - id: ruff
+        args: [--fix]
+      - id: ruff-format
+
+  # TypeScript/JS — only if you want formatting enforced; optional
+  - repo: https://github.com/pre-commit/mirrors-prettier
+    rev: v4.0.0-alpha.8
+    hooks:
+      - id: prettier
+        types_or: [javascript, ts, tsx, jsx, json, yaml]
+
+  # Shell scripts — catches real bash bugs, not just style
+  - repo: https://github.com/shellcheck-py/shellcheck-py
+    rev: v0.10.0.1
+    hooks:
+      - id: shellcheck

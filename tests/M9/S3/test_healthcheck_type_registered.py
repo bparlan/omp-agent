@@ -9,7 +9,8 @@ from pathlib import Path
 REPO_ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(REPO_ROOT))
 
-from core.artifacts.artifact_types import get_artifact_type, get_all_artifact_types
+from core.artifacts.artifact_types import get_artifact_type
+
 
 def main():
     # Test health-check artifact type registration
@@ -43,6 +44,7 @@ def main():
 
     print("PASS: health-check artifact type is registered with canonical storage rules")
     sys.exit(0)
+
 
 if __name__ == "__main__":
     main()

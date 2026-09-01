@@ -55,6 +55,7 @@ LEGACY_ID_PATTERN = re.compile(r"^M(\d+)S(\d+)([A-Z]+)?(\d+)?$")
 # Legacy filename patterns for matching files
 LEGACY_FILENAME_PATTERN = re.compile(r"^M(\d+)S(\d+)([A-Z]+?)(\d+)?\.md$")
 
+
 def resolve_yaml_frontmatter(filepath):
     """Extract YAML frontmatter from a file.
 
@@ -66,6 +67,7 @@ def resolve_yaml_frontmatter(filepath):
     except IOError as e:
         return None, str(e)
     return metadata, None
+
 
 def get_expected_type_from_directory(fpath):
     """Infer the expected artifact type from the file's parent directory name."""
@@ -81,8 +83,10 @@ def resolve_tier1(identifier, milestone_dir, verbose):
     # Tier 1 only applies to canonical IDs
     if not CANONICAL_ID_PATTERN.match(identifier):
         if verbose:
-            print(f"Tier 1: Skipped — identifier '{identifier}' is not a canonical ID",
-                  file=sys.stderr)
+            print(
+                f"Tier 1: Skipped — identifier '{identifier}' is not a canonical ID",
+                file=sys.stderr,
+            )
         return None, None
 
     if verbose:
@@ -117,21 +121,28 @@ def resolve_tier2(identifier, milestone_dir, verbose):
     prefix_match = CANONICAL_ID_PATTERN.match(identifier)
     if not prefix_match:
         if verbose:
-            print(f"Tier 2: Skipped — identifier '{identifier}' is not a canonical ID",
-                  file=sys.stderr)
+            print(
+                f"Tier 2: Skipped — identifier '{identifier}' is not a canonical ID",
+                file=sys.stderr,
+            )
         return None, None, None
 
     prefix = prefix_match.group(1)
     type_dir = TYPE_DIR_MAP.get(prefix)
     if not type_dir:
         if verbose:
-            print(f"Tier 2: No directory mapping for prefix '{prefix}'", file=sys.stderr)
+            print(
+                f"Tier 2: No directory mapping for prefix '{prefix}'", file=sys.stderr
+            )
         return None, None, None
 
     search_dir = os.path.join(milestone_dir, type_dir)
     if not os.path.isdir(search_dir):
         if verbose:
-            print(f"Tier 2: Directory '{type_dir}/' not found in milestone", file=sys.stderr)
+            print(
+                f"Tier 2: Directory '{type_dir}/' not found in milestone",
+                file=sys.stderr,
+            )
         return None, None, type_dir
 
     if verbose:
@@ -168,8 +179,10 @@ def resolve_tier3(identifier, milestone_dir, verbose):
     """
     if not LEGACY_ID_PATTERN.match(identifier):
         if verbose:
-            print(f"Tier 3: Skipped — identifier '{identifier}' does not match legacy pattern",
-                  file=sys.stderr)
+            print(
+                f"Tier 3: Skipped — identifier '{identifier}' does not match legacy pattern",
+                file=sys.stderr,
+            )
         return None, None
 
     VALID_LEGACY_SUFFIXES = frozenset({"V", "T", "C", "E", "R", "I", "H"})
@@ -189,8 +202,10 @@ def resolve_tier3(identifier, milestone_dir, verbose):
                 fpath = os.path.join(root, fname)
                 metadata, _ = resolve_yaml_frontmatter(fpath)
                 if verbose:
-                    print(f"Tier 3: Legacy filename exact match — {fpath}",
-                          file=sys.stderr)
+                    print(
+                        f"Tier 3: Legacy filename exact match — {fpath}",
+                        file=sys.stderr,
+                    )
                 return fpath, metadata
 
             # Suffix match with strict boundary.
@@ -199,7 +214,7 @@ def resolve_tier3(identifier, milestone_dir, verbose):
             # "M7S10.md"   → stem="M7S10",  suffix after "M7S1" = "0"      → INVALID
             # "M7S1A.md"   → stem="M7S1A",  suffix after "M7S1" = "A"      → INVALID
             if stem.startswith(identifier):
-                suffix = stem[len(identifier):]
+                suffix = stem[len(identifier) :]
                 if (
                     len(suffix) >= 1
                     and suffix[0] in VALID_LEGACY_SUFFIXES
@@ -208,12 +223,15 @@ def resolve_tier3(identifier, milestone_dir, verbose):
                     fpath = os.path.join(root, fname)
                     metadata, _ = resolve_yaml_frontmatter(fpath)
                     if verbose:
-                        print(f"Tier 3: Legacy filename heuristic match — {fpath}",
-                              file=sys.stderr)
+                        print(
+                            f"Tier 3: Legacy filename heuristic match — {fpath}",
+                            file=sys.stderr,
+                        )
                     return fpath, metadata
 
     if verbose:
         print("Tier 3: No legacy filename match found", file=sys.stderr)
+
 
 def resolve_legacy_manifest(identifier, base_dir, milestone_dir, verbose):
     """Tier 4: Legacy manifest lookup.
@@ -230,23 +248,33 @@ def resolve_legacy_manifest(identifier, base_dir, milestone_dir, verbose):
     """
     if not LEGACY_ID_PATTERN.match(identifier):
         if verbose:
-            print(f"Tier 4 (Legacy Manifest): Skipped — identifier '{identifier}' "
-                  f"does not match legacy pattern", file=sys.stderr)
+            print(
+                f"Tier 4 (Legacy Manifest): Skipped — identifier '{identifier}' "
+                f"does not match legacy pattern",
+                file=sys.stderr,
+            )
         return None, None
 
     # Find the legacy manifest
     manifest_path = None
     candidates = [
         os.path.join(base_dir, "legacy_manifest.txt"),
-        os.path.join(base_dir, "milestones", os.path.basename(milestone_dir), "legacy_manifest.txt"),
+        os.path.join(
+            base_dir,
+            "milestones",
+            os.path.basename(milestone_dir),
+            "legacy_manifest.txt",
+        ),
         os.path.join(milestone_dir, "legacy_manifest.txt"),
     ]
     for candidate in candidates:
         if os.path.isfile(candidate):
             manifest_path = candidate
             if verbose:
-                print(f"Tier 4 (Legacy Manifest): Found manifest at {candidate}",
-                      file=sys.stderr)
+                print(
+                    f"Tier 4 (Legacy Manifest): Found manifest at {candidate}",
+                    file=sys.stderr,
+                )
             break
 
     if not manifest_path:
@@ -255,7 +283,9 @@ def resolve_legacy_manifest(identifier, base_dir, milestone_dir, verbose):
         return None, None
 
     if verbose:
-        print("Tier 4 (Legacy Manifest): Consulting legacy manifest...", file=sys.stderr)
+        print(
+            "Tier 4 (Legacy Manifest): Consulting legacy manifest...", file=sys.stderr
+        )
 
     try:
         with open(manifest_path, "r") as f:
@@ -279,13 +309,17 @@ def resolve_legacy_manifest(identifier, base_dir, milestone_dir, verbose):
                     full_path = os.path.join(base_dir, rel_path)
                     if os.path.isfile(full_path):
                         if verbose:
-                            print(f"Tier 4 (Legacy Manifest): Match — {full_path}",
-                                  file=sys.stderr)
+                            print(
+                                f"Tier 4 (Legacy Manifest): Match — {full_path}",
+                                file=sys.stderr,
+                            )
                         return full_path, None
     except (IOError, OSError) as e:
         if verbose:
-            print(f"Tier 4 (Legacy Manifest): Error reading manifest: {e}",
-                  file=sys.stderr)
+            print(
+                f"Tier 4 (Legacy Manifest): Error reading manifest: {e}",
+                file=sys.stderr,
+            )
         return None, None
 
     if verbose:
@@ -301,7 +335,10 @@ def detect_conflict(fpath, metadata, identifier, verbose):
     """
     if not metadata or not metadata.get("type"):
         if verbose:
-            print(f"Conflict check: No metadata or type field for {fpath}", file=sys.stderr)
+            print(
+                f"Conflict check: No metadata or type field for {fpath}",
+                file=sys.stderr,
+            )
         return None
 
     actual_type = metadata["type"]
@@ -309,8 +346,10 @@ def detect_conflict(fpath, metadata, identifier, verbose):
 
     if not expected_type:
         if verbose:
-            print(f"Conflict check: No type mapping for directory '{os.path.basename(os.path.dirname(fpath))}'",
-                  file=sys.stderr)
+            print(
+                f"Conflict check: No type mapping for directory '{os.path.basename(os.path.dirname(fpath))}'",
+                file=sys.stderr,
+            )
         return None
 
     if actual_type != expected_type:
@@ -325,8 +364,10 @@ def detect_conflict(fpath, metadata, identifier, verbose):
         return conflict
 
     if verbose:
-        print(f"Conflict check: No conflict — type '{actual_type}' matches directory",
-              file=sys.stderr)
+        print(
+            f"Conflict check: No conflict — type '{actual_type}' matches directory",
+            file=sys.stderr,
+        )
     return None
 
 
@@ -335,13 +376,19 @@ def main():
         description="OMP AEF Artifact Resolution Utility",
         epilog="Exit codes: 0=resolved, 1=not found, 2=conflict detected",
     )
-    parser.add_argument("identifier", help="Canonical ID (SPEC-001) or legacy ID (M7S1)")
     parser.add_argument(
-        "--milestone", "-m", required=True,
+        "identifier", help="Canonical ID (SPEC-001) or legacy ID (M7S1)"
+    )
+    parser.add_argument(
+        "--milestone",
+        "-m",
+        required=True,
         help="Milestone ID (e.g., M7)",
     )
     parser.add_argument(
-        "--verbose", "-v", action="store_true",
+        "--verbose",
+        "-v",
+        action="store_true",
         help="Print resolution trace to stderr",
     )
     parser.add_argument(
@@ -384,7 +431,9 @@ def main():
         sys.exit(0)
 
     # === Tier 2: Canonical directory context ===
-    fpath, metadata, type_dir = resolve_tier2(args.identifier, milestone_dir, args.verbose)
+    fpath, metadata, type_dir = resolve_tier2(
+        args.identifier, milestone_dir, args.verbose
+    )
     if fpath:
         conflict = detect_conflict(fpath, metadata, args.identifier, args.verbose)
         if conflict:
@@ -415,7 +464,9 @@ def main():
         sys.exit(0)
 
     # === Tier 4: Legacy manifest lookup ===
-    fpath, _ = resolve_legacy_manifest(args.identifier, base_dir, milestone_dir, args.verbose)
+    fpath, _ = resolve_legacy_manifest(
+        args.identifier, base_dir, milestone_dir, args.verbose
+    )
     if fpath:
         print(os.path.abspath(fpath))
         sys.exit(0)

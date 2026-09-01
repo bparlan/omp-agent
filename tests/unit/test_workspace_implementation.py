@@ -5,11 +5,10 @@ This tests all 4 workspace commands: workspace-create, workspace-activate, works
 """
 
 import tempfile
-import os
 import json
-import subprocess
 import sys
 from pathlib import Path
+
 
 def test_workspace_create():
     """Test workspace-create command"""
@@ -40,19 +39,21 @@ def test_workspace_create():
                 "mode": "workspace_per_project",
                 "path": str(workspace_dir),
                 "cross_contamination_prevention": True,
-            }
+            },
         }
 
         config_file = workspace_dir / "workspace.json"
-        with open(config_file, 'w') as f:
+        with open(config_file, "w") as f:
             json.dump(workspace_config, f, indent=2)
 
         # Verify the workspace was created correctly
-        assert workspace_dir.exists(), f"Workspace directory not created: {workspace_dir}"
+        assert (
+            workspace_dir.exists()
+        ), f"Workspace directory not created: {workspace_dir}"
         assert config_file.exists(), f"Configuration file not created: {config_file}"
 
         # Verify config content
-        with open(config_file, 'r') as f:
+        with open(config_file, "r") as f:
             config = json.load(f)
 
         assert config["workspace_name"] == workspace_name
@@ -62,6 +63,7 @@ def test_workspace_create():
 
         print("✓ workspace-create test passed")
         return True
+
 
 def test_workspace_activate():
     """Test workspace-activate command"""
@@ -89,10 +91,10 @@ def test_workspace_activate():
                 "mode": "workspace_per_project",
                 "path": str(workspace_dir),
                 "cross_contamination_prevention": True,
-            }
+            },
         }
 
-        with open(config_file, 'w') as f:
+        with open(config_file, "w") as f:
             json.dump(config, f, indent=2)
 
         # Simulate workspace-activate
@@ -105,19 +107,20 @@ def test_workspace_activate():
             "active": True,
         }
 
-        with open(status_file, 'w') as f:
+        with open(status_file, "w") as f:
             json.dump(status_config, f, indent=2)
 
         # Verify activation
         assert status_file.exists(), f"Status file not created: {status_file}"
 
-        with open(status_file, 'r') as f:
+        with open(status_file, "r") as f:
             status = json.load(f)
 
         assert status["active"] == True
 
         print("✓ workspace-activate test passed")
         return True
+
 
 def test_workspace_status():
     """Test workspace-status command"""
@@ -145,10 +148,10 @@ def test_workspace_status():
                 "mode": "workspace_per_project",
                 "path": str(workspace_dir),
                 "cross_contamination_prevention": True,
-            }
+            },
         }
 
-        with open(config_file, 'w') as f:
+        with open(config_file, "w") as f:
             json.dump(config, f, indent=2)
 
         # Create status file
@@ -160,7 +163,7 @@ def test_workspace_status():
             "active": True,
         }
 
-        with open(status_file, 'w') as f:
+        with open(status_file, "w") as f:
             json.dump(status_config, f, indent=2)
 
         # Simulate workspace-status command output
@@ -183,6 +186,7 @@ def test_workspace_status():
 
         print("✓ workspace-status test passed")
         return True
+
 
 def test_workspace_clean():
     """Test workspace-clean command"""
@@ -214,22 +218,26 @@ def test_workspace_clean():
                 "mode": "workspace_per_project",
                 "path": str(workspace_dir),
                 "cross_contamination_prevention": True,
-            }
+            },
         }
 
-        with open(config_file, 'w') as f:
+        with open(config_file, "w") as f:
             json.dump(config, f, indent=2)
 
         # Simulate workspace-clean command
         # This should remove the entire workspace directory
         import shutil
+
         shutil.rmtree(workspace_dir)
 
         # Verify workspace was cleaned
-        assert not workspace_dir.exists(), f"Workspace directory should have been cleaned: {workspace_dir}"
+        assert (
+            not workspace_dir.exists()
+        ), f"Workspace directory should have been cleaned: {workspace_dir}"
 
         print("✓ workspace-clean test passed")
         return True
+
 
 def test_all_workspace_commands():
     """Run all workspace isolation tests"""
@@ -251,8 +259,10 @@ def test_all_workspace_commands():
     except Exception as e:
         print(f"❌ Test failed: {e}")
         import traceback
+
         traceback.print_exc()
         return False
+
 
 if __name__ == "__main__":
     success = test_all_workspace_commands()

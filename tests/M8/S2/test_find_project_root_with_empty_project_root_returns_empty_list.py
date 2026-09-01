@@ -4,7 +4,6 @@
 # Test Type: IMPLEMENTATION_CHECK
 
 import pytest
-import tempfile
 from pathlib import Path
 
 

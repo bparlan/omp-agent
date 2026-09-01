@@ -22,7 +22,9 @@ def test_discover_skills_returns_empty_list_when_skills_empty():
 
         # Verify skills/ directory exists but is empty
         skill_subdirs = list(skills_dir.iterdir())
-        assert len(skill_subdirs) == 0, f"Skills directory should be empty: {skill_subdirs}"
+        assert (
+            len(skill_subdirs) == 0
+        ), f"Skills directory should be empty: {skill_subdirs}"
 
         # Run the function under test
         result = discover_skills(project_root)

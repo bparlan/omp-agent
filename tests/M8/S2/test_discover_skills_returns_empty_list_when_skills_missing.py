@@ -20,7 +20,9 @@ def test_discover_skills_returns_empty_list_when_skills_missing():
 
         # Verify skills/ does not exist
         skills_dir = project_root / "skills"
-        assert not skills_dir.exists(), f"Skills directory should not exist: {skills_dir}"
+        assert (
+            not skills_dir.exists()
+        ), f"Skills directory should not exist: {skills_dir}"
 
         # Run the function under test
         result = discover_skills(project_root)

@@ -25,11 +25,17 @@ def test_discover_skills_is_deterministic():
     assert isinstance(result1, list), f"Expected list, got {type(result1)}"
     assert isinstance(result2, list), f"Expected list, got {type(result2)}"
 
-    assert all(isinstance(item, str) for item in result1), f"Expected all strings, got {[type(item) for item in result1]}"
-    assert all(isinstance(item, str) for item in result2), f"Expected all strings, got {[type(item) for item in result2]}"
+    assert all(
+        isinstance(item, str) for item in result1
+    ), f"Expected all strings, got {[type(item) for item in result1]}"
+    assert all(
+        isinstance(item, str) for item in result2
+    ), f"Expected all strings, got {[type(item) for item in result2]}"
 
     # Verify both results are equal (byte-equal comparison)
-    assert result1 == result2, f"Results differ: first call {result1}, second call {result2}"
+    assert (
+        result1 == result2
+    ), f"Results differ: first call {result1}, second call {result2}"
 
 
 if __name__ == "__main__":

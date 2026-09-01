@@ -3,14 +3,14 @@
 import argparse
 import subprocess
 import sys
-import re
 from pathlib import Path
+
 
 def parse_test_ledger(ledger_path: Path) -> list[Path]:
     """Parses the Markdown test ledger to extract file paths."""
     if not ledger_path.is_file():
         print(f"Error: Ledger file not found: {ledger_path}", file=sys.stderr)
-        sys.exit(2) # VALIDITY_FAILURE
+        sys.exit(2)  # VALIDITY_FAILURE
 
     test_files = []
     # Regex to find the 'Test File' column in a Markdown table.
@@ -21,7 +21,7 @@ def parse_test_ledger(ledger_path: Path) -> list[Path]:
     # Let's assume the header is on line 100 in VER.md, so check for 'Test File' or extract based on position if header is not explicit.
     # For now, looking for pipe-delimited lines and extracting the second element.
     try:
-        with open(ledger_path, 'r') as f:
+        with open(ledger_path, "r") as f:
             lines = f.readlines()
 
             # Attempt to find the 'Test File' column header.
@@ -33,54 +33,75 @@ def parse_test_ledger(ledger_path: Path) -> list[Path]:
                     break
 
             if header_line_index == -1:
-                print(f"Error: Could not find 'Test File' header in ledger: {ledger_path}", file=sys.stderr)
-                sys.exit(2) # VALIDITY_FAILURE
+                print(
+                    f"Error: Could not find 'Test File' header in ledger: {ledger_path}",
+                    file=sys.stderr,
+                )
+                sys.exit(2)  # VALIDITY_FAILURE
 
             # Process lines after the header. We skip the header itself and the separator line.
             # Assume separator is on the line immediately after the header.
             for i in range(header_line_index + 2, len(lines)):
                 line = lines[i].strip()
-                if not line or line.startswith('---'): # Skip empty lines or separator lines
+                if not line or line.startswith(
+                    "---"
+                ):  # Skip empty lines or separator lines
                     continue
 
                 # Split by pipe, strip whitespace, and try to get the second element
-                parts = [part.strip() for part in line.split('|')]
-                if len(parts) > 2: # Ensure there are at least 3 parts (e.g., | Col1 | Col2 | Col3 |)
-                    test_file_path_str = parts[1] # Second element is the 'Test File'
-                    if test_file_path_str and test_file_path_str != 'Test File': # Avoid empty strings or the header itself if not skipped correctly
+                parts = [part.strip() for part in line.split("|")]
+                if (
+                    len(parts) > 2
+                ):  # Ensure there are at least 3 parts (e.g., | Col1 | Col2 | Col3 |)
+                    test_file_path_str = parts[1]  # Second element is the 'Test File'
+                    if (
+                        test_file_path_str and test_file_path_str != "Test File"
+                    ):  # Avoid empty strings or the header itself if not skipped correctly
                         test_files.append(Path(test_file_path_str))
 
     except Exception as e:
         print(f"Error parsing ledger file {ledger_path}: {e}", file=sys.stderr)
-        sys.exit(2) # VALIDITY_FAILURE
+        sys.exit(2)  # VALIDITY_FAILURE
 
     if not test_files:
-        print(f"Warning: No test files found in ledger {ledger_path}. Exiting with PASS.", file=sys.stderr)
+        print(
+            f"Warning: No test files found in ledger {ledger_path}. Exiting with PASS.",
+            file=sys.stderr,
+        )
         # As per edge case: Empty ledger should exit with 0.
-        return [] # Empty ledger, considered a pass for execution purposes.
+        return []  # Empty ledger, considered a pass for execution purposes.
 
     return test_files
+
 
 def check_git_integrity(test_files: list[Path]) -> int:
     """Checks Git status for each test file."""
     if not test_files:
         print("No test files to check. Exiting with PASS.", file=sys.stderr)
-        return 0 # PASS: Empty ledger is handled as a pass.
+        return 0  # PASS: Empty ledger is handled as a pass.
 
     untracked_files = []
     git_repo_check_command = ["git", "rev-parse", "--is-inside-work-tree"]
     try:
-        subprocess.run(git_repo_check_command, check=True, capture_output=True, text=True)
+        subprocess.run(
+            git_repo_check_command, check=True, capture_output=True, text=True
+        )
     except subprocess.CalledProcessError:
         print("Error: Not a git repository.", file=sys.stderr)
-        return 2 # VALIDITY_FAILURE: Not in a git repo
+        return 2  # VALIDITY_FAILURE: Not in a git repo
     except FileNotFoundError:
-        print("Error: 'git' command not found. Please ensure Git is installed and in your PATH.", file=sys.stderr)
-        return 2 # VALIDITY_FAILURE: Git command not found
+        print(
+            "Error: 'git' command not found. Please ensure Git is installed and in your PATH.",
+            file=sys.stderr,
+        )
+        return 2  # VALIDITY_FAILURE: Git command not found
 
     for file_path in test_files:
         if not file_path.exists():
-            print(f"Warning: Test file '{file_path}' listed in ledger does not exist on disk. Treating as untracked for Git integrity check.", file=sys.stderr)
+            print(
+                f"Warning: Test file '{file_path}' listed in ledger does not exist on disk. Treating as untracked for Git integrity check.",
+                file=sys.stderr,
+            )
             untracked_files.append(file_path)
             continue
 
@@ -105,7 +126,7 @@ def check_git_integrity(test_files: list[Path]) -> int:
                 ["git", "status", "--short", "--", str(file_path)],
                 capture_output=True,
                 text=True,
-                check=False # Do not raise exception for non-zero exit codes here
+                check=False,  # Do not raise exception for non-zero exit codes here
             )
 
             # If git status itself failed for a specific file (e.g., file not in repo but exists locally),
@@ -124,32 +145,40 @@ def check_git_integrity(test_files: list[Path]) -> int:
             elif result.returncode != 0 and status_output.startswith(" fatal:"):
                 # Handle specific git errors like file not found in index after deletion.
                 # If git status returns a fatal error for the file, treat as untracked.
-                print(f"Warning: Git status for '{file_path}' returned fatal error: {status_output.strip()}. Treating as untracked.", file=sys.stderr)
+                print(
+                    f"Warning: Git status for '{file_path}' returned fatal error: {status_output.strip()}. Treating as untracked.",
+                    file=sys.stderr,
+                )
                 untracked_files.append(file_path)
 
         except FileNotFoundError:
             # This should ideally be caught by the initial git_repo_check_command, but as a fallback.
-            print("Error: 'git' command not found. Please ensure Git is installed and in your PATH.", file=sys.stderr)
-            return 2 # VALIDITY_FAILURE
+            print(
+                "Error: 'git' command not found. Please ensure Git is installed and in your PATH.",
+                file=sys.stderr,
+            )
+            return 2  # VALIDITY_FAILURE
 
     if untracked_files:
-        print("Error: The following test files are untracked or ignored by Git:", file=sys.stderr)
+        print(
+            "Error: The following test files are untracked or ignored by Git:",
+            file=sys.stderr,
+        )
         for f in untracked_files:
             print(f"  - {f}", file=sys.stderr)
-        return 1 # BLOCKED
+        return 1  # BLOCKED
     else:
         print("All test files are tracked in Git.")
-        return 0 # PASS
+        return 0  # PASS
+
 
 def main():
     parser = argparse.ArgumentParser(
         description="Verify Git integrity of test files listed in a ledger.",
-        epilog="Exit Codes: 0=PASS, 1=BLOCKED (untracked files), 2=VALIDITY_FAILURE"
+        epilog="Exit Codes: 0=PASS, 1=BLOCKED (untracked files), 2=VALIDITY_FAILURE",
     )
     parser.add_argument(
-        "--ledger",
-        required=True,
-        help="Path to the Markdown test plan ledger."
+        "--ledger", required=True, help="Path to the Markdown test plan ledger."
     )
     args = parser.parse_args()
 
@@ -157,13 +186,16 @@ def main():
 
     test_files = parse_test_ledger(ledger_path)
 
-    if not test_files and ledger_path.is_file(): # Check if ledger was valid but empty
-        sys.exit(0) # Empty ledger is a pass.
-    elif not test_files and not ledger_path.is_file(): # Ledger file itself was not found by parse_test_ledger
-        sys.exit(2) # parse_test_ledger should have exited, but as a safeguard.
+    if not test_files and ledger_path.is_file():  # Check if ledger was valid but empty
+        sys.exit(0)  # Empty ledger is a pass.
+    elif (
+        not test_files and not ledger_path.is_file()
+    ):  # Ledger file itself was not found by parse_test_ledger
+        sys.exit(2)  # parse_test_ledger should have exited, but as a safeguard.
 
     exit_code = check_git_integrity(test_files)
     sys.exit(exit_code)
+
 
 if __name__ == "__main__":
     main()

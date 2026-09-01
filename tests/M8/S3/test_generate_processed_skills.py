@@ -56,7 +56,8 @@ def test_generate_processed_skills_creates_file():
     # Create temporary skills directory for testing
     with tempfile.TemporaryDirectory() as temp_dir:
         from unittest.mock import patch
-        with patch('reporting.get_skills_directory') as mock_get_dir:
+
+        with patch("reporting.get_skills_directory") as mock_get_dir:
             mock_skills_dir = Path(temp_dir) / "skills"
             mock_skills_dir.mkdir(parents=True)
             mock_get_dir.return_value = mock_skills_dir
@@ -66,36 +67,49 @@ def test_generate_processed_skills_creates_file():
 
             # Verify the file was created
             output_path = mock_skills_dir / "processed_skills.json"
-            assert output_path.exists(), f"processed_skills.json not created at {output_path}"
+            assert (
+                output_path.exists()
+            ), f"processed_skills.json not created at {output_path}"
 
             # Read and parse JSON
             content = output_path.read_text(encoding="utf-8")
             processed_data = json.loads(content)
 
             # Verify it's a dictionary
-            assert isinstance(processed_data, dict), "processed_skills.json should be a dictionary"
+            assert isinstance(
+                processed_data, dict
+            ), "processed_skills.json should be a dictionary"
 
             # Verify number of keys matches results length
-            assert len(processed_data) == len(results), "Key count mismatch with results length"
+            assert len(processed_data) == len(
+                results
+            ), "Key count mismatch with results length"
 
             # Verify all skill names are present as keys
             for skill in results:
-                assert skill["name"] in processed_data, f"Skill {skill['name']} not found in keys"
+                assert (
+                    skill["name"] in processed_data
+                ), f"Skill {skill['name']} not found in keys"
 
             # Verify identity-preserving mapping (deep equality)
             for skill in results:
-                assert processed_data[skill["name"]] == skill, f"Value mismatch for skill {skill['name']}"
+                assert (
+                    processed_data[skill["name"]] == skill
+                ), f"Value mismatch for skill {skill['name']}"
 
             # Verify no extra keys were added
             for key in processed_data:
-                assert key in [skill["name"] for skill in results], f"Unexpected key {key} in processed data"
+                assert key in [
+                    skill["name"] for skill in results
+                ], f"Unexpected key {key} in processed data"
 
 
 def test_generate_processed_skills_empty_results():
     """VI-4 edge case: empty results produces empty JSON object {}."""
     with tempfile.TemporaryDirectory() as temp_dir:
         from unittest.mock import patch
-        with patch('reporting.get_skills_directory') as mock_get_dir:
+
+        with patch("reporting.get_skills_directory") as mock_get_dir:
             mock_skills_dir = Path(temp_dir) / "skills"
             mock_skills_dir.mkdir(parents=True)
             mock_get_dir.return_value = mock_skills_dir
@@ -105,14 +119,18 @@ def test_generate_processed_skills_empty_results():
 
             # Verify the file was created
             output_path = mock_skills_dir / "processed_skills.json"
-            assert output_path.exists(), "processed_skills.json not created for empty results"
+            assert (
+                output_path.exists()
+            ), "processed_skills.json not created for empty results"
 
             # Read and parse JSON
             content = output_path.read_text(encoding="utf-8")
             processed_data = json.loads(content)
 
             # Verify it's an empty dictionary
-            assert processed_data == {}, "processed_skills.json should be empty dict for empty results"
+            assert (
+                processed_data == {}
+            ), "processed_skills.json should be empty dict for empty results"
 
 
 if __name__ == "__main__":

@@ -10,6 +10,7 @@ sys.path.insert(0, os.path.join(os.getcwd()))
 
 from core.artifacts.resolution import resolve_artifact
 
+
 def test_resolution_priority():
     data = resolve_artifact(identity="SPEC-M9S1", type="specification", strict=False)
 
@@ -18,18 +19,23 @@ def test_resolution_priority():
 
     if data.get("resolved") is True:
         artifact = data.get("artifact")
-        assert isinstance(artifact, dict) and artifact, "Missing or invalid artifact details"
+        assert (
+            isinstance(artifact, dict) and artifact
+        ), "Missing or invalid artifact details"
         print("PASS: Resolver returned canonical artifact details")
     else:
         error = data.get("error")
         assert isinstance(error, dict), "Error must be a dictionary"
         assert "type" in error, "Error missing 'type' field"
-        assert "options" not in error or isinstance(error.get("options"), list), "If present, options must be a list"
+        assert "options" not in error or isinstance(
+            error.get("options"), list
+        ), "If present, options must be a list"
         print("PASS: Resolver returned structured error when no artifact matches")
 
     return 0
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     try:
         sys.exit(test_resolution_priority())
     except AssertionError as e:

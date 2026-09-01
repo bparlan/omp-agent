@@ -15,26 +15,53 @@ from core.artifacts.artifact_types import (
     get_artifact_type,
 )
 
-def test_type_definitions():
-    sample = get_artifact_type('specification')
-    assert sample is not None, "get_artifact_type('specification') returned None"
-    assert isinstance(sample, CanonicalArtifactType), "Expected CanonicalArtifactType instance"
 
-    expected_types = ['specification', 'verification', 'test', 'implementation', 'milestone', 'review', 'evaluation', 'documentation']
+def test_type_definitions():
+    sample = get_artifact_type("specification")
+    assert sample is not None, "get_artifact_type('specification') returned None"
+    assert isinstance(
+        sample, CanonicalArtifactType
+    ), "Expected CanonicalArtifactType instance"
+
+    expected_types = [
+        "specification",
+        "verification",
+        "test",
+        "implementation",
+        "milestone",
+        "review",
+        "evaluation",
+        "documentation",
+    ]
     for expected_type in expected_types:
-        assert expected_type in _ARTIFACT_TYPE_DEFINITIONS, f"_ARTIFACT_TYPE_DEFINITIONS missing type: {expected_type}"
-        assert expected_type in _RAW_ARTIFACT_TYPE_DEFINITIONS, f"_RAW_ARTIFACT_TYPE_DEFINITIONS missing type: {expected_type}"
+        assert (
+            expected_type in _ARTIFACT_TYPE_DEFINITIONS
+        ), f"_ARTIFACT_TYPE_DEFINITIONS missing type: {expected_type}"
+        assert (
+            expected_type in _RAW_ARTIFACT_TYPE_DEFINITIONS
+        ), f"_RAW_ARTIFACT_TYPE_DEFINITIONS missing type: {expected_type}"
 
     for type_name, type_def in _RAW_ARTIFACT_TYPE_DEFINITIONS.items():
-        assert isinstance(type_def, dict), f"Type definition for {type_name} is not a dictionary"
-        assert 'machine_identifier' in type_def, f"Type definition for {type_name} missing 'machine_identifier'"
-        assert 'canonical_storage_location' in type_def, f"Type definition for {type_name} missing 'canonical_storage_location'"
-        assert 'required_metadata' in type_def, f"Type definition for {type_name} missing 'required_metadata'"
+        assert isinstance(
+            type_def, dict
+        ), f"Type definition for {type_name} is not a dictionary"
+        assert (
+            "machine_identifier" in type_def
+        ), f"Type definition for {type_name} missing 'machine_identifier'"
+        assert (
+            "canonical_storage_location" in type_def
+        ), f"Type definition for {type_name} missing 'canonical_storage_location'"
+        assert (
+            "required_metadata" in type_def
+        ), f"Type definition for {type_name} missing 'required_metadata'"
 
-    print("PASS: Type definitions module contains CanonicalArtifactType and all expected artifact types")
+    print(
+        "PASS: Type definitions module contains CanonicalArtifactType and all expected artifact types"
+    )
     return 0
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     try:
         sys.exit(test_type_definitions())
     except AssertionError as e:

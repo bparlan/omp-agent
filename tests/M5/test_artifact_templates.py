@@ -6,14 +6,16 @@ Tests template frontmatter, required fields, and canonical type field.
 """
 
 import re
-from pathlib import Path
 
 
 class TemplateValidator:
     """Validates artifact templates against canonical requirements."""
 
     def __init__(self):
-        self.frontmatter_pattern = re.compile(r'^---\n(.*?)\n---', re.DOTALL | re.MULTILINE)
+        self.frontmatter_pattern = re.compile(
+            r"^---\n(.*?)\n---", re.DOTALL | re.MULTILINE
+        )
+
     def validate_template_frontmatter(self, content: str) -> dict:
         """
         Validate template YAML frontmatter.
@@ -29,7 +31,7 @@ class TemplateValidator:
             "errors": [],
             "has_frontmatter": False,
             "frontmatter_content": None,
-            "fields": {}
+            "fields": {},
         }
 
         # Extract frontmatter
@@ -56,22 +58,22 @@ class TemplateValidator:
     def _parse_yaml(self, yaml_text: str) -> dict:
         """Simple YAML parser for frontmatter."""
         fields = {}
-        lines = yaml_text.strip().split('\n')
+        lines = yaml_text.strip().split("\n")
 
         for line in lines:
             line = line.strip()
-            if not line or line.startswith('#'):
+            if not line or line.startswith("#"):
                 continue
 
             # Handle key: value format
-            if ':' in line:
-                key, value = line.split(':', 1)
+            if ":" in line:
+                key, value = line.split(":", 1)
                 key = key.strip()
                 value = value.strip()
 
                 # Handle list values (e.g., derived_from: [INV-001])
-                if value.startswith('[') and value.endswith(']'):
-                    value = value[1:-1].split(',')
+                if value.startswith("[") and value.endswith("]"):
+                    value = value[1:-1].split(",")
 
                 fields[key] = value
 
@@ -94,7 +96,7 @@ status: proposed
 
 # Specification
 """,
-                "should_have": True
+                "should_have": True,
             },
             {
                 "name": "Investigation template has frontmatter",
@@ -108,7 +110,7 @@ status: proposed
 
 # Investigation
 """,
-                "should_have": True
+                "should_have": True,
             },
             {
                 "name": "Template without frontmatter",
@@ -116,26 +118,26 @@ status: proposed
 
 Some content.
 """,
-                "should_have": False
-            }
+                "should_have": False,
+            },
         ]
 
         all_passed = True
         for test_case in test_cases:
             print(f"  - {test_case['name']}")
-            result = self.validate_template_frontmatter(test_case['content'])
+            result = self.validate_template_frontmatter(test_case["content"])
 
-            if test_case['should_have']:
-                if result['has_frontmatter']:
-                    print(f"    ✓ PASS: Frontmatter found")
+            if test_case["should_have"]:
+                if result["has_frontmatter"]:
+                    print("    ✓ PASS: Frontmatter found")
                 else:
-                    print(f"    ✗ FAIL: Frontmatter missing but should be present")
+                    print("    ✗ FAIL: Frontmatter missing but should be present")
                     all_passed = False
             else:
-                if not result['has_frontmatter']:
-                    print(f"    ✓ PASS: Frontmatter correctly detected as missing")
+                if not result["has_frontmatter"]:
+                    print("    ✓ PASS: Frontmatter correctly detected as missing")
                 else:
-                    print(f"    ✗ FAIL: Frontmatter found but shouldn't be")
+                    print("    ✗ FAIL: Frontmatter found but shouldn't be")
                     all_passed = False
 
         if all_passed:
@@ -165,7 +167,7 @@ status: proposed
 
 # Specification
 """,
-                "should_have_all": True
+                "should_have_all": True,
             },
             {
                 "name": "Investigation template has all required fields",
@@ -179,7 +181,7 @@ status: proposed
 
 # Investigation
 """,
-                "should_have_all": True
+                "should_have_all": True,
             },
             {
                 "name": "Specification template missing id field",
@@ -192,7 +194,7 @@ status: proposed
 
 # Specification
 """,
-                "should_have_all": False
+                "should_have_all": False,
             },
             {
                 "name": "Specification template missing type field",
@@ -205,7 +207,7 @@ status: proposed
 
 # Specification
 """,
-                "should_have_all": False
+                "should_have_all": False,
             },
             {
                 "name": "Specification template missing title field",
@@ -218,7 +220,7 @@ status: proposed
 
 # Specification
 """,
-                "should_have_all": False
+                "should_have_all": False,
             },
             {
                 "name": "Specification template missing milestone_id field",
@@ -231,7 +233,7 @@ status: proposed
 
 # Specification
 """,
-                "should_have_all": False
+                "should_have_all": False,
             },
             {
                 "name": "Specification template missing status field",
@@ -244,22 +246,22 @@ milestone_id: M5
 
 # Specification
 """,
-                "should_have_all": False
-            }
+                "should_have_all": False,
+            },
         ]
 
         all_passed = True
         for test_case in test_cases:
             print(f"  - {test_case['name']}")
-            result = self.validate_template_frontmatter(test_case['content'])
+            result = self.validate_template_frontmatter(test_case["content"])
 
-            if result['valid']:
-                fields = result['frontmatter_content']
+            if result["valid"]:
+                fields = result["frontmatter_content"]
                 missing = [field for field in required_fields if field not in fields]
 
-                if test_case['should_have_all']:
+                if test_case["should_have_all"]:
                     if not missing:
-                        print(f"    ✓ PASS: All required fields present")
+                        print("    ✓ PASS: All required fields present")
                     else:
                         print(f"    ✗ FAIL: Missing required fields: {missing}")
                         all_passed = False
@@ -267,13 +269,19 @@ milestone_id: M5
                     if missing:
                         print(f"    ✓ PASS: Correctly missing fields: {missing}")
                     else:
-                        print(f"    ✗ FAIL: All required fields present but should be missing some")
+                        print(
+                            "    ✗ FAIL: All required fields present but should be missing some"
+                        )
                         all_passed = False
             else:
-                if not test_case['should_have_all']:
-                    print(f"    ✓ PASS: Correctly flagged as invalid (missing frontmatter)")
+                if not test_case["should_have_all"]:
+                    print(
+                        "    ✓ PASS: Correctly flagged as invalid (missing frontmatter)"
+                    )
                 else:
-                    print(f"    ✗ FAIL: Should have valid frontmatter but failed: {result['errors']}")
+                    print(
+                        f"    ✗ FAIL: Should have valid frontmatter but failed: {result['errors']}"
+                    )
                     all_passed = False
 
         if all_passed:
@@ -295,7 +303,7 @@ milestone_id: M5
             "investigation",
             "evaluation",
             "review",
-            "audit"
+            "audit",
         }
 
         test_cases = [
@@ -312,7 +320,7 @@ status: proposed
 # Specification
 """,
                 "expected_type": "specification",
-                "should_pass": True
+                "should_pass": True,
             },
             {
                 "name": "Investigation template has type: investigation",
@@ -327,7 +335,7 @@ status: proposed
 # Investigation
 """,
                 "expected_type": "investigation",
-                "should_pass": True
+                "should_pass": True,
             },
             {
                 "name": "Template has type: milestone",
@@ -342,7 +350,7 @@ status: proposed
 # Milestone
 """,
                 "expected_type": "milestone",
-                "should_pass": True
+                "should_pass": True,
             },
             {
                 "name": "Invalid type: invalid-type",
@@ -357,7 +365,7 @@ status: proposed
 # Test
 """,
                 "expected_type": None,
-                "should_pass": False
+                "should_pass": False,
             },
             {
                 "name": "Invalid type: Specification (capitalized)",
@@ -372,30 +380,32 @@ status: proposed
 # Specification
 """,
                 "expected_type": None,
-                "should_pass": False
-            }
+                "should_pass": False,
+            },
         ]
 
         all_passed = True
         for test_case in test_cases:
             print(f"  - {test_case['name']}")
-            result = self.validate_template_frontmatter(test_case['content'])
+            result = self.validate_template_frontmatter(test_case["content"])
 
-            if result['valid'] and test_case['expected_type']:
-                actual_type = result['frontmatter_content'].get('type')
+            if result["valid"] and test_case["expected_type"]:
+                actual_type = result["frontmatter_content"].get("type")
 
-                if test_case['should_pass']:
-                    if actual_type.lower() == test_case['expected_type'].lower():
+                if test_case["should_pass"]:
+                    if actual_type.lower() == test_case["expected_type"].lower():
                         print(f"    ✓ PASS: Type field correct: '{actual_type}'")
                     else:
-                        print(f"    ✗ FAIL: Expected '{test_case['expected_type']}', got '{actual_type}'")
+                        print(
+                            f"    ✗ FAIL: Expected '{test_case['expected_type']}', got '{actual_type}'"
+                        )
                         all_passed = False
                 else:
                     print(f"    ✗ FAIL: Should be invalid but got type '{actual_type}'")
                     all_passed = False
             else:
-                if not test_case['should_pass']:
-                    print(f"    ✓ PASS: Type field correctly flagged as invalid")
+                if not test_case["should_pass"]:
+                    print("    ✓ PASS: Type field correctly flagged as invalid")
                 else:
                     print(f"    ✗ FAIL: Should be valid but failed: {result['errors']}")
                     all_passed = False
@@ -427,7 +437,7 @@ related_artifacts: [INV-001, SPEC-000]
 
 # Specification
 """,
-                "should_be_valid": True
+                "should_be_valid": True,
             },
             {
                 "name": "Template with dates",
@@ -444,7 +454,7 @@ template_version: 2.0.0
 
 # Specification
 """,
-                "should_be_valid": True
+                "should_be_valid": True,
             },
             {
                 "name": "Template with all optional fields",
@@ -465,26 +475,28 @@ template_version: 2.0.0
 
 # Specification
 """,
-                "should_be_valid": True
-            }
+                "should_be_valid": True,
+            },
         ]
 
         all_passed = True
         for test_case in test_cases:
             print(f"  - {test_case['name']}")
-            result = self.validate_template_frontmatter(test_case['content'])
+            result = self.validate_template_frontmatter(test_case["content"])
 
-            if test_case['should_be_valid']:
-                if result['valid']:
-                    print(f"    ✓ PASS: Template is valid")
+            if test_case["should_be_valid"]:
+                if result["valid"]:
+                    print("    ✓ PASS: Template is valid")
                 else:
-                    print(f"    ✗ FAIL: Template should be valid but failed: {result['errors']}")
+                    print(
+                        f"    ✗ FAIL: Template should be valid but failed: {result['errors']}"
+                    )
                     all_passed = False
             else:
-                if not result['valid']:
-                    print(f"    ✓ PASS: Template correctly flagged as invalid")
+                if not result["valid"]:
+                    print("    ✓ PASS: Template correctly flagged as invalid")
                 else:
-                    print(f"    ✗ FAIL: Template should be invalid but passed")
+                    print("    ✗ FAIL: Template should be invalid but passed")
                     all_passed = False
 
         if all_passed:
@@ -511,21 +523,21 @@ status: proposed
 
         result = self.validate_template_frontmatter(template)
 
-        if result['valid']:
-            fields = result['frontmatter_content']
+        if result["valid"]:
+            fields = result["frontmatter_content"]
 
             # Check canonical ID format
             id_format_checks = [
-                (fields.get('id') == 'SPEC-001', "SPEC-001 format"),
-                (fields.get('type') == 'specification', "type: specification"),
-                (fields.get('milestone_id') == 'M5', "milestone_id: M5"),
-                (fields.get('status') == 'proposed', "status: proposed")
+                (fields.get("id") == "SPEC-001", "SPEC-001 format"),
+                (fields.get("type") == "specification", "type: specification"),
+                (fields.get("milestone_id") == "M5", "milestone_id: M5"),
+                (fields.get("status") == "proposed", "status: proposed"),
             ]
 
             all_checks_pass = all(check for check, _ in id_format_checks)
 
             if all_checks_pass:
-                print(f"  ✓ PASS: Template examples consistent with canonical IDs")
+                print("  ✓ PASS: Template examples consistent with canonical IDs")
                 return True
             else:
                 for check, name in id_format_checks:

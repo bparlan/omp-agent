@@ -29,7 +29,9 @@ def test_all_functions_have_type_hints():
     for func_name in REQUIRED_FUNCTIONS:
         func = getattr(cli, func_name)
         hints = typing.get_type_hints(func)
-        assert isinstance(hints, dict), f"{func_name}: get_type_hints returned {type(hints)}"
+        assert isinstance(
+            hints, dict
+        ), f"{func_name}: get_type_hints returned {type(hints)}"
         assert len(hints) > 0, f"{func_name} has no type annotations"
 
 

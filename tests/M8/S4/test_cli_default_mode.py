@@ -60,8 +60,12 @@ def test_run_health_check_batch_mode():
     from cli import process_all_skills, run_health_check
 
     skill_names = [
-        "skill_alpha", "skill_beta", "skill_gamma",
-        "skill_delta", "skill_epsilon", "skill_zeta",
+        "skill_alpha",
+        "skill_beta",
+        "skill_gamma",
+        "skill_delta",
+        "skill_epsilon",
+        "skill_zeta",
     ]
 
     contents = {}
@@ -98,8 +102,12 @@ def test_run_health_check_default_mode():
     from cli import run_health_check
 
     skill_names = [
-        "skill_alpha", "skill_beta", "skill_gamma",
-        "skill_delta", "skill_epsilon", "skill_zeta",
+        "skill_alpha",
+        "skill_beta",
+        "skill_gamma",
+        "skill_delta",
+        "skill_epsilon",
+        "skill_zeta",
     ]
 
     contents = {}
@@ -117,12 +125,10 @@ def test_run_health_check_default_mode():
         with patch("builtins.open", side_effect=_open_impl):
             results, stdout = _capture_stdout(run_health_check)
 
-    assert len(results) == len(skill_names), (
-        f"Default mode: expected {len(skill_names)} results, got {len(results)}"
-    )
-    assert "BATCH" not in stdout, (
-        "Default mode should not contain batch headers"
-    )
+    assert len(results) == len(
+        skill_names
+    ), f"Default mode: expected {len(skill_names)} results, got {len(results)}"
+    assert "BATCH" not in stdout, "Default mode should not contain batch headers"
 
 
 if __name__ == "__main__":

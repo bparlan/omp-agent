@@ -6,9 +6,6 @@
 """VI-5: generate_skills_summary returns correct summary dictionary."""
 
 import copy
-import json
-import tempfile
-from pathlib import Path
 from datetime import datetime
 
 import pytest
@@ -68,25 +65,38 @@ def test_generate_skills_summary_returns_dict():
     # Verify summary section
     summary_section = summary["summary"]
     required_summary_keys = [
-        "total_skills", "healthy_count", "needs_review_count", "error_count",
-        "skipped_count", "stable_ready_count", "generation_timestamp"
+        "total_skills",
+        "healthy_count",
+        "needs_review_count",
+        "error_count",
+        "skipped_count",
+        "stable_ready_count",
+        "generation_timestamp",
     ]
     for key in required_summary_keys:
         assert key in summary_section, f"Missing required summary key: {key}"
 
     # Verify counts are correct
-    assert summary_section["total_skills"] == len(results), "total_skills count mismatch"
+    assert summary_section["total_skills"] == len(
+        results
+    ), "total_skills count mismatch"
     assert summary_section["healthy_count"] == 1, "healthy_count should be 1"
     assert summary_section["needs_review_count"] == 1, "needs_review_count should be 1"
     assert summary_section["error_count"] == 1, "error_count should be 1"
     assert summary_section["skipped_count"] == 1, "skipped_count should be 1"
-    assert summary_section["stable_ready_count"] == 2, "stable_ready_count should be 2 (alpha and gamma)"
+    assert (
+        summary_section["stable_ready_count"] == 2
+    ), "stable_ready_count should be 2 (alpha and gamma)"
 
     # Verify timestamp is valid ISO 8601 format
     try:
-        datetime.fromisoformat(summary_section["generation_timestamp"].replace("Z", "+00:00"))
+        datetime.fromisoformat(
+            summary_section["generation_timestamp"].replace("Z", "+00:00")
+        )
     except ValueError:
-        pytest.fail(f"Invalid timestamp format: {summary_section['generation_timestamp']}")
+        pytest.fail(
+            f"Invalid timestamp format: {summary_section['generation_timestamp']}"
+        )
 
     # Verify skills array matches input (order preserved)
     assert summary["skills"] == results, "skills array should match input results"
@@ -100,12 +110,14 @@ def test_generate_skills_summary_returns_dict():
         "healthy": ["zebra-skill"],
         "needs_review": ["alpha-skill"],
         "error": ["beta-skill"],
-        "skipped": ["gamma-skill"]
+        "skipped": ["gamma-skill"],
     }
 
     for status, expected_skills in expected_distribution.items():
         assert status in status_dist, f"Missing status in distribution: {status}"
-        assert set(status_dist[status]) == set(expected_skills), f"Incorrect skills for status {status}"
+        assert set(status_dist[status]) == set(
+            expected_skills
+        ), f"Incorrect skills for status {status}"
 
 
 def test_generate_skills_summary_empty_results():
@@ -122,13 +134,19 @@ def test_generate_skills_summary_empty_results():
     # Verify empty results handling
     assert summary["summary"]["total_skills"] == 0, "total_skills should be 0"
     assert summary["summary"]["healthy_count"] == 0, "healthy_count should be 0"
-    assert summary["summary"]["needs_review_count"] == 0, "needs_review_count should be 0"
+    assert (
+        summary["summary"]["needs_review_count"] == 0
+    ), "needs_review_count should be 0"
     assert summary["summary"]["error_count"] == 0, "error_count should be 0"
     assert summary["summary"]["skipped_count"] == 0, "skipped_count should be 0"
-    assert summary["summary"]["stable_ready_count"] == 0, "stable_ready_count should be 0"
+    assert (
+        summary["summary"]["stable_ready_count"] == 0
+    ), "stable_ready_count should be 0"
 
     assert summary["skills"] == [], "skills should be empty list"
-    assert summary["status_distribution"] == {}, "status_distribution should be empty dict"
+    assert (
+        summary["status_distribution"] == {}
+    ), "status_distribution should be empty dict"
 
 
 if __name__ == "__main__":

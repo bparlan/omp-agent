@@ -8,10 +8,20 @@ from pathlib import Path
 # These are basic heuristics and can be expanded.
 PROJECT_INDICATORS = {
     "markdown": [".md"],  # Look for .md files, potentially in docs/ or similar.
-    "htmlcss": ["index.html", "style.css", "*.html", "*.css"], # Look for core web files.
-    "python": ["requirements.txt", "setup.py", "*.py"], # Look for Python project markers.
-    "aef_task": ["SKILL.md", "templates/"], # Look for OMP-specific agent structure.
+    "htmlcss": [
+        "index.html",
+        "style.css",
+        "*.html",
+        "*.css",
+    ],  # Look for core web files.
+    "python": [
+        "requirements.txt",
+        "setup.py",
+        "*.py",
+    ],  # Look for Python project markers.
+    "aef_task": ["SKILL.md", "templates/"],  # Look for OMP-specific agent structure.
 }
+
 
 def detect_project_type(project_path: Path) -> str | None:
     """Detects the project type based on file presence and heuristics."""
@@ -34,6 +44,7 @@ def detect_project_type(project_path: Path) -> str | None:
     # If no clear indicators are found, return None
     return None
 
+
 if __name__ == "__main__":
     if len(sys.argv) != 2:
         print("Usage: python detect_project_type.py <project_path>", file=sys.stderr)
@@ -43,7 +54,10 @@ if __name__ == "__main__":
     project_path = Path(project_path_str)
 
     if not project_path.is_dir():
-        print(f"Error: Project path '{project_path_str}' is not a directory.", file=sys.stderr)
+        print(
+            f"Error: Project path '{project_path_str}' is not a directory.",
+            file=sys.stderr,
+        )
         sys.exit(1)
 
     project_type = detect_project_type(project_path)

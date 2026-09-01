@@ -33,12 +33,15 @@ def test_type_hints_on_all_functions():
 
         # Check that results is List[Dict[str, Any]] (this matches the spec)
         from typing import List, Dict, Any
+
         expected_results_type = List[Dict[str, Any]]
 
         # For generate_skills_summary, return type should be Dict[str, Any]
         if func_name == "generate_skills_summary":
             assert "return" in hints, f"{func_name} missing return type hint"
-            assert hints["return"] == Dict[str, Any], f"{func_name} return type mismatch"
+            assert (
+                hints["return"] == Dict[str, Any]
+            ), f"{func_name} return type mismatch"
         else:
             # For file generation functions, return type should be None
             assert hints.get("return") == type(None), f"{func_name} should return None"

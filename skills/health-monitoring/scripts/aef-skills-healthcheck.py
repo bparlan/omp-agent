@@ -13,9 +13,10 @@ import re
 import yaml
 import sys
 from pathlib import Path
-from typing import Dict, List, Tuple, Optional, Any
+from typing import Dict, List, Tuple
 from datetime import datetime
 from enum import Enum
+
 
 class HealthCheckStatus(Enum):
     HEALTHY = "healthy"
@@ -24,8 +25,16 @@ class HealthCheckStatus(Enum):
     BLOCKED = "blocked"
     UNKNOWN = "unknown"
 
+
 class ValidationIssue:
-    def __init__(self, issue_type: str, severity: str, message: str, skill_path: str, fix_suggestion: str = ""):
+    def __init__(
+        self,
+        issue_type: str,
+        severity: str,
+        message: str,
+        skill_path: str,
+        fix_suggestion: str = "",
+    ):
         self.issue_type = issue_type
         self.severity = severity
         self.message = message
@@ -40,8 +49,9 @@ class ValidationIssue:
             "message": self.message,
             "skill_path": self.skill_path,
             "fix_suggestion": self.fix_suggestion,
-            "timestamp": self.timestamp.isoformat()
+            "timestamp": self.timestamp.isoformat(),
         }
+
 
 class SkillHealthChecker:
     def __init__(self, skills_dir: str = "skills", dry_run: bool = False):
@@ -57,14 +67,20 @@ class SkillHealthChecker:
             "management_infra": [],
             "planning_specification": [],
             "testing_verification": [],
-            "implementation": []
+            "implementation": [],
         }
 
         # Core skills that should be prioritized
         self.core_skills = [
-            "generate-spec", "generate-verification", "generate-tests",
-            "implement-specification", "evaluate-implementation", "evaluate-tests",
-            "review-implementation", "close-milestone", "healthcheck"
+            "generate-spec",
+            "generate-verification",
+            "generate-tests",
+            "implement-specification",
+            "evaluate-implementation",
+            "evaluate-tests",
+            "review-implementation",
+            "close-milestone",
+            "healthcheck",
         ]
 
     def discover_skill_phases(self) -> None:
@@ -73,29 +89,50 @@ class SkillHealthChecker:
 
         # Define phase classifications based on skill functionality
         development_cycle_skills = [
-            "evaluate-implementation", "evaluate-tests", "implement-specification"
+            "evaluate-implementation",
+            "evaluate-tests",
+            "implement-specification",
         ]
 
         management_infra_skills = [
-            "manage-development", "manage-roadmap", "review-implementation",
-            "close-milestone", "session-audit", "evolve-skills", "sync-documentation",
-            "archive-docs", "healthcheck"
+            "manage-development",
+            "manage-roadmap",
+            "review-implementation",
+            "close-milestone",
+            "session-audit",
+            "evolve-skills",
+            "sync-documentation",
+            "archive-docs",
+            "healthcheck",
         ]
 
         planning_specification_skills = [
-            "milestoner", "milestone-focus", "milestone-planning",
-            "generate-spec", "generate-verification", "generate-tests",
-            "specification-writer", "requirement-analyzer"
+            "milestoner",
+            "milestone-focus",
+            "milestone-planning",
+            "generate-spec",
+            "generate-verification",
+            "generate-tests",
+            "specification-writer",
+            "requirement-analyzer",
         ]
 
         testing_verification_skills = [
-            "evaluate-tests", "evaluate-implementation", "evaluate-verification",
-            "test-validator", "verification-auditor", "quality-assurance"
+            "evaluate-tests",
+            "evaluate-implementation",
+            "evaluate-verification",
+            "test-validator",
+            "verification-auditor",
+            "quality-assurance",
         ]
 
         implementation_skills = [
-            "implement-specification", "implement-tests", "implement-verification",
-            "implementation-orchestrator", "code-implementation", "production-deploy"
+            "implement-specification",
+            "implement-tests",
+            "implement-verification",
+            "implementation-orchestrator",
+            "code-implementation",
+            "production-deploy",
         ]
 
         # Assign skills to phases
@@ -110,11 +147,25 @@ class SkillHealthChecker:
                 continue
 
             # Classify skill based on name and content
-            is_development = any(dev_skill in skill_name.lower() for dev_skill in development_cycle_skills)
-            is_management = any(mgmt_skill in skill_name.lower() for mgmt_skill in management_infra_skills)
-            is_planning = any(plan_skill in skill_name.lower() for plan_skill in planning_specification_skills)
-            is_testing = any(test_skill in skill_name.lower() for test_skill in testing_verification_skills)
-            is_implementation = any(impl_skill in skill_name.lower() for impl_skill in implementation_skills)
+            is_development = any(
+                dev_skill in skill_name.lower()
+                for dev_skill in development_cycle_skills
+            )
+            is_management = any(
+                mgmt_skill in skill_name.lower()
+                for mgmt_skill in management_infra_skills
+            )
+            is_planning = any(
+                plan_skill in skill_name.lower()
+                for plan_skill in planning_specification_skills
+            )
+            is_testing = any(
+                test_skill in skill_name.lower()
+                for test_skill in testing_verification_skills
+            )
+            is_implementation = any(
+                impl_skill in skill_name.lower() for impl_skill in implementation_skills
+            )
 
             # Assign to primary phase
             if is_development:
@@ -131,7 +182,7 @@ class SkillHealthChecker:
                 # Default to management_infra if unclear classification
                 self.phase_groups["management_infra"].append(skill_name)
 
-        print(f"Phase Groups:")
+        print("Phase Groups:")
         for phase, skills in self.phase_groups.items():
             if skills:
                 print(f"  {phase}: {len(skills)} skills")
@@ -143,16 +194,18 @@ class SkillHealthChecker:
         issues = []
 
         try:
-            content = skill_path.read_text(encoding='utf-8')
+            content = skill_path.read_text(encoding="utf-8")
 
             # Check for proper YAML frontmatter delimiters
-            if not content.startswith('---'):
+            if not content.startswith("---"):
                 issues.append("Missing YAML frontmatter opening delimiter '---'")
                 return False, issues
 
-            parts = content.split('---')
+            parts = content.split("---")
             if len(parts) < 3:
-                issues.append("Invalid YAML frontmatter structure - missing closing delimiter '---'")
+                issues.append(
+                    "Invalid YAML frontmatter structure - missing closing delimiter '---'"
+                )
                 return False, issues
 
             # Extract frontmatter
@@ -166,7 +219,13 @@ class SkillHealthChecker:
                 return False, issues
 
             # Required fields validation
-            required_fields = ["name", "version", "description", "tools", "user-invocable"]
+            required_fields = [
+                "name",
+                "version",
+                "description",
+                "tools",
+                "user-invocable",
+            ]
             missing_fields = []
 
             for field in required_fields:
@@ -174,30 +233,47 @@ class SkillHealthChecker:
                     missing_fields.append(field)
 
             if missing_fields:
-                issues.append(f"Missing required YAML fields: {', '.join(missing_fields)}")
+                issues.append(
+                    f"Missing required YAML fields: {', '.join(missing_fields)}"
+                )
                 return False, issues
 
             # Validate field types and constraints
             if not isinstance(frontmatter.get("name"), str) or not frontmatter["name"]:
                 issues.append("Field 'name' must be a non-empty string")
 
-            if not isinstance(frontmatter.get("version"), str) or not frontmatter["version"]:
+            if (
+                not isinstance(frontmatter.get("version"), str)
+                or not frontmatter["version"]
+            ):
                 issues.append("Field 'version' must be a non-empty string")
             else:
                 # Check version format
                 version = frontmatter["version"]
-                if not re.match(r'^\d+\.\d+\.\d+', version) and not re.match(r'^\d+\.\d+$', version):
-                    issues.append(f"Version field '{version}' should follow semantic versioning pattern (e.g., 1.0.0)")
+                if not re.match(r"^\d+\.\d+\.\d+", version) and not re.match(
+                    r"^\d+\.\d+$", version
+                ):
+                    issues.append(
+                        f"Version field '{version}' should follow semantic versioning pattern (e.g., 1.0.0)"
+                    )
 
-            if not isinstance(frontmatter.get("description"), str) or not frontmatter["description"]:
+            if (
+                not isinstance(frontmatter.get("description"), str)
+                or not frontmatter["description"]
+            ):
                 issues.append("Field 'description' must be a non-empty string")
 
-            if not isinstance(frontmatter.get("tools"), list) or not frontmatter["tools"]:
+            if (
+                not isinstance(frontmatter.get("tools"), list)
+                or not frontmatter["tools"]
+            ):
                 issues.append("Field 'tools' must be a non-empty list")
             else:
                 for tool in frontmatter["tools"]:
                     if not isinstance(tool, str) or not tool:
-                        issues.append("Each tool in 'tools' list must be a non-empty string")
+                        issues.append(
+                            "Each tool in 'tools' list must be a non-empty string"
+                        )
                         break
 
             if not isinstance(frontmatter.get("user-invocable"), bool):
@@ -212,16 +288,18 @@ class SkillHealthChecker:
 
         return True, issues
 
-    def validate_stability_requirements(self, skill_path: Path) -> Tuple[bool, List[str]]:
+    def validate_stability_requirements(
+        self, skill_path: Path
+    ) -> Tuple[bool, List[str]]:
         """Validate stability requirements for the skill."""
         issues = []
 
         try:
-            content = skill_path.read_text(encoding='utf-8')
-            if not content.startswith('---'):
+            content = skill_path.read_text(encoding="utf-8")
+            if not content.startswith("---"):
                 return False, issues
 
-            parts = content.split('---')
+            parts = content.split("---")
             if len(parts) < 3:
                 return False, issues
 
@@ -244,11 +322,11 @@ class SkillHealthChecker:
         issues = []
 
         try:
-            content = skill_path.read_text(encoding='utf-8')
-            if not content.startswith('---'):
+            content = skill_path.read_text(encoding="utf-8")
+            if not content.startswith("---"):
                 return False, issues
 
-            parts = content.split('---')
+            parts = content.split("---")
             if len(parts) < 3:
                 return False, issues
 
@@ -259,22 +337,37 @@ class SkillHealthChecker:
 
             # Check for AEF-specific patterns and conventions
             aef_patterns = [
-                r"aef", r"omp", r"specification", r"pipeline", r"agent",
-                r"development", r"management", r"testing", r"verification"
+                r"aef",
+                r"omp",
+                r"specification",
+                r"pipeline",
+                r"agent",
+                r"development",
+                r"management",
+                r"testing",
+                r"verification",
             ]
 
-            has_aef_keywords = any(re.search(pattern, content.lower()) for pattern in aef_patterns)
+            has_aef_keywords = any(
+                re.search(pattern, content.lower()) for pattern in aef_patterns
+            )
             if not has_aef_keywords:
-                issues.append(f"Skill '{skill_name}' may not be properly integrated with AEF framework")
+                issues.append(
+                    f"Skill '{skill_name}' may not be properly integrated with AEF framework"
+                )
 
             # Check for proper tool specifications
             tools = frontmatter.get("tools", [])
             if not any(tool in tools for tool in ["read", "write", "edit"]):
-                issues.append(f"Skill '{skill_name}' may lack essential AEF tools (read, write, edit)")
+                issues.append(
+                    f"Skill '{skill_name}' may lack essential AEF tools (read, write, edit)"
+                )
 
             # Check for user-invocable flag
             if not frontmatter.get("user-invocable", False):
-                issues.append(f"Skill '{skill_name}' should be user-invocable for AEF pipeline integration")
+                issues.append(
+                    f"Skill '{skill_name}' should be user-invocable for AEF pipeline integration"
+                )
 
         except Exception as e:
             issues.append(f"Error validating AEF integration: {str(e)}")
@@ -286,28 +379,28 @@ class SkillHealthChecker:
         issues = []
 
         try:
-            content = skill_path.read_text(encoding='utf-8')
+            content = skill_path.read_text(encoding="utf-8")
 
             # Check for NUL bytes
-            if '\x00' in content:
+            if "\x00" in content:
                 issues.append("File contains NUL bytes (0x00) which is not valid UTF-8")
 
             # Check for proper line endings (LF only)
-            if '\r\n' in content:
+            if "\r\n" in content:
                 issues.append("File contains Windows line endings (CRLF). Use LF only")
 
             # Check file size (reasonable limit)
-            file_size = len(content.encode('utf-8'))
+            file_size = len(content.encode("utf-8"))
             if file_size > 1024 * 1024:  # 1MB
                 issues.append(f"File size is {file_size} bytes, exceeds 1MB limit")
 
             # Check for proper YAML structure
-            lines = content.split('\n')
+            lines = content.split("\n")
             yaml_section = False
             yaml_end = False
 
             for line in lines:
-                if line.strip() == '---':
+                if line.strip() == "---":
                     if not yaml_section:
                         yaml_section = True
                     elif not yaml_end:
@@ -328,11 +421,11 @@ class SkillHealthChecker:
         issues = []
 
         try:
-            content = skill_path.read_text(encoding='utf-8')
-            if not content.startswith('---'):
+            content = skill_path.read_text(encoding="utf-8")
+            if not content.startswith("---"):
                 return False, issues
 
-            parts = content.split('---')
+            parts = content.split("---")
             if len(parts) < 3:
                 return False, issues
 
@@ -344,14 +437,18 @@ class SkillHealthChecker:
             # Basic compatibility check - references to other skills
             if "generate-spec" in content.lower() and skill_name != "generate-spec":
                 if "generated_spec" not in content.lower():
-                    issues.append(f"Skill '{skill_name}' may depend on generate-spec but doesn't reference it properly")
+                    issues.append(
+                        f"Skill '{skill_name}' may depend on generate-spec but doesn't reference it properly"
+                    )
 
         except Exception as e:
             issues.append(f"Error checking skill compatibility: {str(e)}")
 
         return len(issues) == 0, issues
 
-    def validate_skill_comprehensive(self, skill_path: Path) -> Tuple[HealthCheckStatus, List[ValidationIssue]]:
+    def validate_skill_comprehensive(
+        self, skill_path: Path
+    ) -> Tuple[HealthCheckStatus, List[ValidationIssue]]:
         """Perform comprehensive validation of a single skill."""
         print(f"\n=== Validating {skill_path.name} ===")
 
@@ -362,30 +459,49 @@ class SkillHealthChecker:
         yaml_valid, yaml_issues = self.validate_yaml_frontmatter(skill_path)
         if not yaml_valid:
             for issue in yaml_issues:
-                all_issues.append(ValidationIssue(
-                    "YAML_FRONTMATTER", "CRITICAL", issue, str(skill_path),
-                    "Fix YAML frontmatter according to AEF standards"
-                ))
+                all_issues.append(
+                    ValidationIssue(
+                        "YAML_FRONTMATTER",
+                        "CRITICAL",
+                        issue,
+                        str(skill_path),
+                        "Fix YAML frontmatter according to AEF standards",
+                    )
+                )
             status = HealthCheckStatus.BLOCKED
 
         # Validate stability requirements
-        stability_valid, stability_issues = self.validate_stability_requirements(skill_path)
+        stability_valid, stability_issues = self.validate_stability_requirements(
+            skill_path
+        )
         if not stability_valid:
             for issue in stability_issues:
-                all_issues.append(ValidationIssue(
-                    "STABILITY", "CRITICAL", issue, str(skill_path),
-                    "Add '-stable' suffix to version field"
-                ))
+                all_issues.append(
+                    ValidationIssue(
+                        "STABILITY",
+                        "CRITICAL",
+                        issue,
+                        str(skill_path),
+                        "Add '-stable' suffix to version field",
+                    )
+                )
             status = HealthCheckStatus.BLOCKED
 
         # Validate AEF integration
-        integration_valid, integration_issues = self.validate_aef_integration(skill_path)
+        integration_valid, integration_issues = self.validate_aef_integration(
+            skill_path
+        )
         if not integration_valid:
             for issue in integration_issues:
-                all_issues.append(ValidationIssue(
-                    "AEF_INTEGRATION", "WARNING", issue, str(skill_path),
-                    "Review AEF integration requirements"
-                ))
+                all_issues.append(
+                    ValidationIssue(
+                        "AEF_INTEGRATION",
+                        "WARNING",
+                        issue,
+                        str(skill_path),
+                        "Review AEF integration requirements",
+                    )
+                )
             if status == HealthCheckStatus.HEALTHY:
                 status = HealthCheckStatus.WARNING
 
@@ -393,21 +509,33 @@ class SkillHealthChecker:
         integrity_valid, integrity_issues = self.validate_file_integrity(skill_path)
         if not integrity_valid:
             for issue in integrity_issues:
-                all_issues.append(ValidationIssue(
-                    "FILE_INTEGRITY", "WARNING", issue, str(skill_path),
-                    "Fix file integrity issues"
-                ))
+                all_issues.append(
+                    ValidationIssue(
+                        "FILE_INTEGRITY",
+                        "WARNING",
+                        issue,
+                        str(skill_path),
+                        "Fix file integrity issues",
+                    )
+                )
             if status == HealthCheckStatus.HEALTHY:
                 status = HealthCheckStatus.WARNING
 
         # Check compatibility with other AEF skills
-        compatibility_valid, compatibility_issues = self.check_skill_compatibility(skill_path)
+        compatibility_valid, compatibility_issues = self.check_skill_compatibility(
+            skill_path
+        )
         if not compatibility_valid:
             for issue in compatibility_issues:
-                all_issues.append(ValidationIssue(
-                    "COMPATIBILITY", "WARNING", issue, str(skill_path),
-                    "Review AEF skill compatibility"
-                ))
+                all_issues.append(
+                    ValidationIssue(
+                        "COMPATIBILITY",
+                        "WARNING",
+                        issue,
+                        str(skill_path),
+                        "Review AEF skill compatibility",
+                    )
+                )
             if status == HealthCheckStatus.HEALTHY:
                 status = HealthCheckStatus.WARNING
 
@@ -418,7 +546,7 @@ class SkillHealthChecker:
             for issue in all_issues:
                 print(f"    [{issue.severity}] {issue.issue_type}: {issue.message}")
         else:
-            print(f"  No issues found - skill is healthy!")
+            print("  No issues found - skill is healthy!")
 
         return status, all_issues
 
@@ -427,17 +555,17 @@ class SkillHealthChecker:
         print(f"\n=== Attempting to auto-fix {skill_path.name} ===")
 
         try:
-            content = skill_path.read_text(encoding='utf-8')
+            content = skill_path.read_text(encoding="utf-8")
 
             # Check for auto-fixable issues
             fixes_applied = []
 
             # Fix 1: Add missing -stable suffix to version
-            if not content.startswith('---'):
+            if not content.startswith("---"):
                 print("  Cannot auto-fix - YAML frontmatter malformed")
                 return False
 
-            parts = content.split('---')
+            parts = content.split("---")
             if len(parts) < 3:
                 print("  Cannot auto-fix - incomplete YAML frontmatter")
                 return False
@@ -446,22 +574,26 @@ class SkillHealthChecker:
 
             try:
                 frontmatter = yaml.safe_load(frontmatter_text)
-                if frontmatter and 'version' in frontmatter:
-                    version = frontmatter['version']
-                    if not version.endswith('stable'):
+                if frontmatter and "version" in frontmatter:
+                    version = frontmatter["version"]
+                    if not version.endswith("stable"):
                         # Fix version
-                        new_version = version + '-stable'
-                        frontmatter['version'] = new_version
+                        new_version = version + "-stable"
+                        frontmatter["version"] = new_version
 
                         # Reconstruct frontmatter
-                        new_frontmatter = yaml.dump(frontmatter, default_flow_style=False).strip()
+                        new_frontmatter = yaml.dump(
+                            frontmatter, default_flow_style=False
+                        ).strip()
                         new_content = f"---\n{new_frontmatter}\n---\n{parts[2]}"
 
                         if not self.dry_run:
-                            skill_path.write_text(new_content, encoding='utf-8')
+                            skill_path.write_text(new_content, encoding="utf-8")
                             fixes_applied.append(f"Updated version to '{new_version}'")
                         else:
-                            fixes_applied.append(f"Would update version to '{new_version}' (dry run)")
+                            fixes_applied.append(
+                                f"Would update version to '{new_version}' (dry run)"
+                            )
 
                         print(f"  Applied fixes: {', '.join(fixes_applied)}")
                         return True
@@ -516,8 +648,10 @@ class SkillHealthChecker:
 
             phase_results[phase] = {
                 "total": len(skills),
-                "healthy": sum(1 for skill_name in skills if self.is_skill_healthy(skill_name)),
-                "issues": len(phase_issues)
+                "healthy": sum(
+                    1 for skill_name in skills if self.is_skill_healthy(skill_name)
+                ),
+                "issues": len(phase_issues),
             }
 
         # Generate final report
@@ -537,7 +671,9 @@ class SkillHealthChecker:
         except:
             return False
 
-    def generate_comprehensive_report(self, phase_results: Dict, all_issues: List[ValidationIssue]) -> Dict:
+    def generate_comprehensive_report(
+        self, phase_results: Dict, all_issues: List[ValidationIssue]
+    ) -> Dict:
         """Generate comprehensive health report."""
         total_skills = sum(phase["total"] for phase in phase_results.values())
         healthy_skills = self.stable_skills
@@ -556,13 +692,15 @@ class SkillHealthChecker:
                 "total_skills_analyzed": total_skills,
                 "healthy_skills": healthy_skills,
                 "skills_needing_attention": total_skills - healthy_skills,
-                "compliance_rate": (healthy_skills / total_skills * 100) if total_skills > 0 else 0,
-                "total_issues_found": total_issues
+                "compliance_rate": (healthy_skills / total_skills * 100)
+                if total_skills > 0
+                else 0,
+                "total_issues_found": total_issues,
             },
             "phase_analysis": phase_results,
             "issue_analysis": issue_types,
             "recommendations": self.generate_recommendations(all_issues),
-            "action_items": self.generate_action_items(all_issues)
+            "action_items": self.generate_action_items(all_issues),
         }
 
         return report
@@ -571,20 +709,36 @@ class SkillHealthChecker:
         """Generate recommendations based on issues found."""
         recommendations = []
 
-        if any(issue.issue_type == "YAML_FRONTMATTER" and issue.severity == "CRITICAL" for issue in issues):
-            recommendations.append("Fix YAML frontmatter structure in all skills with critical errors")
+        if any(
+            issue.issue_type == "YAML_FRONTMATTER" and issue.severity == "CRITICAL"
+            for issue in issues
+        ):
+            recommendations.append(
+                "Fix YAML frontmatter structure in all skills with critical errors"
+            )
 
-        if any(issue.issue_type == "STABILITY" and issue.severity == "CRITICAL" for issue in issues):
-            recommendations.append("Add '-stable' suffix to all skill versions to meet stability requirements")
+        if any(
+            issue.issue_type == "STABILITY" and issue.severity == "CRITICAL"
+            for issue in issues
+        ):
+            recommendations.append(
+                "Add '-stable' suffix to all skill versions to meet stability requirements"
+            )
 
         if any(issue.issue_type == "AEF_INTEGRATION" for issue in issues):
-            recommendations.append("Review AEF integration for all skills to ensure proper framework compliance")
+            recommendations.append(
+                "Review AEF integration for all skills to ensure proper framework compliance"
+            )
 
         if any(issue.issue_type == "FILE_INTEGRITY" for issue in issues):
-            recommendations.append("Fix file integrity issues (NUL bytes, line endings, file size)")
+            recommendations.append(
+                "Fix file integrity issues (NUL bytes, line endings, file size)"
+            )
 
         if not recommendations:
-            recommendations.append("All skills are healthy - maintain current compliance standards")
+            recommendations.append(
+                "All skills are healthy - maintain current compliance standards"
+            )
 
         return recommendations
 
@@ -597,26 +751,32 @@ class SkillHealthChecker:
         warning_issues = [issue for issue in issues if issue.severity == "WARNING"]
 
         for issue in critical_issues:
-            action_items.append({
-                "priority": "CRITICAL",
-                "skill": issue.skill_path,
-                "issue": issue.message,
-                "action": "Immediate fix required",
-                "fix_suggestion": issue.fix_suggestion
-            })
+            action_items.append(
+                {
+                    "priority": "CRITICAL",
+                    "skill": issue.skill_path,
+                    "issue": issue.message,
+                    "action": "Immediate fix required",
+                    "fix_suggestion": issue.fix_suggestion,
+                }
+            )
 
         for issue in warning_issues:
-            action_items.append({
-                "priority": "MEDIUM",
-                "skill": issue.skill_path,
-                "issue": issue.message,
-                "action": "Review and fix",
-                "fix_suggestion": issue.fix_suggestion
-            })
+            action_items.append(
+                {
+                    "priority": "MEDIUM",
+                    "skill": issue.skill_path,
+                    "issue": issue.message,
+                    "action": "Review and fix",
+                    "fix_suggestion": issue.fix_suggestion,
+                }
+            )
 
         return action_items
 
-    def export_report(self, report: Dict, output_file: str = "aef-skills-health-report.json"):
+    def export_report(
+        self, report: Dict, output_file: str = "aef-skills-health-report.json"
+    ):
         """Export health check report to JSON file."""
         try:
             import json
@@ -629,7 +789,7 @@ class SkillHealthChecker:
             report["issues"] = issue_data
             report["exported_at"] = datetime.now().isoformat()
 
-            with open(output_file, 'w', encoding='utf-8') as f:
+            with open(output_file, "w", encoding="utf-8") as f:
                 json.dump(report, f, indent=2, default=str)
 
             print(f"\n✅ Report exported to: {output_file}")
@@ -639,6 +799,7 @@ class SkillHealthChecker:
             print(f"Error exporting report: {e}")
             return False
 
+
 def main():
     """Main function to run the comprehensive health check."""
     import argparse
@@ -647,24 +808,28 @@ def main():
         description="AEF Skills Comprehensive Health Check System"
     )
     parser.add_argument(
-        "--skills-dir", "-s",
+        "--skills-dir",
+        "-s",
         default="skills",
-        help="Path to skills directory (default: skills)"
+        help="Path to skills directory (default: skills)",
     )
     parser.add_argument(
-        "--dry-run", "-d",
+        "--dry-run",
+        "-d",
         action="store_true",
-        help="Run in dry-run mode (don't modify files)"
+        help="Run in dry-run mode (don't modify files)",
     )
     parser.add_argument(
-        "--output", "-o",
+        "--output",
+        "-o",
         default="aef-skills-health-report.json",
-        help="Output file for health report (default: aef-skills-health-report.json)"
+        help="Output file for health report (default: aef-skills-health-report.json)",
     )
     parser.add_argument(
-        "--auto-fix", "-f",
+        "--auto-fix",
+        "-f",
         action="store_true",
-        help="Attempt to auto-fix common issues"
+        help="Attempt to auto-fix common issues",
     )
 
     args = parser.parse_args()
@@ -702,11 +867,12 @@ def main():
     if args.output:
         success = checker.export_report(report, args.output)
         if success:
-            print(f"\n✅ Health check completed successfully!")
+            print("\n✅ Health check completed successfully!")
             print(f"   - Report saved to: {args.output}")
         else:
             print(f"\n❌ Error saving report to: {args.output}")
             sys.exit(1)
+
 
 if __name__ == "__main__":
     main()

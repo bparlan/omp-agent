@@ -1,10 +1,12 @@
 from dataclasses import dataclass
 from typing import Dict, Any, List, Optional
-from core.artifacts.artifact_types import CanonicalArtifactType, _ARTIFACT_TYPE_DEFINITIONS
+from core.artifacts.artifact_types import _ARTIFACT_TYPE_DEFINITIONS
+
 
 @dataclass
 class ArtifactTypeDefinition:
     """Artifact type registration record."""
+
     name: str
     schema: Dict[str, Any]
     storage_rule: Dict[str, Any]
@@ -17,12 +19,12 @@ class ArtifactRegistry:
         self._types: Dict[str, ArtifactTypeDefinition] = {}
         self._relationships: Dict[str, List[Dict[str, Any]]] = {}
 
-    def register_type(self, type_name: str, schema: Dict[str, Any], storage_rule: Dict[str, Any]) -> None:
+    def register_type(
+        self, type_name: str, schema: Dict[str, Any], storage_rule: Dict[str, Any]
+    ) -> None:
         """Registers an artifact type definition."""
         self._types[type_name] = ArtifactTypeDefinition(
-            name=type_name,
-            schema=schema,
-            storage_rule=storage_rule
+            name=type_name, schema=schema, storage_rule=storage_rule
         )
 
     def get_type(self, type_name: str) -> Optional[ArtifactTypeDefinition]:
@@ -43,7 +45,13 @@ class ArtifactRegistry:
         """Returns all registered type names."""
         return list(self._types.keys())
 
-    def store_relationship(self, source_id: str, target_id: str, relationship_type: str, metadata: dict = None) -> bool:
+    def store_relationship(
+        self,
+        source_id: str,
+        target_id: str,
+        relationship_type: str,
+        metadata: dict = None,
+    ) -> bool:
         """Store a relationship between artifacts.
 
         Args:
@@ -59,7 +67,7 @@ class ArtifactRegistry:
             "source_id": source_id,
             "target_id": target_id,
             "relationship_type": relationship_type,
-            "metadata": metadata or {}
+            "metadata": metadata or {},
         }
 
         if source_id not in self._relationships:
@@ -101,20 +109,37 @@ def _ensure_registered_types() -> None:
                 "type": {"type": "string"},
                 "title": {"type": "string"},
                 "milestone_id": {"type": "string", "pattern": "^M[0-9]+$"},
-                "status": {"type": "string", "enum": ["draft", "approved", "implemented", "reviewed", "archived"]},
+                "status": {
+                    "type": "string",
+                    "enum": [
+                        "draft",
+                        "approved",
+                        "implemented",
+                        "reviewed",
+                        "archived",
+                    ],
+                },
                 "derived_from": {"type": "array", "items": {"type": "string"}},
-                "template_version": {"type": "string", "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$"},
+                "template_version": {
+                    "type": "string",
+                    "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$",
+                },
                 "metadata": {
                     "type": "object",
-                    "required": ["created_at", "updated_at", "artifact_identity", "artifact_type"],
+                    "required": [
+                        "created_at",
+                        "updated_at",
+                        "artifact_identity",
+                        "artifact_type",
+                    ],
                     "properties": {
                         "created_at": {"type": "string", "format": "date-time"},
                         "updated_at": {"type": "string", "format": "date-time"},
                         "artifact_identity": {"type": "string"},
-                        "artifact_type": {"type": "string"}
-                    }
-                }
-            }
+                        "artifact_type": {"type": "string"},
+                    },
+                },
+            },
         }
 
         registry_storage_rule = {
@@ -124,8 +149,8 @@ def _ensure_registered_types() -> None:
                 "milestone_id_prefix": "M",
                 "skill_id_prefix": "",
                 "health_check_suffix": "-HC",
-                "numbering_scheme": "{N}"
-            }
+                "numbering_scheme": "{N}",
+            },
         }
 
         _registry.register_type(type_name, registry_schema, registry_storage_rule)

@@ -6,16 +6,20 @@ in the AEF (Agentic Engineering Framework) healthcheck refactoring project.
 """
 
 from pathlib import Path
-from typing import List, Optional
+from typing import List
 
 # Public constant for skills directory name
 SKILLS_DIR_NAME: str = "skills"
 
+
 class DiscoveryError(Exception):
     """Custom exception for discovery-related errors."""
+
     pass
 
+
 # NEW: Add get_skills_directory function after SKILLS_DIR_NAME
+
 
 def get_skills_directory(project_root: Path | str | None = None) -> Path:
     """Get the skills directory path for the project.

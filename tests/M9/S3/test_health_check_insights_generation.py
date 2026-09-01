@@ -30,14 +30,14 @@ def main():
         "insights": ["Missing -stable suffix", "Missing required fields"],
         "recommendations": [
             "Add -stable to version field",
-            "Add missing required fields"
+            "Add missing required fields",
         ],
         "metadata": {
             "created_at": "2024-01-01T00:00:00Z",
             "updated_at": "2024-01-01T00:00:00Z",
             "artifact_identity": "HC-skill_a-1",
-            "artifact_type": "health-check"
-        }
+            "artifact_type": "health-check",
+        },
     }
 
     # Test metadata without issues
@@ -55,8 +55,8 @@ def main():
             "created_at": "2024-01-01T00:00:00Z",
             "updated_at": "2024-01-01T00:00:00Z",
             "artifact_identity": "HC-skill_b-1",
-            "artifact_type": "health-check"
-        }
+            "artifact_type": "health-check",
+        },
     }
 
     # Check that insights are populated when issues exist

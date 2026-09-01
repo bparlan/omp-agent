@@ -52,7 +52,9 @@ def fetch_model_list() -> list[str] | None:
             },
         )
         # Use any available API key for auth
-        api_key = os.environ.get("OPENAI_API_KEY") or os.environ.get("ANTHROPIC_API_KEY")
+        api_key = os.environ.get("OPENAI_API_KEY") or os.environ.get(
+            "ANTHROPIC_API_KEY"
+        )
         if api_key:
             req.add_header("Authorization", f"Bearer {api_key}")
 
@@ -105,7 +107,9 @@ def main() -> int:
         return EXIT_MISSING_MODEL
 
     print(f"Gateway reachable at {GATEWAY_BASE}")
-    print(f"Models available ({len(model_ids)}): {', '.join(sorted(model_ids)[:10])}{'...' if len(model_ids) > 10 else ''}")
+    print(
+        f"Models available ({len(model_ids)}): {', '.join(sorted(model_ids)[:10])}{'...' if len(model_ids) > 10 else ''}"
+    )
 
     # 3. Check for expected model
     if EXPECTED_MODEL in model_ids:

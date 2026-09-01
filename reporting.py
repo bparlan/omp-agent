@@ -24,12 +24,15 @@ from pathlib import Path
 from typing import List, Dict, Any
 import json
 
+
 class ReportingError(Exception):
     """Custom exception for reporting-related errors."""
 
     def __init__(self, message: str, skill_name: str | None = None):
         super().__init__(message)
         self.skill_name = skill_name
+
+
 def generate_badges(results: List[Dict[str, Any]], skills_dir: Path) -> None:
     """
     Generate a markdown badges table from skill validation results.
@@ -66,9 +69,13 @@ def generate_badges(results: List[Dict[str, Any]], skills_dir: Path) -> None:
 
     # Always include table header; separator only when there are results
     lines.append("")
-    lines.append("| Skill Name | Status | Last Checked | Validation Score | Has Stable Suffix |")
+    lines.append(
+        "| Skill Name | Status | Last Checked | Validation Score | Has Stable Suffix |"
+    )
     if sorted_results:
-        lines.append("|------------|--------|--------------|------------------|-------------------|")
+        lines.append(
+            "|------------|--------|--------------|------------------|-------------------|"
+        )
 
         # Add skill rows
         for skill in sorted_results:
@@ -86,10 +93,13 @@ def generate_badges(results: List[Dict[str, Any]], skills_dir: Path) -> None:
             has_stable = skill.get("has_stable_suffix", False)
             stable_str = "Yes" if has_stable else "No"
 
-            lines.append(f"| {name} | {status} | {last_checked} | {score_str} | {stable_str} |")
+            lines.append(
+                f"| {name} | {status} | {last_checked} | {score_str} | {stable_str} |"
+            )
 
     # Write content to file
     output_path.write_text("\n".join(lines), encoding="utf-8")
+
 
 def generate_health_report(results: List[Dict[str, Any]], skills_dir: Path) -> None:
     """
@@ -140,6 +150,7 @@ def generate_health_report(results: List[Dict[str, Any]], skills_dir: Path) -> N
     with output_path.open("w", encoding="utf-8") as f:
         json.dump(report, f, indent=2, ensure_ascii=False)
 
+
 def generate_processed_skills(results: List[Dict[str, Any]], skills_dir: Path) -> None:
     """
     Generate a processed skills mapping from validation results.
@@ -178,6 +189,8 @@ def generate_processed_skills(results: List[Dict[str, Any]], skills_dir: Path) -
     # Write JSON to file
     with output_path.open("w", encoding="utf-8") as f:
         json.dump(processed_skills, f, indent=2, ensure_ascii=False)
+
+
 def generate_skills_summary(results: List[Dict[str, Any]]) -> Dict[str, Any]:
     """
     Generate a comprehensive skills summary dictionary.
@@ -236,14 +249,20 @@ def generate_skills_summary(results: List[Dict[str, Any]]) -> Dict[str, Any]:
         "generation_timestamp": datetime.now().isoformat(),
     }
 
-    return {"summary": summary, "skills": results, "status_distribution": status_distribution}
+    return {
+        "summary": summary,
+        "skills": results,
+        "status_distribution": status_distribution,
+    }
+
+
 # Module-level constants and configuration
 __all__ = (
     "generate_badges",
     "generate_health_report",
     "generate_processed_skills",
     "generate_skills_summary",
-    "ReportingError"
+    "ReportingError",
 )
 
 # Verify no module-level mutable globals exist (AST inspection validation)

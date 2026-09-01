@@ -38,14 +38,14 @@ def test_wrapper_healthcheck_py_delegates_to_root():
     source = wrapper_path.read_text(encoding="utf-8")
 
     # Verify wrapper imports from root-level modules
-    assert "from cli import" in source or "import cli" in source, (
-        "Wrapper must import from root-level cli module"
-    )
+    assert (
+        "from cli import" in source or "import cli" in source
+    ), "Wrapper must import from root-level cli module"
 
     # Verify wrapper does NOT import from wrapper-local modules
-    assert "from skills.healthcheck.cli import" not in source, (
-        "Wrapper must not import from wrapper-local cli module"
-    )
+    assert (
+        "from skills.healthcheck.cli import" not in source
+    ), "Wrapper must not import from wrapper-local cli module"
 
     # Execute wrapper and verify it works
     result = _run_command([sys.executable, str(wrapper_path), "--help"])
@@ -63,14 +63,12 @@ def test_wrapper_index_js_delegates_to_python():
     source = wrapper_path.read_text(encoding="utf-8")
 
     # Verify wrapper references the Python script
-    assert "healthcheck.py" in source, (
-        "Node wrapper must reference healthcheck.py script"
-    )
+    assert (
+        "healthcheck.py" in source
+    ), "Node wrapper must reference healthcheck.py script"
 
     # Verify wrapper does NOT duplicate CLI logic
-    assert "argparse" not in source, (
-        "Node wrapper must not duplicate CLI parsing logic"
-    )
+    assert "argparse" not in source, "Node wrapper must not duplicate CLI parsing logic"
 
 
 def test_wrapper_integration_consistency():
@@ -85,22 +83,23 @@ def test_wrapper_integration_consistency():
     main_result = _run_command([sys.executable, str(main_path), "--help"])
 
     # Both should succeed
-    assert wrapper_result.returncode == 0, (
-        f"Wrapper failed with exit code {wrapper_result.returncode}"
-    )
-    assert main_result.returncode == 0, (
-        f"Root main.py failed with exit code {main_result.returncode}"
-    )
+    assert (
+        wrapper_result.returncode == 0
+    ), f"Wrapper failed with exit code {wrapper_result.returncode}"
+    assert (
+        main_result.returncode == 0
+    ), f"Root main.py failed with exit code {main_result.returncode}"
 
     # Both should produce similar help output
-    assert "healthcheck" in wrapper_result.stdout.lower(), (
-        "Wrapper help output must mention 'healthcheck'"
-    )
-    assert "healthcheck" in main_result.stdout.lower(), (
-        "Root main.py help output must mention 'healthcheck'"
-    )
+    assert (
+        "healthcheck" in wrapper_result.stdout.lower()
+    ), "Wrapper help output must mention 'healthcheck'"
+    assert (
+        "healthcheck" in main_result.stdout.lower()
+    ), "Root main.py help output must mention 'healthcheck'"
 
 
 if __name__ == "__main__":
     import pytest
+
     sys.exit(pytest.main([__file__, "-v"]))

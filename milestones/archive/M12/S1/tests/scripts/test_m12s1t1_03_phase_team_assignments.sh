@@ -50,7 +50,7 @@ continuity_failures=0
 for phase in "${!EXPECTED_TEAMS[@]}"; do
     expected="${EXPECTED_TEAMS[$phase]}"
     echo "Checking phase: $phase"
-    
+
     # Verify team size is 3
     member_count=$(echo "$expected" | wc -w)
     if [[ $member_count -ne 3 ]]; then
@@ -58,22 +58,22 @@ for phase in "${!EXPECTED_TEAMS[@]}"; do
         team_failures=$((team_failures + 1))
         continue
     fi
-    
+
     # Verify the-implementer is present in all teams
     if [[ ! "$expected" =~ "the-implementer" ]]; then
         echo "FAIL: Phase $phase missing continuity anchor the-implementer"
         continuity_failures=$((continuity_failures + 1))
     fi
-    
+
     # Verify no duplicate members
     echo "$expected" | tr ' ' '\n' | sort | uniq -d
     if [[ $? -eq 0 ]]; then
         echo "FAIL: Phase $phase contains duplicate members"
         team_failures=$((team_failures + 1))
     fi
-    
+
     echo "✓ Phase $phase team structure valid"
-    
+
 done
 
 # Check we have exactly 6 phases

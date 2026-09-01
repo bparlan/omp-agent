@@ -1,7 +1,5 @@
 """Test that explicit approval allows implementation when all prerequisites met."""
 
-import pytest
-
 
 def test_explicit_approval_granted_allows_implementation():
     """

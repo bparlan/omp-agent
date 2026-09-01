@@ -26,9 +26,10 @@ def test_healthcheck_py_exit_code_is_zero_or_one():
         text=True,
         timeout=30,
     )
-    assert result.returncode in (0, 1), (
-        f"Exit code must be 0 or 1, got {result.returncode}\nstderr: {result.stderr}"
-    )
+    assert result.returncode in (
+        0,
+        1,
+    ), f"Exit code must be 0 or 1, got {result.returncode}\nstderr: {result.stderr}"
 
 
 def test_healthcheck_py_completes_within_timeout():

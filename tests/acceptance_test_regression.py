@@ -13,7 +13,6 @@ Verifies that the current implementation correctly handles:
 """
 
 import sys
-import os
 from pathlib import Path
 
 PASS = 0
@@ -23,6 +22,7 @@ tests_run = 0
 tests_passed = 0
 tests_failed = 0
 
+
 def test(name, fn):
     global tests_run, tests_passed, tests_failed
     tests_run += 1
@@ -31,7 +31,7 @@ def test(name, fn):
     try:
         result = fn()
         if result == PASS:
-            print(f"  ✓ PASS")
+            print("  ✓ PASS")
             tests_passed += 1
         else:
             print(f"  ✗ FAIL: {result}")
@@ -39,8 +39,10 @@ def test(name, fn):
     except Exception as e:
         print(f"  ✗ EXCEPTION: {e}")
         import traceback
+
         traceback.print_exc()
         tests_failed += 1
+
 
 # ============================================================
 # Test 1: YAML/frontmatter parsing collisions
@@ -62,17 +64,17 @@ def test_frontmatter_parsing():
     vm_path = Path("bin/validate_metadata.py")
     vm_content = vm_path.read_text()
     if "from _frontmatter import" in vm_content:
-        print(f"    validate_metadata.py uses shared _frontmatter.py")
+        print("    validate_metadata.py uses shared _frontmatter.py")
     else:
-        print(f"    WARNING: validate_metadata.py does not use shared _frontmatter.py")
+        print("    WARNING: validate_metadata.py does not use shared _frontmatter.py")
 
     # Check that resolve_artifact imports from it
     ra_path = Path("bin/resolve_artifact.py")
     ra_content = ra_path.read_text()
     if "from _frontmatter import" in ra_content:
-        print(f"    resolve_artifact.py uses shared _frontmatter.py")
+        print("    resolve_artifact.py uses shared _frontmatter.py")
     else:
-        print(f"    WARNING: resolve_artifact.py does not use shared _frontmatter.py")
+        print("    WARNING: resolve_artifact.py does not use shared _frontmatter.py")
 
     # Check that omp-verify-traceability and omp-verify-git-integrity DO NOT do inline parsing
     # (they should use _frontmatter but audit showed they don't)
@@ -87,6 +89,7 @@ def test_frontmatter_parsing():
 
     return PASS
 
+
 # ============================================================
 # Test 2: Shebang/metadata ordering
 # ============================================================
@@ -99,12 +102,12 @@ def test_shebang_ordering():
 
     # Check for the shebang + traceability comment requirement
     if "line 1 MUST be:" in content and "#!/bin/bash" in content:
-        print(f"    Shebang requirement found")
+        print("    Shebang requirement found")
     else:
         return "MISSING: Shebang requirement in generate-tests"
 
     if "Verification IDs" in content and "Requirement IDs" in content:
-        print(f"    Traceability header requirement found")
+        print("    Traceability header requirement found")
     else:
         return "MISSING: Traceability header requirement in generate-tests"
 
@@ -113,11 +116,12 @@ def test_shebang_ordering():
     if ledger_path.exists():
         ledger_content = ledger_path.read_text()
         if "Verification IDs" in ledger_content:
-            print(f"    omp-verify-test-ledger validates traceability headers")
+            print("    omp-verify-test-ledger validates traceability headers")
         else:
-            print(f"    WARNING: omp-verify-test-ledger does not validate headers")
+            print("    WARNING: omp-verify-test-ledger does not validate headers")
 
     return PASS
+
 
 # ============================================================
 # Test 3: Syntax self-healing
@@ -130,14 +134,14 @@ def test_syntax_self_healing():
     content = gt_path.read_text()
 
     if "Self-Healing" in content or "self-healing" in content:
-        print(f"    Self-healing mechanism found")
+        print("    Self-healing mechanism found")
     else:
         return "MISSING: Self-healing mechanism in generate-tests"
 
     if "3 attempts" in content or "up to 3" in content:
-        print(f"    Self-healing has bounded retry (3 attempts)")
+        print("    Self-healing has bounded retry (3 attempts)")
     else:
-        print(f"    WARNING: Self-healing retry limit not found")
+        print("    WARNING: Self-healing retry limit not found")
 
     # Check that evaluate-tests does NOT self-heal (only generate-tests should)
     et_path = Path("skills/evaluate-tests/SKILL.md")
@@ -145,11 +149,12 @@ def test_syntax_self_healing():
 
     edit_count = et_content.count("edit")
     if edit_count < 3:
-        print(f"    evaluate-tests has limited editing capability (expected)")
+        print("    evaluate-tests has limited editing capability (expected)")
     else:
         print(f"    NOTE: evaluate-tests has {edit_count} 'edit' references")
 
     return PASS
+
 
 # ============================================================
 # Test 4: Brownfield false-green detection
@@ -162,23 +167,24 @@ def test_brownfield_false_green():
     content = et_path.read_text()
 
     if "VALID_BROWNFIELD_PASS" in content:
-        print(f"    VALID_BROWNFIELD_PASS classification exists")
+        print("    VALID_BROWNFIELD_PASS classification exists")
     else:
         return "MISSING: VALID_BROWNFIELD_PASS in evaluate-tests"
 
     # Check for the implementation presence check
     if "target implementation is already physically present" in content:
-        print(f"    Implementation presence check exists")
+        print("    Implementation presence check exists")
     else:
-        print(f"    WARNING: Implementation presence check wording may differ")
+        print("    WARNING: Implementation presence check wording may differ")
 
     # Check for the distinction between TDD leak and brownfield
     if "TDD Leak" in content or "TDD_LEAK" in content:
-        print(f"    TDD leak detection exists")
+        print("    TDD leak detection exists")
     else:
-        print(f"    WARNING: TDD leak detection not found")
+        print("    WARNING: TDD leak detection not found")
 
     return PASS
+
 
 # ============================================================
 # Test 5: Stale ledger entries
@@ -193,20 +199,20 @@ def test_stale_ledger_entries():
     if sanitizer_path.exists():
         content = sanitizer_path.read_text()
         if "prune_stale_ledger_rows" in content:
-            print(f"    Stale ledger pruning function exists")
+            print("    Stale ledger pruning function exists")
         else:
-            print(f"    WARNING: prune_stale_ledger_rows not found in sanitizer")
+            print("    WARNING: prune_stale_ledger_rows not found in sanitizer")
     else:
-        print(f"    WARNING: omp-sanitize-tests.py not found")
+        print("    WARNING: omp-sanitize-tests.py not found")
 
     # Check generate-tests ledger truncation rule
     gt_path = Path("skills/generate-tests/SKILL.md")
     gt_content = gt_path.read_text()
 
     if "completely overwrite or truncate" in gt_content:
-        print(f"    Ledger truncation rule exists in generate-tests")
+        print("    Ledger truncation rule exists in generate-tests")
     else:
-        print(f"    WARNING: Ledger truncation rule not found")
+        print("    WARNING: Ledger truncation rule not found")
 
     # Check if any pipeline stage invokes the sanitizer
     # It should be invoked by generate-tests or evaluate-tests
@@ -221,9 +227,10 @@ def test_stale_ledger_entries():
             if search_term in skill_content:
                 print(f"    {skill_name} invokes sanitizer")
 
-    print(f"    NOTE: omp-sanitize-tests.py is not auto-invoked by any pipeline stage")
+    print("    NOTE: omp-sanitize-tests.py is not auto-invoked by any pipeline stage")
 
     return PASS
+
 
 # ============================================================
 # Test 6: CLI argument compatibility
@@ -257,15 +264,16 @@ def test_cli_argument_compatibility():
             all_use_argparse = False
 
     if not all_use_argparse:
-        print(f"    Some binaries may use positional arguments or sys.argv directly")
+        print("    Some binaries may use positional arguments or sys.argv directly")
 
     # Check for .bak files indicating flag conversion was done
     bak_files = list(Path("bin").glob("*.bak"))
     if bak_files:
         print(f"    Backup files found: {[f.name for f in bak_files]}")
-        print(f"    (indicates CLI conversion was performed)")
+        print("    (indicates CLI conversion was performed)")
 
     return PASS
+
 
 # ============================================================
 # Test 7: Metadata schema consistency
@@ -284,6 +292,7 @@ def test_metadata_schema_consistency():
 
     # Find the valid_types list
     import re
+
     vm_match = re.search(r"valid_types\s*=\s*\[(.*?)\]", vm_content, re.DOTALL)
     if vm_match:
         vm_types = set(re.findall(r"'([^']+)'", vm_match.group(1)))
@@ -302,25 +311,28 @@ def test_metadata_schema_consistency():
     doc_content = doc_path.read_text()
 
     if "ARCH" in doc_content:
-        print(f"    ARTIFACT_ARCHITECTURE.md includes ARCH")
+        print("    ARTIFACT_ARCHITECTURE.md includes ARCH")
     else:
-        print(f"    WARNING: ARTIFACT_ARCHITECTURE.md does not include ARCH")
+        print("    WARNING: ARTIFACT_ARCHITECTURE.md does not include ARCH")
 
     # Check legacy_boundaries documentation
     if "legacy_boundaries" in doc_content:
-        print(f"    ARTIFACT_ARCHITECTURE.md documents legacy_boundaries")
+        print("    ARTIFACT_ARCHITECTURE.md documents legacy_boundaries")
     else:
-        print(f"    WARNING: legacy_boundaries not documented in ARTIFACT_ARCHITECTURE.md")
+        print(
+            "    WARNING: legacy_boundaries not documented in ARTIFACT_ARCHITECTURE.md"
+        )
 
     # Verify the M5 test checks legacy_boundaries
     test_path = Path("tests/M5/test_metadata_schema.py")
     test_content = test_path.read_text()
     if "legacy_boundaries" in test_content:
-        print(f"    legacy_boundaries tested in M5 test suite")
+        print("    legacy_boundaries tested in M5 test suite")
     else:
-        print(f"    WARNING: legacy_boundaries not tested")
+        print("    WARNING: legacy_boundaries not tested")
 
     return PASS
+
 
 # ============================================================
 # Run all tests

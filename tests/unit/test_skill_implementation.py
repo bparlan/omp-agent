@@ -6,15 +6,14 @@ This skill implements the SDD pipeline orchestration for milestone development.
 It should orchestrate the 12-stage development lifecycle and manage spec processing.
 """
 
-import os
 import sys
-import json
 from pathlib import Path
 from typing import Dict, Any, Optional
 
 # Skill metadata
 SKILL_NAME = "manage-development"
 SKILL_VERSION = "2.2.0-stable"
+
 
 def read_skill_info(skill_name: str) -> Dict[str, Any]:
     """Read skill information from SKILL.md file"""
@@ -25,7 +24,7 @@ def read_skill_info(skill_name: str) -> Dict[str, Any]:
         return {"error": f"SKILL.md not found for skill: {skill_name}"}
 
     try:
-        with open(skill_md_path, 'r') as f:
+        with open(skill_md_path, "r") as f:
             content = f.read()
 
         # Extract frontmatter (YAML)
@@ -37,7 +36,7 @@ def read_skill_info(skill_name: str) -> Dict[str, Any]:
                 result = {
                     "name": skill_name,
                     "version": SKILL_VERSION,
-                    "description": skill_name.replace("-", " ").title()
+                    "description": skill_name.replace("-", " ").title(),
                 }
                 return result
 
@@ -45,6 +44,7 @@ def read_skill_info(skill_name: str) -> Dict[str, Any]:
 
     except Exception as e:
         return {"error": f"Failed to read SKILL.md: {str(e)}"}
+
 
 def discover_milestones() -> list:
     """Discover available milestones"""
@@ -55,12 +55,13 @@ def discover_milestones() -> list:
         return milestones
 
     for item in milestones_dir.iterdir():
-        if item.is_dir() and not item.name.startswith('.'):
+        if item.is_dir() and not item.name.startswith("."):
             milestone_file = item / "M*.md"
             if any(milestone_file.parent.glob("*.md")):
                 milestones.append(item.name)
 
     return sorted(milestones)
+
 
 def discover_specifications(milestone: str) -> list:
     """Discover specifications for a milestone"""
@@ -73,17 +74,19 @@ def discover_specifications(milestone: str) -> list:
     # Find files matching M{num}S{num}.md pattern
     for file_path in milestone_dir.glob("M*_S*.md"):
         # Extract spec ID
-        match = file_path.name.replace('.md', '')
-        if len(match) >= 4 and match[1] == '1' and match[3] == 'S':
+        match = file_path.name.replace(".md", "")
+        if len(match) >= 4 and match[1] == "1" and match[3] == "S":
             specs.append(match)
 
     return sorted(specs)
+
 
 def validate_spec_id(spec_id: str) -> bool:
     """Validate specification ID format (M{X}S{Y})"""
     if len(spec_id) < 4:
         return False
     return spec_id.startswith("M") and "S" in spec_id
+
 
 def get_state_for_spec(spec_id: str, milestones_path: Path) -> Optional[str]:
     """Get current state for a specification artifact"""
@@ -92,8 +95,8 @@ def get_state_for_spec(spec_id: str, milestones_path: Path) -> Optional[str]:
         f"{spec_id}R.md",  # review artifact (final state)
         f"{spec_id}E.md",  # evaluation artifact
         f"{spec_id}C.md",  # implementation artifact
-        f"{spec_id}TE.md", # test evaluation artifact
-        f"{spec_id}T*.md", # test artifact
+        f"{spec_id}TE.md",  # test evaluation artifact
+        f"{spec_id}T*.md",  # test artifact
     ]
 
     milestone_dir = milestones_path / spec_id[:2]
@@ -102,13 +105,14 @@ def get_state_for_spec(spec_id: str, milestones_path: Path) -> Optional[str]:
         if "*" in pattern:
             files = list(milestone_dir.glob(pattern))
             if files:
-                return pattern.replace("*", files[0].stem[len(spec_id):-1])
+                return pattern.replace("*", files[0].stem[len(spec_id) : -1])
         else:
             artifact_file = milestone_dir / pattern
             if artifact_file.exists():
                 return pattern
 
     return None
+
 
 def validate_artifact_state(spec_id: str, milestones_path: Path, type: str) -> str:
     """Validate artifact state - from the skill documentation"""
@@ -151,6 +155,7 @@ def validate_artifact_state(spec_id: str, milestones_path: Path, type: str) -> s
 
     elif type == "closure":
         from glob import glob
+
         closure_files = sorted(glob(str(milestones_path / spec_id[:2] / "*CLOSE-*.md")))
         if not closure_files:
             return "MISSING"
@@ -165,6 +170,7 @@ def validate_artifact_state(spec_id: str, milestones_path: Path, type: str) -> s
         return "PENDING"
 
     return "UNKNOWN"
+
 
 def main():
     """Main skill execution function"""
@@ -204,13 +210,16 @@ def main():
 
             # Validate different artifact states
             for state_type in ["test_evaluation", "evaluation", "review", "closure"]:
-                validation = validate_artifact_state(spec_id, milestones_path, state_type)
+                validation = validate_artifact_state(
+                    spec_id, milestones_path, state_type
+                )
                 print(f"{state_type}: {validation}")
 
             print()
 
     print("Skill execution completed successfully.")
     return 0
+
 
 if __name__ == "__main__":
     sys.exit(main())

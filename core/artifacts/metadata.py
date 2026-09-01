@@ -1,13 +1,13 @@
 import re
 
 import yaml
-from typing import Dict, Any, Optional, List
+from typing import Dict, Any, Optional
 
 
 def parse_metadata(content: str) -> Dict[str, Any]:
     """Parses metadata from content, assuming YAML frontmatter."""
     try:
-        parts = content.split('---\n', 2)
+        parts = content.split("---\n", 2)
         if len(parts) < 2:
             return {}
         metadata_str = parts[1]
@@ -20,7 +20,7 @@ def parse_metadata(content: str) -> Dict[str, Any]:
 def get_metadata_from_file(file_path: str) -> Dict[str, Any]:
     """Reads a file and extracts metadata from its YAML frontmatter."""
     try:
-        with open(file_path, 'r') as f:
+        with open(file_path, "r") as f:
             content = f.read()
         return parse_metadata(content)
     except FileNotFoundError:
@@ -49,7 +49,7 @@ def extract_frontmatter(filepath: str) -> Optional[Dict[str, Any]]:
         return None
 
     # Strip UTF-8 BOM if present
-    if content.startswith('\ufeff'):
+    if content.startswith("\ufeff"):
         content = content[1:]
 
     # Extract YAML frontmatter delimited by --- ... ---

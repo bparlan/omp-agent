@@ -4,7 +4,6 @@
 # Test Type: IMPLEMENTATION_CHECK
 
 import pytest
-from pathlib import Path
 
 
 def test_SKILLS_DIR_NAME_constant():
@@ -14,7 +13,9 @@ def test_SKILLS_DIR_NAME_constant():
     from discovery import SKILLS_DIR_NAME
 
     # Verify the constant is importable
-    assert isinstance(SKILLS_DIR_NAME, str), f"Expected string, got {type(SKILLS_DIR_NAME)}"
+    assert isinstance(
+        SKILLS_DIR_NAME, str
+    ), f"Expected string, got {type(SKILLS_DIR_NAME)}"
 
     # Verify the constant equals \"skills\"
     assert SKILLS_DIR_NAME == "skills", f"Expected 'skills', got {SKILLS_DIR_NAME}"

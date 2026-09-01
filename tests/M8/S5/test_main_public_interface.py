@@ -32,9 +32,9 @@ def test_main_exports_main_callable():
 def test_main_has_main_guard():
     """V-006: main.py must have if __name__ == '__main__' guard."""
     source = (PROJECT_ROOT / "main.py").read_text(encoding="utf-8")
-    assert 'if __name__ == "__main__"' in source or "if __name__ == '__main__'" in source, (
-        "main.py must have if __name__ == '__main__' guard"
-    )
+    assert (
+        'if __name__ == "__main__"' in source or "if __name__ == '__main__'" in source
+    ), "main.py must have if __name__ == '__main__' guard"
 
 
 def test_main_returns_int_exit_status():
@@ -46,9 +46,9 @@ def test_main_returns_int_exit_status():
     except SystemExit as exc:
         exit_code = exc.code if exc.code is not None else 0
 
-    assert isinstance(exit_code, int), (
-        f"main() must return int exit status, got {type(exit_code)}: {exit_code}"
-    )
+    assert isinstance(
+        exit_code, int
+    ), f"main() must return int exit status, got {type(exit_code)}: {exit_code}"
 
 
 def test_main_interface_matches_spec():
@@ -57,13 +57,17 @@ def test_main_interface_matches_spec():
 
     # Verify main() accepts expected arguments
     import inspect
+
     sig = inspect.signature(main.main)
     params = list(sig.parameters.keys())
 
     # main() should accept argv parameter or similar
-    assert len(params) >= 1, "main() must accept at least one parameter (argv or similar)"
+    assert (
+        len(params) >= 1
+    ), "main() must accept at least one parameter (argv or similar)"
 
 
 if __name__ == "__main__":
     import pytest
+
     sys.exit(pytest.main([__file__, "-v"]))

@@ -56,9 +56,9 @@ def test_main_py_no_wrapper_local_imports():
     """V-004: main.py must not import from skills.healthcheck.* or wrapper paths."""
     main = _import_main()
     source = inspect.getsource(main)
-    assert "skills.healthcheck" not in source, (
-        "main.py must not import from wrapper-local paths like skills.healthcheck.*"
-    )
+    assert (
+        "skills.healthcheck" not in source
+    ), "main.py must not import from wrapper-local paths like skills.healthcheck.*"
 
 
 def test_main_py_import_succeeds_without_side_effects():

@@ -37,29 +37,29 @@ from pathlib import Path
 
 # Patterns that identify "counter-only" reports (claims without traces)
 COUNTER_PATTERNS: list[re.Pattern] = [
-    re.compile(r'^TESTS_RUN\s*=\s*\d+', re.MULTILINE),
-    re.compile(r'^TESTS_PASSED\s*=\s*\d+', re.MULTILINE),
-    re.compile(r'^TESTS_FAILED\s*=\s*\d+', re.MULTILINE),
-    re.compile(r'^VALID_TESTS\s*=\s*\d+', re.MULTILINE),
-    re.compile(r'^INVALID_TESTS\s*=\s*\d+', re.MULTILINE),
-    re.compile(r'^EXIT_CODE\s*=\s*\d+', re.MULTILINE),
+    re.compile(r"^TESTS_RUN\s*=\s*\d+", re.MULTILINE),
+    re.compile(r"^TESTS_PASSED\s*=\s*\d+", re.MULTILINE),
+    re.compile(r"^TESTS_FAILED\s*=\s*\d+", re.MULTILINE),
+    re.compile(r"^VALID_TESTS\s*=\s*\d+", re.MULTILINE),
+    re.compile(r"^INVALID_TESTS\s*=\s*\d+", re.MULTILINE),
+    re.compile(r"^EXIT_CODE\s*=\s*\d+", re.MULTILINE),
 ]
 
 # Patterns that indicate raw evidence IS present (populated blocks)
 EVIDENCE_PATTERNS: list[re.Pattern] = [
     # Populated YAML raw_evidence field (non-empty: has content after | or text)
-    re.compile(r'raw_evidence:\s*\|?\s*\S'),
+    re.compile(r"raw_evidence:\s*\|?\s*\S"),
     # Populated fenced evidence block with a command
-    re.compile(r'\$ ', re.MULTILINE),
+    re.compile(r"\$ ", re.MULTILINE),
     # Populated "checklist" evidence row
-    re.compile(r'-\s*\[[xX]\]\s+.+?:?\s*`[^`]+`\s*→'),
+    re.compile(r"-\s*\[[xX]\]\s+.+?:?\s*`[^`]+`\s*→"),
     # Literal "[claim:" marker (evidence block header)
-    re.compile(r'\[claim:\s*\S'),
+    re.compile(r"\[claim:\s*\S"),
     # Manual check with a reason populated
-    re.compile(r'Check type:\s*MANUAL'),
+    re.compile(r"Check type:\s*MANUAL"),
     # Non-empty stdout/stderr capture
-    re.compile(r'^stdout:\s*\S', re.MULTILINE),
-    re.compile(r'^stderr:\s*\S', re.MULTILINE),
+    re.compile(r"^stdout:\s*\S", re.MULTILINE),
+    re.compile(r"^stderr:\s*\S", re.MULTILINE),
 ]
 
 
@@ -96,37 +96,39 @@ def check_evidence_gap(text: str, path: str) -> list[str]:
 
 # Resolution-language markers (strong claims of completeness)
 RESOLUTION_PATTERNS: list[re.Pattern] = [
-    re.compile(r'✅\s*COMPLETE'),
-    re.compile(r'Exit Code:\s*0\b'),
-    re.compile(r'No blocking issues remain', re.IGNORECASE),
-    re.compile(r'All tests passed', re.IGNORECASE),
-    re.compile(r'all critical defects resolved', re.IGNORECASE),
-    re.compile(r'\bRESOLVED\b'),
-    re.compile(r'✔️\s*COMPLETE'),
-    re.compile(r'✅\s*FIXED'),
-    re.compile(r'✅\s*RESOLVED'),
+    re.compile(r"✅\s*COMPLETE"),
+    re.compile(r"Exit Code:\s*0\b"),
+    re.compile(r"No blocking issues remain", re.IGNORECASE),
+    re.compile(r"All tests passed", re.IGNORECASE),
+    re.compile(r"all critical defects resolved", re.IGNORECASE),
+    re.compile(r"\bRESOLVED\b"),
+    re.compile(r"✔️\s*COMPLETE"),
+    re.compile(r"✅\s*FIXED"),
+    re.compile(r"✅\s*RESOLVED"),
 ]
 
 # Pending-language markers (claims of incompleteness or blockers)
 PENDING_PATTERNS: list[re.Pattern] = [
-    re.compile(r'⚠️\s*PENDING'),
-    re.compile(r'⚠️\s*BLOCKED'),
-    re.compile(r'\bBLOCKED\b'),
-    re.compile(r'\bTEST_VALIDATION_BLOCKED\b'),
-    re.compile(r'\bPENDING\b'),
-    re.compile(r'❌\s*BLOCKED'),
+    re.compile(r"⚠️\s*PENDING"),
+    re.compile(r"⚠️\s*BLOCKED"),
+    re.compile(r"\bBLOCKED\b"),
+    re.compile(r"\bTEST_VALIDATION_BLOCKED\b"),
+    re.compile(r"\bPENDING\b"),
+    re.compile(r"❌\s*BLOCKED"),
 ]
 
 # Qualifying scope statements that disambiguate resolution + pending co-occurrence
 QUALIFIER_PATTERNS: list[re.Pattern] = [
-    re.compile(r'(?i)scope\s*:'),
-    re.compile(r'(?i)applies\s+to\b'),
-    re.compile(r'(?i)applies\s+only\s+to\b'),
-    re.compile(r'\bsubset\s*:'),
-    re.compile(r'\bpartial\s*:'),
-    re.compile(r'Only applicable to', re.IGNORECASE),
-    re.compile(r'This (exit code|status|result) applies', re.IGNORECASE),
-    re.compile(r'Exit Code:\s*\d+\s+\(', re.IGNORECASE),  # qualified codes like "Exit Code: 0 (PASS)" vs bare
+    re.compile(r"(?i)scope\s*:"),
+    re.compile(r"(?i)applies\s+to\b"),
+    re.compile(r"(?i)applies\s+only\s+to\b"),
+    re.compile(r"\bsubset\s*:"),
+    re.compile(r"\bpartial\s*:"),
+    re.compile(r"Only applicable to", re.IGNORECASE),
+    re.compile(r"This (exit code|status|result) applies", re.IGNORECASE),
+    re.compile(
+        r"Exit Code:\s*\d+\s+\(", re.IGNORECASE
+    ),  # qualified codes like "Exit Code: 0 (PASS)" vs bare
 ]
 
 
@@ -175,6 +177,7 @@ def check_self_contradiction(text: str, path: str) -> list[str]:
 # MAIN
 # ---------------------------------------------------------------------------
 
+
 def lint_file(file_path: str) -> int:
     """Lint a single evaluation or completion report. Returns 0 = pass, 1 = fail."""
     path = Path(file_path)
@@ -208,10 +211,18 @@ def lint_file(file_path: str) -> int:
 
 def main() -> int:
     if len(sys.argv) < 2:
-        print(f"Usage: {sys.argv[0]} <evaluation_or_completion_file> [...]", file=sys.stderr)
+        print(
+            f"Usage: {sys.argv[0]} <evaluation_or_completion_file> [...]",
+            file=sys.stderr,
+        )
         print("", file=sys.stderr)
-        print("Lint one or more evaluation (*E.md) or completion (*C.md) reports.", file=sys.stderr)
-        print("Exit code 0 = pass, 1 = findings raised, 2 = file error.", file=sys.stderr)
+        print(
+            "Lint one or more evaluation (*E.md) or completion (*C.md) reports.",
+            file=sys.stderr,
+        )
+        print(
+            "Exit code 0 = pass, 1 = findings raised, 2 = file error.", file=sys.stderr
+        )
         return 2
 
     exit_code = 0

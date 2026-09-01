@@ -2,15 +2,17 @@
 import sys
 import argparse
 
+
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument('--project', required=True)
-    parser.add_argument('--runtime', required=True)
-    parser.add_argument('--operation', required=True)
-    parser.add_argument('--args', default='')
+    parser.add_argument("--project", required=True)
+    parser.add_argument("--runtime", required=True)
+    parser.add_argument("--operation", required=True)
+    parser.add_argument("--args", default="")
     args = parser.parse_args()
     # For the test, we just exit 0 to indicate success
     sys.exit(0)
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     main()

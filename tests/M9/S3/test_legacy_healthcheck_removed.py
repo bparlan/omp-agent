@@ -3,7 +3,6 @@
 # {Requirement IDs: NFR-HEALTHCENTER-BACKWARD_COMPATIBILITY}
 # Test Type: IMPLEMENTATION_CHECK
 
-import os
 import sys
 from pathlib import Path
 

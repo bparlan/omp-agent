@@ -66,36 +66,36 @@ def main():
         ("tests/M9/S1/test_vi9_verify_metadata_cli.sh", "bash"),
         ("tests/M9/S1/test_vi10_performance_threshold.sh", "bash"),
     ]
-    
+
     tests_run = 0
     tests_passed = 0
     tests_failed = 0
     valid_initial_failures = 0
     invalid_tests = 0
     tdd_leaks = 0
-    
+
     print("=== COMPREHENSIVE TEST EVALUATION FOR M9S1 ===\n")
-    
+
     for test_path, interpreter in test_files:
         tests_run += 1
         print(f"Running: {test_path} (interpreter: {interpreter})")
-        
+
         # First check if file exists
         if not os.path.exists(test_path):
             print(f"  ❌ File not found: {test_path}")
             tests_failed += 1
             continue
-            
+
         # Run the test
         result = run_test(test_path, interpreter)
-        
+
         # Check for syntax errors first (INVALID_TEST)
         if "SyntaxError" in result.get("stderr", "") or "unterminated string literal" in result.get("stderr", ""):
             print(f"  ❌ INVALID_TEST - Syntax error")
             print(f"     Error: {result['stderr']}")
             invalid_tests += 1
             continue
-            
+
         # Check exit codes
         if result["exit_code"] == 127:
             print(f"  ✅ VALID_INITIAL_FAILURE - Exit code 127 (Command Not Found)")
@@ -111,10 +111,10 @@ def main():
         else:
             print(f"  ❌ FAILED - Exit code {result['exit_code']}")
             tests_failed += 1
-            
+
         print(f"  Output: {result['stdout'][:300] if result['stdout'] else 'No stdout'}")
         print()
-        
+
     # Summary
     print("=== SUMMARY ===")
     print(f"Tests run: {tests_run}")
@@ -123,7 +123,7 @@ def main():
     print(f"Valid initial failures (127/1): {valid_initial_failures}")
     print(f"Invalid tests (syntax errors): {invalid_tests}")
     print(f"TDD leaks (false passes): {tdd_leaks}")
-    
+
     # Calculate exit code
     if invalid_tests > 0 or tdd_leaks > 0:
         print(f"\n🔴 PIPELINE LOCKED - Exit Code 2 (Invalid tests or TDD leaks detected)")
@@ -131,12 +131,12 @@ def main():
     else:
         print(f"\n🟢 BASELINE VERIFIED - Exit Code 0 (All tests properly fail on empty codebase)")
         exit_code = 0
-        
+
     print(f"\n=== FINAL ASSESSMENT ===")
     print(f"Expected for pre-implementation: All tests should fail with 127/1")
     print(f"Any test passing with exit 0 is a TDD leak and blocks pipeline")
     print(f"Any test with syntax errors is an invalid test and blocks pipeline")
-    
+
     # Write results
     with open("test_evaluation_results.json", "w") as f:
         import json
@@ -149,7 +149,7 @@ def main():
             "tdd_leaks": tdd_leaks,
             "exit_code": exit_code
         }, f, indent=2)
-    
+
     return exit_code
 
 if __name__ == "__main__":

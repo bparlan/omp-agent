@@ -35,9 +35,9 @@ def test_main_py_type_hints_complete():
     # Check each public function has complete annotations
     for func in public_functions:
         # Check return annotation
-        assert func.returns is not None, (
-            f"Public function '{func.name}' missing return type annotation"
-        )
+        assert (
+            func.returns is not None
+        ), f"Public function '{func.name}' missing return type annotation"
 
         # Check all parameters have annotations (excluding 'self' for methods)
         args = func.args
@@ -47,21 +47,22 @@ def test_main_py_type_hints_complete():
 
         for arg in all_args:
             if arg.arg != "self":
-                assert arg.annotation is not None, (
-                    f"Parameter '{arg.arg}' in function '{func.name}' missing type annotation"
-                )
+                assert (
+                    arg.annotation is not None
+                ), f"Parameter '{arg.arg}' in function '{func.name}' missing type annotation"
 
         if vararg and vararg.arg != "self":
-            assert vararg.annotation is not None, (
-                f"Variadic parameter '{vararg.arg}' in function '{func.name}' missing type annotation"
-            )
+            assert (
+                vararg.annotation is not None
+            ), f"Variadic parameter '{vararg.arg}' in function '{func.name}' missing type annotation"
 
         if kwarg:
-            assert kwarg.annotation is not None, (
-                f"Keyword parameter '{kwarg.arg}' in function '{func.name}' missing type annotation"
-            )
+            assert (
+                kwarg.annotation is not None
+            ), f"Keyword parameter '{kwarg.arg}' in function '{func.name}' missing type annotation"
 
 
 if __name__ == "__main__":
     import pytest
+
     sys.exit(pytest.main([__file__, "-v"]))

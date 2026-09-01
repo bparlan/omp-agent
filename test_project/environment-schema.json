@@ -16,12 +16,7 @@
         "require_exact_match": true,
         "compatibility_threshold": 0.95,
         "allow_alternatives": true,
-        "priority_order": [
-          "mise",
-          "system",
-          "virtualenv",
-          "container"
-        ]
+        "priority_order": ["mise", "system", "virtualenv", "container"]
       }
     },
     "isolation": {

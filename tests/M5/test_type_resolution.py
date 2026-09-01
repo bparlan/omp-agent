@@ -29,7 +29,7 @@ class ArtifactTypeResolver:
 
     def __init__(self, current_milestone: str = "M5"):
         self.current_milestone = current_milestone
-        self.type_pattern = re.compile(r'^type:\s*([a-z-]+)$', re.MULTILINE)
+        self.type_pattern = re.compile(r"^type:\s*([a-z-]+)$", re.MULTILINE)
 
     def resolve_artifact_type(self, path: str) -> str:
         """
@@ -74,7 +74,7 @@ class ArtifactTypeResolver:
     def _extract_type_from_metadata(self, path: str) -> Optional[str]:
         """Extract type from YAML frontmatter."""
         try:
-            with open(path, 'r', encoding='utf-8') as f:
+            with open(path, "r", encoding="utf-8") as f:
                 content = f.read()
                 match = self.type_pattern.search(content)
                 if match:
@@ -92,7 +92,7 @@ class ArtifactTypeResolver:
         # Find which milestone directory we're in
         milestone_idx = None
         for i, part in enumerate(parts):
-            if re.match(r'^M\d+$', part):
+            if re.match(r"^M\d+$", part):
                 milestone_idx = i
                 break
 
@@ -104,9 +104,10 @@ class ArtifactTypeResolver:
             subdir = parts[milestone_idx + 1]
             for type_name, directories in self.ARTIFACT_TYPES.items():
                 # Handle directories with trailing slashes
-                directory_patterns = [d.rstrip('/') for d in directories]
+                directory_patterns = [d.rstrip("/") for d in directories]
                 if subdir in directory_patterns:
                     return type_name
+
     def _extract_type_from_filename(self, path_obj: Path) -> str:
         """Extract type from filename using canonical pattern."""
         filename = path_obj.stem.lower()
@@ -115,7 +116,7 @@ class ArtifactTypeResolver:
         for type_name, directories in self.ARTIFACT_TYPES.items():
             for pattern in directories:
                 # Handle directory-based patterns (e.g., specs/)
-                if pattern.endswith('/'):
+                if pattern.endswith("/"):
                     expected_prefix = f"{type_name}-"
                     if filename.startswith(expected_prefix):
                         return type_name
@@ -133,42 +134,44 @@ class ArtifactTypeResolver:
                 "path": "milestones/M5/specs/INV-001.md",
                 "content": "type: investigation\n---",
                 "expected": "investigation",
-                "priority": "metadata"
+                "priority": "metadata",
             },
             {
                 "name": "Directory used when no metadata",
                 "path": "milestones/M5/specs/SPEC-001.md",
                 "content": "# Specification",
                 "expected": "specification",
-                "priority": "directory"
+                "priority": "directory",
             },
             {
                 "name": "Filename used as final fallback",
                 "path": "milestones/M5/investigations/INVESTIGATIONS.md",
                 "content": "# Investigation",
                 "expected": "investigation",
-                "priority": "filename"
-            }
+                "priority": "filename",
+            },
         ]
 
         all_passed = True
         for test_case in test_cases:
             print(f"  - {test_case['name']} (priority: {test_case['priority']})")
-            self._create_test_file(test_case['path'], test_case['content'])
+            self._create_test_file(test_case["path"], test_case["content"])
             resolver = ArtifactTypeResolver()
 
             try:
-                result = resolver.resolve_artifact_type(test_case['path'])
-                if result == test_case['expected']:
+                result = resolver.resolve_artifact_type(test_case["path"])
+                if result == test_case["expected"]:
                     print(f"    ✓ PASS: Got '{result}'")
                 else:
-                    print(f"    ✗ FAIL: Expected '{test_case['expected']}', got '{result}'")
+                    print(
+                        f"    ✗ FAIL: Expected '{test_case['expected']}', got '{result}'"
+                    )
                     all_passed = False
             except Exception as e:
                 print(f"    ✗ FAIL: Unexpected exception: {e}")
                 all_passed = False
 
-            self._cleanup_test_file(test_case['path'])
+            self._cleanup_test_file(test_case["path"])
 
         if all_passed:
             print("  ✓ All resolution priority tests passed")
@@ -198,7 +201,9 @@ class ArtifactTypeResolver:
         self._cleanup_test_file(path)
 
         if len(unique_results) == 1 and results[0] == "specification":
-            print(f"  ✓ PASS: Resolution is deterministic (all returned '{results[0]}')")
+            print(
+                f"  ✓ PASS: Resolution is deterministic (all returned '{results[0]}')"
+            )
             return True
         else:
             print(f"  ✗ FAIL: Non-deterministic resolution: {results}")
@@ -243,44 +248,46 @@ class ArtifactTypeResolver:
                 "name": "Metadata investigation in specs directory",
                 "path": "milestones/M5/specs/INV-001.md",
                 "content": "type: investigation\n---",
-                "should_fail": True
+                "should_fail": True,
             },
             {
                 "name": "Metadata specification in investigations directory",
                 "path": "milestones/M5/investigations/SPEC-001.md",
                 "content": "type: specification\n---",
-                "should_fail": True
+                "should_fail": True,
             },
             {
                 "name": "Ambiguous metadata, specs directory, investigation filename",
                 "path": "milestones/M5/specs/INVESTIGATIONS.md",
                 "content": "# No type field\n---",
-                "should_fail": True
+                "should_fail": True,
             },
             {
                 "name": "Valid case: metadata and directory match",
                 "path": "milestones/M5/specs/SPEC-001.md",
                 "content": "type: specification\n---",
-                "should_fail": False
-            }
+                "should_fail": False,
+            },
         ]
 
         all_passed = True
         for test_case in test_cases:
             print(f"  - {test_case['name']}")
-            self._create_test_file(test_case['path'], test_case['content'])
+            self._create_test_file(test_case["path"], test_case["content"])
             resolver = ArtifactTypeResolver()
 
             try:
-                result = resolver.resolve_artifact_type(test_case['path'])
+                result = resolver.resolve_artifact_type(test_case["path"])
 
-                if test_case['should_fail']:
-                    print(f"    ✗ FAIL: Should have raised conflict error, got '{result}'")
+                if test_case["should_fail"]:
+                    print(
+                        f"    ✗ FAIL: Should have raised conflict error, got '{result}'"
+                    )
                     all_passed = False
                 else:
                     print(f"    ✓ PASS: No conflict, returned '{result}'")
             except ValueError as e:
-                if test_case['should_fail']:
+                if test_case["should_fail"]:
                     print(f"    ✓ PASS: Conflict detected: {str(e)[:50]}...")
                 else:
                     print(f"    ✗ FAIL: Unexpected conflict error: {e}")
@@ -289,7 +296,7 @@ class ArtifactTypeResolver:
                 print(f"    ✗ FAIL: Unexpected exception: {e}")
                 all_passed = False
 
-            self._cleanup_test_file(test_case['path'])
+            self._cleanup_test_file(test_case["path"])
 
         if all_passed:
             print("  ✓ All conflict detection tests passed")
@@ -307,24 +314,24 @@ class ArtifactTypeResolver:
                 "name": "Metadata investigation in specs directory",
                 "path": "milestones/M5/specs/INV-001.md",
                 "content": "type: investigation\n---",
-                "expected_error": "conflict"
+                "expected_error": "conflict",
             },
             {
                 "name": "Metadata specification in investigations directory",
                 "path": "milestones/M5/investigations/SPEC-001.md",
                 "content": "type: specification\n---",
-                "expected_error": "conflict"
-            }
+                "expected_error": "conflict",
+            },
         ]
 
         all_passed = True
         for test_case in test_cases:
             print(f"  - {test_case['name']}")
-            self._create_test_file(test_case['path'], test_case['content'])
+            self._create_test_file(test_case["path"], test_case["content"])
             resolver = ArtifactTypeResolver()
 
             try:
-                result = resolver.resolve_artifact_type(test_case['path'])
+                result = resolver.resolve_artifact_type(test_case["path"])
 
                 if result in ["investigation", "specification"]:
                     print(f"    ✗ FAIL: Silent reinterpretation to '{result}'")
@@ -334,7 +341,7 @@ class ArtifactTypeResolver:
                     all_passed = False
             except ValueError as e:
                 if "conflict" in str(e).lower():
-                    print(f"    ✓ PASS: Did not reinterpret, raised error")
+                    print("    ✓ PASS: Did not reinterpret, raised error")
                 else:
                     print(f"    ✗ FAIL: Raised error but not about conflict: {e}")
                     all_passed = False
@@ -342,7 +349,7 @@ class ArtifactTypeResolver:
                 print(f"    ✗ FAIL: Unexpected exception: {e}")
                 all_passed = False
 
-            self._cleanup_test_file(test_case['path'])
+            self._cleanup_test_file(test_case["path"])
 
         if all_passed:
             print("  ✓ All fail-closed tests passed")
@@ -361,7 +368,7 @@ class ArtifactTypeResolver:
 
         try:
             resolver.resolve_artifact_type(path)
-            print(f"  ✗ FAIL: No error raised")
+            print("  ✗ FAIL: No error raised")
             return False
         except ValueError as e:
             error_msg = str(e)
@@ -374,10 +381,12 @@ class ArtifactTypeResolver:
             self._cleanup_test_file(path)
 
             if has_type_in_metadata and has_directory and has_explicit_conflict:
-                print(f"  ✓ PASS: Error message includes all required components")
+                print("  ✓ PASS: Error message includes all required components")
                 return True
             else:
-                print(f"  ✗ FAIL: Error message missing components: metadata={has_type_in_metadata}, directory={has_directory}, conflict={has_explicit_conflict}")
+                print(
+                    f"  ✗ FAIL: Error message missing components: metadata={has_type_in_metadata}, directory={has_directory}, conflict={has_explicit_conflict}"
+                )
                 print(f"    Message: {error_msg}")
                 return False
         except Exception as e:
@@ -391,7 +400,7 @@ class ArtifactTypeResolver:
         """Create a test file in the milestones directory."""
         path_obj = Path(path)
         path_obj.parent.mkdir(parents=True, exist_ok=True)
-        path_obj.write_text(content, encoding='utf-8')
+        path_obj.write_text(content, encoding="utf-8")
 
     def _cleanup_test_file(self, path: str):
         """Remove a test file."""

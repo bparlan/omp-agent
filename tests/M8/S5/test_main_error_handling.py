@@ -44,9 +44,9 @@ def test_main_returns_int_on_success():
     # Even on missing args, main should return an int
     try:
         exit_code = main.main(["--help"])
-        assert isinstance(exit_code, int), (
-            f"main() must return int, got {type(exit_code)}"
-        )
+        assert isinstance(
+            exit_code, int
+        ), f"main() must return int, got {type(exit_code)}"
     except SystemExit as exc:
         # argparse SystemExit(0) is acceptable for --help
         assert exc.code in (0, None), f"Unexpected SystemExit code: {exc.code}"
@@ -67,4 +67,5 @@ def test_main_no_traceback_on_normal_error():
 
 if __name__ == "__main__":
     import pytest
+
     sys.exit(pytest.main([__file__, "-v"]))

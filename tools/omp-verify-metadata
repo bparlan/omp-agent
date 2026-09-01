@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 """Metadata verification CLI: exits 0 for valid, 1 for invalid."""
+
 import os
 import sys
 

@@ -55,27 +55,27 @@ template_version: 1.2.0
 """
         investigation_path = self.test_dir / "investigations" / "INV-001.md"
         investigation_path.parent.mkdir(parents=True, exist_ok=True)
-        investigation_path.write_text(investigation_content, encoding='utf-8')
+        investigation_path.write_text(investigation_content, encoding="utf-8")
 
         # Check for canonical ID format
-        content = investigation_path.read_text(encoding='utf-8')
+        content = investigation_path.read_text(encoding="utf-8")
 
         # Should have canonical ID in frontmatter if it existed
-        has_canonical_id = re.search(r'^id:\s*INV-\d+$', content, re.MULTILINE)
+        has_canonical_id = re.search(r"^id:\s*INV-\d+$", content, re.MULTILINE)
 
         if has_canonical_id:
-            print(f"  ✓ PASS: Investigation has canonical ID format: INV-001")
+            print("  ✓ PASS: Investigation has canonical ID format: INV-001")
         else:
-            print(f"  ✗ FAIL: Investigation missing canonical ID or incorrect format")
+            print("  ✗ FAIL: Investigation missing canonical ID or incorrect format")
             return False
 
         # Check that it does NOT prescribe compound spec IDs
         # Looking for patterns like "M5S1I1", "INV-001 -> SPEC-INV-001", etc.
         compound_id_patterns = [
-            r'M5S1I1',
-            r'SPEC-INV-001',
-            r'INV-\d+.*SPEC-INV-',
-            r'spec.*specification.*investigation.*specification'
+            r"M5S1I1",
+            r"SPEC-INV-001",
+            r"INV-\d+.*SPEC-INV-",
+            r"spec.*specification.*investigation.*specification",
         ]
 
         has_compound_id = any(
@@ -84,9 +84,9 @@ template_version: 1.2.0
         )
 
         if not has_compound_id:
-            print(f"  ✓ PASS: Investigation does not prescribe compound spec IDs")
+            print("  ✓ PASS: Investigation does not prescribe compound spec IDs")
         else:
-            print(f"  ✗ FAIL: Investigation prescribes compound spec IDs")
+            print("  ✗ FAIL: Investigation prescribes compound spec IDs")
             return False
 
         # Clean up
@@ -127,52 +127,52 @@ Redesign AEF artifact identity, type detection, lineage, and storage model...
         specs_dir.mkdir(parents=True, exist_ok=True)
 
         specification_path = specs_dir / "SPEC-001.md"
-        specification_path.write_text(specification_content, encoding='utf-8')
+        specification_path.write_text(specification_content, encoding="utf-8")
 
         # Check canonical ID format
-        content = specification_path.read_text(encoding='utf-8')
+        content = specification_path.read_text(encoding="utf-8")
 
         # Check id field
-        has_canonical_id = re.search(r'^id:\s*SPEC-\d+$', content, re.MULTILINE)
-        has_type = re.search(r'^type:\s*specification$', content, re.MULTILINE)
-        has_milestone_id = re.search(r'^milestone_id:\s*M5$', content, re.MULTILINE)
+        has_canonical_id = re.search(r"^id:\s*SPEC-\d+$", content, re.MULTILINE)
+        has_type = re.search(r"^type:\s*specification$", content, re.MULTILINE)
+        has_milestone_id = re.search(r"^milestone_id:\s*M5$", content, re.MULTILINE)
 
         all_present = has_canonical_id and has_type and has_milestone_id
 
         if all_present:
-            print(f"  ✓ PASS: Specification has canonical ID: SPEC-001")
+            print("  ✓ PASS: Specification has canonical ID: SPEC-001")
         else:
-            print(f"  ✗ FAIL: Specification missing required fields")
+            print("  ✗ FAIL: Specification missing required fields")
             if not has_canonical_id:
-                print(f"    Missing: id field (expected SPEC-001)")
+                print("    Missing: id field (expected SPEC-001)")
             if not has_type:
-                print(f"    Missing: type field")
+                print("    Missing: type field")
             if not has_milestone_id:
-                print(f"    Missing: milestone_id field")
+                print("    Missing: milestone_id field")
             specification_path.unlink()
             return False
 
         # Check lineage fields
-        has_derived_from = 'derived_from:' in content
-        has_related_artifacts = 'related_artifacts:' in content
+        has_derived_from = "derived_from:" in content
+        has_related_artifacts = "related_artifacts:" in content
 
         if has_derived_from and has_related_artifacts:
-            print(f"  ✓ PASS: Specification includes lineage fields")
+            print("  ✓ PASS: Specification includes lineage fields")
         else:
-            print(f"  ✗ FAIL: Specification missing lineage fields")
+            print("  ✗ FAIL: Specification missing lineage fields")
             if not has_derived_from:
-                print(f"    Missing: derived_from")
+                print("    Missing: derived_from")
             if not has_related_artifacts:
-                print(f"    Missing: related_artifacts")
+                print("    Missing: related_artifacts")
             specification_path.unlink()
             return False
 
         # Check that title is present
-        has_title = re.search(r'^title:', content, re.MULTILINE)
+        has_title = re.search(r"^title:", content, re.MULTILINE)
         if has_title:
-            print(f"  ✓ PASS: Specification has title field")
+            print("  ✓ PASS: Specification has title field")
         else:
-            print(f"  ✗ FAIL: Specification missing title field")
+            print("  ✗ FAIL: Specification missing title field")
             specification_path.unlink()
             return False
 
@@ -203,7 +203,7 @@ Redesign AEF artifact identity, type detection, lineage, and storage model...
         # Write investigation
         investigation_path = self.test_dir / "investigations" / "INV-001.md"
         investigation_path.parent.mkdir(parents=True, exist_ok=True)
-        investigation_path.write_text(investigation_content, encoding='utf-8')
+        investigation_path.write_text(investigation_content, encoding="utf-8")
 
         # Simulate generating 3 specs from investigation
         spec_contents = [
@@ -239,7 +239,7 @@ derived_from: [INV-001]
 ---
 
 # SPEC-003
-"""
+""",
         ]
 
         specs_dir = self.test_dir / "specs"
@@ -250,15 +250,15 @@ derived_from: [INV-001]
 
         for i, spec_content in enumerate(spec_contents):
             spec_path = specs_dir / f"SPEC-{i+1}.md"
-            spec_path.write_text(spec_content, encoding='utf-8')
+            spec_path.write_text(spec_content, encoding="utf-8")
             spec_paths.append(spec_path)
 
             # Check each spec
-            content = spec_path.read_text(encoding='utf-8')
-            has_canonical_id = re.search(r'^id:\s*SPEC-\d+$', content, re.MULTILINE)
-            has_type = re.search(r'^type:\s*specification$', content, re.MULTILINE)
-            has_derived_from = 'derived_from:' in content
-            has_milestone_id = re.search(r'^milestone_id:\s*M5$', content, re.MULTILINE)
+            content = spec_path.read_text(encoding="utf-8")
+            has_canonical_id = re.search(r"^id:\s*SPEC-\d+$", content, re.MULTILINE)
+            has_type = re.search(r"^type:\s*specification$", content, re.MULTILINE)
+            has_derived_from = "derived_from:" in content
+            has_milestone_id = re.search(r"^milestone_id:\s*M5$", content, re.MULTILINE)
 
             if has_canonical_id and has_type and has_derived_from and has_milestone_id:
                 print(f"  ✓ PASS: SPEC-{i+1} has all required fields")
@@ -337,21 +337,21 @@ Redesign AEF artifact identity, type detection, lineage, and storage model.
         # Should NOT contain prescription of compound spec IDs
         # Looking for patterns like "M5S1I1", "INV-001 -> SPEC-INV-001", etc.
         compound_id_patterns = [
-            r'M5S1I1',
-            r'SPEC-INV-001',
-            r'INV-\d+.*SPEC-INV-\d+',  # Require digit after SPEC-INV-
+            r"M5S1I1",
+            r"SPEC-INV-001",
+            r"INV-\d+.*SPEC-INV-\d+",  # Require digit after SPEC-INV-
         ]
 
         # Should NOT contain prescription of compound spec IDs (not just mentions)
         # Looking for patterns where the spec actually prescribes/recommends them
         compound_id_patterns = [
-            r'prescribes.*M5S1I1',
-            r'should.*prescribe.*M5S1I1',
-            r'should.*create.*M5S1I1',
-            r'M5S1I1.*should',
-            r'SPEC-INV-\d+.*should',
-            r'specification.*prescribes.*M5S1I1',
-            r'generate-spec.*prescribes.*SPEC-INV',
+            r"prescribes.*M5S1I1",
+            r"should.*prescribe.*M5S1I1",
+            r"should.*create.*M5S1I1",
+            r"M5S1I1.*should",
+            r"SPEC-INV-\d+.*should",
+            r"specification.*prescribes.*M5S1I1",
+            r"generate-spec.*prescribes.*SPEC-INV",
         ]
 
         has_compound_id_prescription = any(
@@ -360,24 +360,28 @@ Redesign AEF artifact identity, type detection, lineage, and storage model.
         )
 
         if investigation_referenced and not has_compound_id_prescription:
-            print(f"  ✓ PASS: Investigation referenced correctly without compound spec ID")
+            print(
+                "  ✓ PASS: Investigation referenced correctly without compound spec ID"
+            )
             return True
         else:
-            print(f"  ✗ FAIL: Investigation reference incorrect or compound spec IDs present")
+            print(
+                "  ✗ FAIL: Investigation reference incorrect or compound spec IDs present"
+            )
             if not investigation_referenced:
-                print(f"    Missing: Investigation reference (M5/INVESTIGATION.md)")
+                print("    Missing: Investigation reference (M5/INVESTIGATION.md)")
             if has_compound_id_prescription:
-                print(f"    Has: Compound spec IDs detected")
+                print("    Has: Compound spec IDs detected")
             return False
         # Should NOT contain prescription of compound spec IDs (not just mentions)
         # Looking for patterns where the spec actually prescribes/recommends them
         compound_id_patterns = [
-            r'prescribes.*M5S1I1',
-            r'should.*prescribe.*M5S1I1',
-            r'should.*create.*M5S1I1',
-            r'M5S1I1.*should',
-            r'SPEC-INV-\d+.*should',
-            r'generate-spec.*prescribes.*SPEC-INV',
+            r"prescribes.*M5S1I1",
+            r"should.*prescribe.*M5S1I1",
+            r"should.*create.*M5S1I1",
+            r"M5S1I1.*should",
+            r"SPEC-INV-\d+.*should",
+            r"generate-spec.*prescribes.*SPEC-INV",
         ]
 
         has_compound_id_prescription = any(
@@ -386,14 +390,18 @@ Redesign AEF artifact identity, type detection, lineage, and storage model.
         )
 
         if investigation_referenced and not has_compound_id_prescription:
-            print(f"  ✓ PASS: Investigation referenced correctly without compound spec ID")
+            print(
+                "  ✓ PASS: Investigation referenced correctly without compound spec ID"
+            )
             return True
         else:
-            print(f"  ✗ FAIL: Investigation reference incorrect or compound spec IDs present")
+            print(
+                "  ✗ FAIL: Investigation reference incorrect or compound spec IDs present"
+            )
             if not investigation_referenced:
-                print(f"    Missing: Investigation reference (M5/INVESTIGATION.md)")
+                print("    Missing: Investigation reference (M5/INVESTIGATION.md)")
             if has_compound_id_prescription:
-                print(f"    Has: Compound spec IDs detected")
+                print("    Has: Compound spec IDs detected")
             return False
 
     def test_investigate_issue_delegates_spec_identity(self):
@@ -426,9 +434,9 @@ Pass the investigation ID (INV-001) to generate-spec for lineage tracking.
 
         # Check that output does not prescribe compound spec IDs
         compound_id_patterns = [
-            r'M5S1I1',
-            r'SPEC-INV-001',
-            r'INV-\d+.*SPEC-INV-',
+            r"M5S1I1",
+            r"SPEC-INV-001",
+            r"INV-\d+.*SPEC-INV-",
         ]
 
         has_compound_id = any(
@@ -437,18 +445,20 @@ Pass the investigation ID (INV-001) to generate-spec for lineage tracking.
         )
 
         # Check that investigation ID is provided for lineage tracking
-        has_investigation_id_reference = re.search(r'INV-\d+', output)
+        has_investigation_id_reference = re.search(r"INV-\d+", output)
 
         if not has_compound_id and has_investigation_id_reference:
-            print(f"  ✓ PASS: Output does not prescribe compound spec IDs")
-            print(f"  ✓ PASS: Provides investigation ID for lineage tracking")
+            print("  ✓ PASS: Output does not prescribe compound spec IDs")
+            print("  ✓ PASS: Provides investigation ID for lineage tracking")
             return True
         else:
-            print(f"  ✗ FAIL: Output has compound spec IDs or missing investigation ID reference")
+            print(
+                "  ✗ FAIL: Output has compound spec IDs or missing investigation ID reference"
+            )
             if has_compound_id:
-                print(f"    Has: Compound spec IDs detected")
+                print("    Has: Compound spec IDs detected")
             if not has_investigation_id_reference:
-                print(f"    Missing: Investigation ID reference")
+                print("    Missing: Investigation ID reference")
             return False
 
     def cleanup(self):

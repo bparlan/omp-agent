@@ -70,9 +70,7 @@
       "<__main__.ValidationIssue object at 0x10615d890>",
       "<__main__.ValidationIssue object at 0x10615d9d0>"
     ],
-    "AEF_INTEGRATION": [
-      "<__main__.ValidationIssue object at 0x10615e550>"
-    ]
+    "AEF_INTEGRATION": ["<__main__.ValidationIssue object at 0x10615e550>"]
   },
   "recommendations": [
     "Fix YAML frontmatter structure in all skills with critical errors",

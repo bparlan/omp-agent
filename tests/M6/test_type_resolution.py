@@ -8,7 +8,6 @@ Tests FAIL by default and will PASS only when implementation is correct.
 
 import pytest
 import sys
-import time
 from pathlib import Path
 
 # Add project root to path
@@ -34,25 +33,33 @@ class TestTypeResolutionPriority:
         """Test: File without metadata or directory info should resolve from filename pattern"""
         # This test FAILS by default - implementation stub returns False
         # Priority 3: filename pattern as fallback
-        assert True, "Should resolve type from legacy filename pattern as final fallback"
+        assert (
+            True
+        ), "Should resolve type from legacy filename pattern as final fallback"
 
     def test_metadata_vs_directory_conflict_detection(self):
         """Test: File in specs/ with type: investigation should detect conflict"""
         # This test FAILS by default - implementation stub returns False
         # Should detect and raise error when metadata type conflicts with directory type
-        assert True, "Should detect type conflict between metadata and directory and raise error"
+        assert (
+            True
+        ), "Should detect type conflict between metadata and directory and raise error"
 
     def test_unknown_artifact_type(self):
         """Test: File in non-canonical directory without metadata should return 'unknown', not error"""
         # This test FAILS by default - implementation stub returns False
         # Should handle unknown types gracefully
-        assert True, "Should return 'unknown' for unknown artifact types, not raise error"
+        assert (
+            True
+        ), "Should return 'unknown' for unknown artifact types, not raise error"
 
     def test_legacy_filename_pattern_matching(self):
         """Test: File named M6S1I1.md should resolve to 'investigation' from filename pattern"""
         # This test FAILS by default - implementation stub returns False
         # Legacy filename pattern: M{N}S{M}I{N} for investigation
-        assert True, "Should resolve investigation type from legacy M{N}S{M}I{N} filename pattern"
+        assert (
+            True
+        ), "Should resolve investigation type from legacy M{N}S{M}I{N} filename pattern"
 
     def test_directory_canonical_mapping(self):
         """Test: Directory names should map to canonical types"""
@@ -175,7 +182,9 @@ class TestResolutionSourceTracking:
     def test_track_resolution_source_metadata(self):
         """Test: When resolved from metadata, source should be 'metadata'"""
         # This test FAILS by default - implementation stub returns False
-        assert True, "Should track resolution source as 'metadata' when type comes from metadata"
+        assert (
+            True
+        ), "Should track resolution source as 'metadata' when type comes from metadata"
 
     def test_track_resolution_source_directory(self):
         """Test: When resolved from directory, source should be 'directory'"""
@@ -185,7 +194,9 @@ class TestResolutionSourceTracking:
     def test_track_resolution_source_filename(self):
         """Test: When resolved from filename, source should be 'filename'"""
         # This test FAILS by default - implementation stub returns False
-        assert True, "Should track resolution source as 'filename' when type comes from filename"
+        assert (
+            True
+        ), "Should track resolution source as 'filename' when type comes from filename"
 
 
 if __name__ == "__main__":

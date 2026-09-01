@@ -13,36 +13,54 @@ import yaml
 from pathlib import Path
 from datetime import datetime
 
+
 @dataclass
 class ValidationResult:
     """M9S1 canonical artifact validation result."""
+
     valid: bool = True
     errors: List[str] = field(default_factory=list)
     missing_fields: List[str] = field(default_factory=list)
+
 
 @dataclass
 class ArtifactValidationResult:
     """M9S1 artifact validation result (legacy compatibility)."""
+
     valid: bool = True
     errors: List[str] = field(default_factory=list)
     missing_fields: List[str] = field(default_factory=list)
 
+
 class Validator:
     """Abstract base class for skill validation rules (M8S1 FR-VALIDATOR_BASE_CLASS)."""
+
     def validate(self, content: str) -> Dict[str, Any]:
         raise NotImplementedError
 
+
 from core.artifacts.metadata import extract_frontmatter
-from core.artifacts.artifact_types import get_all_type_definitions, get_artifact_type
-from core.artifacts.registry import get_registry
+from core.artifacts.artifact_types import get_all_type_definitions
+
 
 def _required_artifact_keys() -> List[str]:
     """Return required artifact metadata keys per canonical contract."""
-    return ["id", "type", "title", "milestone_id", "status", "derived_from", "template_version", "metadata"]
+    return [
+        "id",
+        "type",
+        "title",
+        "milestone_id",
+        "status",
+        "derived_from",
+        "template_version",
+        "metadata",
+    ]
+
 
 def _required_metadata_keys() -> List[str]:
     """Return required metadata sub-keys."""
     return ["created_at", "updated_at", "artifact_identity", "artifact_type"]
+
 
 class RequiredFieldsValidator(Validator):
     """Validates required fields in SKILL.md file"""
@@ -55,7 +73,7 @@ class RequiredFieldsValidator(Validator):
             "fields_checked": [],
             "field_results": {},
             "errors": [],
-            "stable_suffix_detected": False
+            "stable_suffix_detected": False,
         }
 
         try:
@@ -89,27 +107,29 @@ class RequiredFieldsValidator(Validator):
         if not content or not isinstance(content, str):
             return None
 
-        lines = content.split('\n')
-        if len(lines) < 2 or lines[0].strip() != '---':
+        lines = content.split("\n")
+        if len(lines) < 2 or lines[0].strip() != "---":
             return None
 
         try:
             end_idx = None
             for i, line in enumerate(lines[1:], 1):
-                if line.strip() == '---':
+                if line.strip() == "---":
                     end_idx = i
                     break
 
             if end_idx is None:
                 return None
 
-            frontmatter_text = '\n'.join(lines[1:end_idx])
+            frontmatter_text = "\n".join(lines[1:end_idx])
             return yaml.safe_load(frontmatter_text) or {}
 
         except Exception:
             return None
 
-    def _validate_fields(self, frontmatter: Dict[str, Any]) -> tuple[List[str], Dict[str, Any]]:
+    def _validate_fields(
+        self, frontmatter: Dict[str, Any]
+    ) -> tuple[List[str], Dict[str, Any]]:
         """Validate skill frontmatter fields and return results."""
         fields_checked = []
         field_results = {}
@@ -125,13 +145,13 @@ class RequiredFieldsValidator(Validator):
                 field_results[field] = {
                     "valid": is_valid,
                     "value": value,
-                    "error": None if is_valid else f"Invalid {field} value"
+                    "error": None if is_valid else f"Invalid {field} value",
                 }
             else:
                 field_results[field] = {
                     "valid": False,
                     "value": None,
-                    "error": f"Missing required field: {field}"
+                    "error": f"Missing required field: {field}",
                 }
 
         return fields_checked, field_results
@@ -182,18 +202,16 @@ class RequiredFieldsValidator(Validator):
 
         # Check if there's a stable suffix in the content
         import re
+
         # Look for patterns like `-stable` in frontmatter or other indicators
-        stable_indicators = [
-            r'-stable\b',
-            r'--stable\b',
-            r'stable[-_]?\d*$'
-        ]
+        stable_indicators = [r"-stable\b", r"--stable\b", r"stable[-_]?\d*$"]
 
         for indicator in stable_indicators:
             if re.search(indicator, content, re.IGNORECASE):
                 return True
 
         return False
+
 
 class ValidationOrchestrator:
     """Orchestrates validation using multiple validators"""
@@ -206,11 +224,7 @@ class ValidationOrchestrator:
     def validate_skill(self, content: str, skill_path: Path) -> ValidationResult:
         """Run all validators and combine results"""
         # Base result with skill info
-        result = ValidationResult(
-            valid=True,
-            errors=[],
-            missing_fields=[]
-        )
+        result = ValidationResult(valid=True, errors=[], missing_fields=[])
 
         # Run all validators
         for validator in self.validators:
@@ -218,7 +232,7 @@ class ValidationOrchestrator:
                 validation_result = validator.validate(content)
 
                 # Merge results
-                if hasattr(validation_result, 'valid'):
+                if hasattr(validation_result, "valid"):
                     result.valid = validation_result.valid
                     result.errors = validation_result.errors
                     result.missing_fields = validation_result.missing_fields
@@ -231,6 +245,7 @@ class ValidationOrchestrator:
                 break
 
         return result
+
 
 class SkillValidator:
     """Concrete validator for skill content (M8S1 FR-SKILL_VALIDATOR)."""
@@ -250,7 +265,7 @@ class SkillValidator:
             "fields_checked": [],
             "field_results": {},
             "errors": [],
-            "stable_suffix_detected": False
+            "stable_suffix_detected": False,
         }
 
         try:
@@ -284,27 +299,29 @@ class SkillValidator:
         if not content or not isinstance(content, str):
             return None
 
-        lines = content.split('\n')
-        if len(lines) < 2 or lines[0].strip() != '---':
+        lines = content.split("\n")
+        if len(lines) < 2 or lines[0].strip() != "---":
             return None
 
         try:
             end_idx = None
             for i, line in enumerate(lines[1:], 1):
-                if line.strip() == '---':
+                if line.strip() == "---":
                     end_idx = i
                     break
 
             if end_idx is None:
                 return None
 
-            frontmatter_text = '\n'.join(lines[1:end_idx])
+            frontmatter_text = "\n".join(lines[1:end_idx])
             return yaml.safe_load(frontmatter_text) or {}
 
         except Exception:
             return None
 
-    def _validate_fields(self, frontmatter: Dict[str, Any]) -> tuple[List[str], Dict[str, Any]]:
+    def _validate_fields(
+        self, frontmatter: Dict[str, Any]
+    ) -> tuple[List[str], Dict[str, Any]]:
         """Validate skill frontmatter fields and return results."""
         fields_checked = []
         field_results = {}
@@ -320,13 +337,13 @@ class SkillValidator:
                 field_results[field] = {
                     "valid": is_valid,
                     "value": value,
-                    "error": None if is_valid else f"Invalid {field} value"
+                    "error": None if is_valid else f"Invalid {field} value",
                 }
             else:
                 field_results[field] = {
                     "valid": False,
                     "value": None,
-                    "error": f"Missing required field: {field}"
+                    "error": f"Missing required field: {field}",
                 }
 
         return fields_checked, field_results
@@ -377,12 +394,9 @@ class SkillValidator:
 
         # Check if there's a stable suffix in the content
         import re
+
         # Look for patterns like `-stable` in frontmatter or other indicators
-        stable_indicators = [
-            r'-stable\b',
-            r'--stable\b',
-            r'stable[-_]?\d*$'
-        ]
+        stable_indicators = [r"-stable\b", r"--stable\b", r"stable[-_]?\d*$"]
 
         for indicator in stable_indicators:
             if re.search(indicator, content, re.IGNORECASE):
@@ -411,7 +425,7 @@ class SkillValidator:
 
             # Use the existing validate method for actual validation
             result = self.validate(content)
-            
+
             # Convert to legacy format for backward compatibility
             return {
                 "name": skill_path.parent.name,
@@ -434,16 +448,27 @@ class SkillValidator:
                 "last_checked": datetime.now().isoformat(),
             }
 
-def validate_metadata(artifact_path: str, schema: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+
+def validate_metadata(
+    artifact_path: str, schema: Optional[Dict[str, Any]] = None
+) -> Dict[str, Any]:
     """Validates artifact frontmatter and metadata against the Artifact Registry schema."""
 
     try:
         metadata = extract_frontmatter(artifact_path)
     except Exception as e:
-        return {"valid": False, "errors": [f"Could not read file: {e}"], "missing_fields": _required_artifact_keys()}
+        return {
+            "valid": False,
+            "errors": [f"Could not read file: {e}"],
+            "missing_fields": _required_artifact_keys(),
+        }
 
     if metadata is None:
-        return {"valid": False, "errors": ["No valid YAML frontmatter found"], "missing_fields": _required_artifact_keys()}
+        return {
+            "valid": False,
+            "errors": ["No valid YAML frontmatter found"],
+            "missing_fields": _required_artifact_keys(),
+        }
 
     required = _required_artifact_keys()
     missing = [field for field in required if field not in metadata]
@@ -472,27 +497,45 @@ def validate_metadata(artifact_path: str, schema: Optional[Dict[str, Any]] = Non
     valid = not missing and not errors
     return {"valid": valid, "errors": errors, "missing_fields": missing}
 
-def _validate_metadata_against_schema(metadata: Dict[str, Any], schema: Dict[str, Any]) -> List[str]:
+
+def _validate_metadata_against_schema(
+    metadata: Dict[str, Any], schema: Dict[str, Any]
+) -> List[str]:
     """Validate metadata against schema constraints."""
     errors = []
 
     if "type" in metadata and "type" in schema:
         type_constraints = schema["type"]
-        if "type" in type_constraints and not _check_type(metadata["type"], type_constraints["type"]):
+        if "type" in type_constraints and not _check_type(
+            metadata["type"], type_constraints["type"]
+        ):
             errors.append(f"Field 'type' must be of type {type_constraints['type']}")
 
-        if "pattern" in type_constraints and not _check_pattern(metadata["type"], type_constraints["pattern"]):
-            errors.append(f"Field 'type' must match pattern {type_constraints['pattern']}")
+        if "pattern" in type_constraints and not _check_pattern(
+            metadata["type"], type_constraints["pattern"]
+        ):
+            errors.append(
+                f"Field 'type' must match pattern {type_constraints['pattern']}"
+            )
 
     if "milestone_id" in metadata and "milestone_id" in schema:
         milestone_constraints = schema["milestone_id"]
-        if "type" in milestone_constraints and not _check_type(metadata["milestone_id"], milestone_constraints["type"]):
-            errors.append(f"Field 'milestone_id' must be of type {milestone_constraints['type']}")
+        if "type" in milestone_constraints and not _check_type(
+            metadata["milestone_id"], milestone_constraints["type"]
+        ):
+            errors.append(
+                f"Field 'milestone_id' must be of type {milestone_constraints['type']}"
+            )
 
-        if "pattern" in milestone_constraints and not _check_pattern(metadata["milestone_id"], milestone_constraints["pattern"]):
-            errors.append(f"Field 'milestone_id' must match pattern {milestone_constraints['pattern']}")
+        if "pattern" in milestone_constraints and not _check_pattern(
+            metadata["milestone_id"], milestone_constraints["pattern"]
+        ):
+            errors.append(
+                f"Field 'milestone_id' must match pattern {milestone_constraints['pattern']}"
+            )
 
     return errors
+
 
 def _validate_field_type(value: Any, constraints: Dict[str, Any]) -> List[str]:
     """Validate a single field against its type constraints."""
@@ -507,6 +550,7 @@ def _validate_field_type(value: Any, constraints: Dict[str, Any]) -> List[str]:
             errors.append(f"Value must match pattern {constraints['pattern']}")
 
     return errors
+
 
 def _check_type(value: Any, expected_type: str) -> bool:
     """Check if value matches expected type."""
@@ -523,10 +567,13 @@ def _check_type(value: Any, expected_type: str) -> bool:
         return type_checkers[expected_type](value)
     return True
 
+
 def _check_pattern(value: str, pattern: str) -> bool:
     """Check if value matches regex pattern."""
     import re
+
     return bool(re.match(pattern, value))
+
 
 def validate_artifact(metadata: Dict[str, Any]) -> Dict[str, Any]:
     """
@@ -551,7 +598,9 @@ def validate_artifact(metadata: Dict[str, Any]) -> Dict[str, Any]:
             # Check if type is in canonical artifact types
             valid_types = get_all_type_definitions().keys()
             if artifact_type not in valid_types:
-                errors.append(f"Field 'type' must be one of: {', '.join(sorted(valid_types))}")
+                errors.append(
+                    f"Field 'type' must be one of: {', '.join(sorted(valid_types))}"
+                )
 
     # Validate validation_score range (0-100)
     if "validation_score" in metadata:
@@ -559,7 +608,9 @@ def validate_artifact(metadata: Dict[str, Any]) -> Dict[str, Any]:
         if not isinstance(validation_score, (int, float)):
             errors.append("Field 'validation_score' must be a number")
         elif not (0 <= validation_score <= 100):
-            errors.append(f"Field 'validation_score' must be between 0 and 100 (got {validation_score})")
+            errors.append(
+                f"Field 'validation_score' must be between 0 and 100 (got {validation_score})"
+            )
 
     if "metadata" in metadata:
         metadata_obj = metadata["metadata"]
@@ -578,6 +629,7 @@ def validate_artifact(metadata: Dict[str, Any]) -> Dict[str, Any]:
     valid = not missing_fields and not errors
     return {"valid": valid, "errors": errors, "missing_fields": missing_fields}
 
+
 # Project Configuration Validation Functions
 def validate_project_config(project_root: str) -> Dict[str, Any]:
     """Validate project configuration at the project root."""
@@ -585,13 +637,21 @@ def validate_project_config(project_root: str) -> Dict[str, Any]:
     config_file = Path(project_root) / "config.yaml"
 
     try:
-        with open(config_file, 'r') as f:
+        with open(config_file, "r") as f:
             yaml_content = yaml.safe_load(f)
     except Exception as e:
-        return {"valid": False, "errors": [f"Could not read config file: {e}"], "missing_fields": []}
+        return {
+            "valid": False,
+            "errors": [f"Could not read config file: {e}"],
+            "missing_fields": [],
+        }
 
     if yaml_content is None:
-        return {"valid": False, "errors": ["No valid YAML in config file"], "missing_fields": []}
+        return {
+            "valid": False,
+            "errors": ["No valid YAML in config file"],
+            "missing_fields": [],
+        }
 
     errors: List[str] = []
     missing: List[str] = []

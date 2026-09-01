@@ -1,7 +1,5 @@
 """Test correct ordering of SDD pipeline stages."""
 
-import pytest
-
 
 def test_correct_ordering_sequence():
     """

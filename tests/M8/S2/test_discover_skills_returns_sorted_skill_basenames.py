@@ -33,26 +33,38 @@ def test_discover_skills_returns_sorted_skill_basenames():
     expected_skills.sort()
 
     # Ensure we have at least 2 skills for the test to be meaningful
-    assert len(expected_skills) >= 2, f"Need at least 2 skills with SKILL.md, found {len(expected_skills)}"
+    assert (
+        len(expected_skills) >= 2
+    ), f"Need at least 2 skills with SKILL.md, found {len(expected_skills)}"
 
     # Run the function under test
     result = discover_skills(fixture_root)
 
     # Verify result is a list of strings
     assert isinstance(result, list), f"Expected list, got {type(result)}"
-    assert all(isinstance(item, str) for item in result), f"Expected all strings, got {[type(item) for item in result]}"
+    assert all(
+        isinstance(item, str) for item in result
+    ), f"Expected all strings, got {[type(item) for item in result]}"
 
     # Verify result length matches expectation
-    assert len(result) == len(expected_skills), f"Expected {len(expected_skills)} skills, got {len(result)}"
+    assert len(result) == len(
+        expected_skills
+    ), f"Expected {len(expected_skills)} skills, got {len(result)}"
 
     # Verify all expected skills are present
-    assert set(result) == set(expected_skills), f"Skill sets differ: expected {expected_skills}, got {result}"
+    assert set(result) == set(
+        expected_skills
+    ), f"Skill sets differ: expected {expected_skills}, got {result}"
 
     # Verify result is lexicographically sorted (deterministic order)
-    assert result == sorted(result), f"Result {result} is not sorted; sorted would be {sorted(result)}"
+    assert result == sorted(
+        result
+    ), f"Result {result} is not sorted; sorted would be {sorted(result)}"
 
     # Verify each result entry matches expected skill basename
-    assert result == expected_skills, f"Result {result} does not match expected skills {expected_skills}"
+    assert (
+        result == expected_skills
+    ), f"Result {result} does not match expected skills {expected_skills}"
 
 
 if __name__ == "__main__":

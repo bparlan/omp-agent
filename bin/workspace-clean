@@ -1,16 +1,15 @@
 #!/usr/bin/env python3
 """Workspace cleanup command for AEF Environment Layer"""
+
 import sys
-import json
-import subprocess
 from pathlib import Path
 import argparse
 import shutil
-import time
+
 
 def workspace_clean(project_path, runtime, force=False):
     """Clean workspace isolation"""
-    print(f"Cleaning workspace isolation")
+    print("Cleaning workspace isolation")
     print(f"Project: {project_path}")
     print(f"Runtime: {runtime}")
     print(f"Force: {'enabled' if force else 'disabled'}")
@@ -56,16 +55,19 @@ def workspace_clean(project_path, runtime, force=False):
         else:
             print(f"Note: Mise cache exists (use --force to clean): {mise_cache}")
 
-    print(f"✓ Workspace cleanup complete")
+    print("✓ Workspace cleanup complete")
     print(f"  Workspaces cleaned: {cleaned_count}")
 
     return True
+
 
 def main():
     parser = argparse.ArgumentParser(description="Clean workspace isolation")
     parser.add_argument("--project", required=True, help="Project path")
     parser.add_argument("--runtime", required=True, help="Runtime environment")
-    parser.add_argument("--force", action="store_true", help="Force cleanup without confirmation")
+    parser.add_argument(
+        "--force", action="store_true", help="Force cleanup without confirmation"
+    )
 
     args = parser.parse_args()
 
@@ -75,6 +77,7 @@ def main():
     except Exception as e:
         print(f"ERROR: {e}")
         return 1
+
 
 if __name__ == "__main__":
     sys.exit(main())

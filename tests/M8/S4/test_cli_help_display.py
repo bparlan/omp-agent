@@ -39,9 +39,9 @@ def test_print_help_contains_required_substrings():
     ]
 
     for substring in required_substrings:
-        assert substring in help_text, (
-            f"Help text missing required substring: '{substring}'"
-        )
+        assert (
+            substring in help_text
+        ), f"Help text missing required substring: '{substring}'"
 
 
 def test_help_flag_exits_zero():

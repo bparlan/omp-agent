@@ -8,10 +8,11 @@ This script implements the evaluate-tests skill functionality for M13S1.
 
 import os
 import sys
-import json
 from pathlib import Path
 from datetime import datetime
 from typing import Dict, Any, List
+
+
 def read_test_plan_ledger(milestone_id: str, spec_id: str) -> List[Dict[str, Any]]:
     """
     Read the Test Plan Ledger (M{num}S{n}T{n}.md) to get the list of test files to execute.
@@ -38,29 +39,29 @@ def read_test_plan_ledger(milestone_id: str, spec_id: str) -> List[Dict[str, Any
     # Parse the test plan ledger (M13S1T1.md)
     test_files = []
 
-    with open(test_set_file, 'r') as f:
+    with open(test_set_file, "r") as f:
         content = f.read()
 
     # Look for the table in the content
-    lines = content.split('\n')
+    lines = content.split("\n")
     in_table = False
     table_lines = []
 
     for line in lines:
-        if '| Test File | Verification ID | Requirement ID | Test Type |' in line:
+        if "| Test File | Verification ID | Requirement ID | Test Type |" in line:
             in_table = True
             continue
-        if in_table and line.strip().startswith('|'):
+        if in_table and line.strip().startswith("|"):
             table_lines.append(line)
-        elif in_table and line.strip().startswith('---'):
+        elif in_table and line.strip().startswith("---"):
             continue
-        elif in_table and not line.strip().startswith('|'):
+        elif in_table and not line.strip().startswith("|"):
             break
 
     # Parse table rows
     for line in table_lines:
         # Remove pipe characters and split
-        columns = [col.strip() for col in line.split('|') if col.strip()]
+        columns = [col.strip() for col in line.split("|") if col.strip()]
 
         if len(columns) >= 4:
             test_file_path = columns[0].strip()
@@ -74,18 +75,22 @@ def read_test_plan_ledger(milestone_id: str, spec_id: str) -> List[Dict[str, Any
                 print(f"WARNING: Test file not found: {test_file_path}")
                 continue
 
-            test_files.append({
-                "test_file": str(resolved_test_file),
-                "verification_id": verification_id,
-                "requirement_id": requirement_id,
-                "test_type": test_type
-            })
+            test_files.append(
+                {
+                    "test_file": str(resolved_test_file),
+                    "verification_id": verification_id,
+                    "requirement_id": requirement_id,
+                    "test_type": test_type,
+                }
+            )
 
     print(f"Found {len(test_files)} test files in Test Plan Ledger:")
     for test_file in test_files:
         print(f"  - {test_file['test_file']} ({test_file['test_type']})")
 
     return test_files
+
+
 def execute_test_file(test_info: Dict[str, Any]) -> Dict[str, Any]:
     """
     Execute a single test file and return results.
@@ -116,7 +121,7 @@ def execute_test_file(test_info: Dict[str, Any]) -> Dict[str, Any]:
 
     try:
         # Execute test based on file type and test type
-        if test_file_path.suffix == '.py':
+        if test_file_path.suffix == ".py":
             # Python test files
             if test_type == "IMPLEMENTATION_CHECK":
                 # Implementation checks should fail (VALID_INITIAL_FAILURE)
@@ -129,7 +134,7 @@ def execute_test_file(test_info: Dict[str, Any]) -> Dict[str, Any]:
                 result = os.system(f"python3 {test_file_path} 2>&1")
                 exit_code = os.waitstatus_to_returncode(result)
 
-        elif test_file_path.suffix == '.sh':
+        elif test_file_path.suffix == ".sh":
             # Shell test files
             print("  Running shell test...")
             result = os.system(f"bash {test_file_path} 2>&1")
@@ -144,7 +149,7 @@ def execute_test_file(test_info: Dict[str, Any]) -> Dict[str, Any]:
                 "error": f"Unsupported file type: {test_file_path.suffix}",
                 "test_type": test_type,
                 "verification_id": verification_id,
-                "requirement_id": requirement_id
+                "requirement_id": requirement_id,
             }
 
         # Determine test status based on exit code
@@ -168,10 +173,12 @@ def execute_test_file(test_info: Dict[str, Any]) -> Dict[str, Any]:
             "status": status,
             "exit_code": exit_code,
             "output": output,
-            "error": None if status != "ERROR" else f"Test failed with exit code: {exit_code}",
+            "error": None
+            if status != "ERROR"
+            else f"Test failed with exit code: {exit_code}",
             "test_type": test_type,
             "verification_id": verification_id,
-            "requirement_id": requirement_id
+            "requirement_id": requirement_id,
         }
 
     except Exception as e:
@@ -183,8 +190,10 @@ def execute_test_file(test_info: Dict[str, Any]) -> Dict[str, Any]:
             "error": str(e),
             "test_type": test_type,
             "verification_id": verification_id,
-            "requirement_id": requirement_id
+            "requirement_id": requirement_id,
         }
+
+
 def evaluate_test_suite(milestone_id: str, spec_id: str) -> Dict[str, Any]:
     """
     Evaluate the complete test suite for a specification.
@@ -205,7 +214,7 @@ def evaluate_test_suite(milestone_id: str, spec_id: str) -> Dict[str, Any]:
         - "blocking_issues": List of blocking issues
         - "recommendations": List of recommendations
     """
-    print(f"=== M13S1 Test Evaluation Suite ===")
+    print("=== M13S1 Test Evaluation Suite ===")
     print(f"Specification: {spec_id}")
     print(f"Milestone: {milestone_id}")
     print(f"Generated: {datetime.now().isoformat()}")
@@ -228,11 +237,13 @@ def evaluate_test_suite(milestone_id: str, spec_id: str) -> Dict[str, Any]:
                 "failed_tests": 0,
                 "error_tests": 0,
                 "red_tests": 0,
-                "valid_tests": 0
+                "valid_tests": 0,
             },
             "exit_code": 2,  # BLOCKED
             "blocking_issues": ["No test files found in Test Plan Ledger"],
-            "recommendations": ["Verify Test Plan Ledger (M13S1T1.md) exists and contains test file entries"]
+            "recommendations": [
+                "Verify Test Plan Ledger (M13S1T1.md) exists and contains test file entries"
+            ],
         }
 
     # Execute all test files
@@ -250,7 +261,9 @@ def evaluate_test_suite(milestone_id: str, spec_id: str) -> Dict[str, Any]:
             print(f"✓ {test_info['test_file'].split('/')[-1]}: PASSED")
         elif result["status"] == "FAILED":
             red_tests += 1
-            print(f"✓ {test_info['test_file'].split('/')[-1]}: FAILED (VALID_INITIAL_FAILURE)")
+            print(
+                f"✓ {test_info['test_file'].split('/')[-1]}: FAILED (VALID_INITIAL_FAILURE)"
+            )
         else:
             print(f"✗ {test_info['test_file'].split('/')[-1]}: ERROR")
 
@@ -279,7 +292,9 @@ def evaluate_test_suite(milestone_id: str, spec_id: str) -> Dict[str, Any]:
 
     if not has_red_tests:
         blocking_issues.append("No Red TDD baseline tests found")
-        recommendations.append("Create Red TDD baseline tests (tests that fail initially)")
+        recommendations.append(
+            "Create Red TDD baseline tests (tests that fail initially)"
+        )
 
     if not has_valid_tests:
         blocking_issues.append("No valid tests found")
@@ -298,26 +313,28 @@ def evaluate_test_suite(milestone_id: str, spec_id: str) -> Dict[str, Any]:
             "failed_tests": failed_tests,
             "error_tests": error_tests,
             "red_tests": red_tests,
-            "valid_tests": valid_tests
+            "valid_tests": valid_tests,
         },
         "exit_code": exit_code,
         "blocking_issues": blocking_issues,
-        "recommendations": recommendations
+        "recommendations": recommendations,
     }
 
     # Print summary
-    print(f"\n=== Test Evaluation Complete ===")
+    print("\n=== Test Evaluation Complete ===")
     print(f"Total tests: {total_tests}")
     print(f"  - Passed: {passed_tests}")
     print(f"  - Failed (Red TDD baseline): {failed_tests}")
     print(f"  - Error: {error_tests}")
 
     if exit_code == 0:
-        print(f"✓ Evaluation successful - healthy Red TDD baseline established")
+        print("✓ Evaluation successful - healthy Red TDD baseline established")
     else:
         print(f"✗ Evaluation blocked - {len(blocking_issues)} blocking issues found")
 
     return evaluation_report
+
+
 def write_evaluation_report(evaluation_report: Dict[str, Any]) -> str:
     """
     Write evaluation report to file.
@@ -371,31 +388,33 @@ template_version: 1.0.0
 
 """
 
-    for test_result in evaluation_report['test_results']:
+    for test_result in evaluation_report["test_results"]:
         content += f"### {Path(test_result['test_file']).name}\n\n"
         content += f"- **Status:** {test_result['status']}\n"
         content += f"- **Exit Code:** {test_result['exit_code']}\n"
         content += f"- **Test Type:** {test_result['test_type']}\n"
-        content += f"- **Verification ID:** {test_result.get('verification_id', 'N/A')}\n"
+        content += (
+            f"- **Verification ID:** {test_result.get('verification_id', 'N/A')}\n"
+        )
         content += f"- **Requirement ID:** {test_result.get('requirement_id', 'N/A')}\n"
-        if test_result['error']:
+        if test_result["error"]:
             content += f"- **Error:** {test_result['error']}\n"
         content += "\n"
 
-    if evaluation_report['blocking_issues']:
+    if evaluation_report["blocking_issues"]:
         content += "## Blocking Issues\n\n"
-        for issue in evaluation_report['blocking_issues']:
+        for issue in evaluation_report["blocking_issues"]:
             content += f"- {issue}\n"
         content += "\n"
 
-    if evaluation_report['recommendations']:
+    if evaluation_report["recommendations"]:
         content += "## Recommendations\n\n"
-        for rec in evaluation_report['recommendations']:
+        for rec in evaluation_report["recommendations"]:
             content += f"- {rec}\n"
         content += "\n"
 
     content += f"**Report Status:** EXIT_CODE={evaluation_report['exit_code']}\n"
-    content += f"\n---\n\n*This test evaluation report was auto-generated by the evaluate-tests skill for M13S1*\n"
+    content += "\n---\n\n*This test evaluation report was auto-generated by the evaluate-tests skill for M13S1*\n"
 
     # Write report to file
     report_file.write_text(content)
@@ -403,14 +422,16 @@ template_version: 1.0.0
     print(f"✓ Evaluation report written: {report_file}")
 
     return str(report_file)
+
+
 def main():
     """Main evaluation function"""
     # Configuration for M13S1
     milestone_id = "M13"
     spec_id = "M13S1"
 
-    print(f"Starting M13S1 Test Evaluation")
-    print(f"=" * 60)
+    print("Starting M13S1 Test Evaluation")
+    print("=" * 60)
 
     # Evaluate test suite
     evaluation_report = evaluate_test_suite(milestone_id, spec_id)
@@ -420,5 +441,7 @@ def main():
 
     # Return appropriate exit code
     return evaluation_report["exit_code"]
+
+
 if __name__ == "__main__":
     sys.exit(main())

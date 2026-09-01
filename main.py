@@ -62,5 +62,6 @@ def main(argv: Optional[List[str]] = None) -> int:
         print(f"Error: {e}", file=sys.stderr)
         return 1
 
+
 if __name__ == "__main__":
     sys.exit(main())

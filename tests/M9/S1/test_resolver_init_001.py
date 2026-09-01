@@ -3,13 +3,13 @@
 # {Requirement IDs: FR-RESOLVER_INIT}
 # Test Type: IMPLEMENTATION_CHECK
 
-import json
 import sys
 import os
 
 sys.path.insert(0, os.path.join(os.getcwd()))
 
 from core.artifacts.resolution import resolve_artifact
+
 
 def test_resolver_api():
     data = resolve_artifact(identity="SPEC-M9S1", type="specification")
@@ -21,7 +21,9 @@ def test_resolver_api():
 
     if data.get("resolved") is True:
         artifact = data.get("artifact")
-        assert isinstance(artifact, dict) and artifact, "Missing or invalid artifact details"
+        assert (
+            isinstance(artifact, dict) and artifact
+        ), "Missing or invalid artifact details"
         print("PASS: Resolver API returned resolved artifact details")
     else:
         error = data.get("error")
@@ -31,7 +33,8 @@ def test_resolver_api():
 
     return 0
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     try:
         sys.exit(test_resolver_api())
     except AssertionError as e:

@@ -33,59 +33,61 @@ print("Running M9S3 test baseline evaluation...\n")
 for test_type, test_path in tests:
     test_full_path = REPO_ROOT / test_path
     print(f"Running: {test_path} ({test_type})")
-    
+
     try:
         if test_type == "PYTHON_TEST":
             result = subprocess.run(
                 ["python3", str(test_full_path)],
                 capture_output=True,
                 text=True,
-                timeout=60
+                timeout=60,
             )
         else:  # SCRIPT_EXECUTION
             result = subprocess.run(
                 ["bash", str(test_full_path)],
                 capture_output=True,
                 text=True,
-                timeout=60
+                timeout=60,
             )
-        
+
         exit_code = result.returncode
         print(f"  Exit code: {exit_code}")
-        
+
         if result.stdout:
             print(f"  stdout: {result.stdout[:200]}")
         if result.stderr:
             print(f"  stderr: {result.stderr[:200]}")
-        
+
         results["TESTS_RUN"] += 1
-        
+
         if exit_code == 0:
             if test_type in ["SCRIPT_EXECUTION", "UNIT_TEST", "INTEGRATION_TEST"]:
                 results["TDD_LEAKS"] += 1
-                print(f"  ❌ TDD LEAK: Implementation check passed when it should have failed")
+                print(
+                    "  ❌ TDD LEAK: Implementation check passed when it should have failed"
+                )
             else:
                 results["TESTS_PASSED"] += 1
-                print(f"  ✓ PASS")
+                print("  ✓ PASS")
         elif exit_code == 127 or exit_code == 1:
             results["VALID_INITIAL_FAILURES"] += 1
-            print(f"  ✓ VALID_INITIAL_FAILURE")
+            print("  ✓ VALID_INITIAL_FAILURE")
         elif exit_code == 2:
             results["INVALID_TESTS"] += 1
-            print(f"  ❌ INVALID_TEST")
+            print("  ❌ INVALID_TEST")
         else:
             results["TESTS_FAILED"] += 1
             print(f"  ❌ FAILED (exit code {exit_code})")
-            
+
     except subprocess.TimeoutExpired:
         results["INVALID_TESTS"] += 1
         results["TESTS_RUN"] += 1
-        print(f"  ❌ INVALID_TEST: Timeout")
+        print("  ❌ INVALID_TEST: Timeout")
     except Exception as e:
         results["INVALID_TESTS"] += 1
         results["TESTS_RUN"] += 1
         print(f"  ❌ INVALID_TEST: {e}")
-    
+
     print()
 
 print("=" * 60)

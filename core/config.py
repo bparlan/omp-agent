@@ -6,9 +6,7 @@ Handles reading, writing, and validating project configuration stored in .omp/co
 Implements contracts: load_project_config(), validate_config(config)
 """
 
-import os
 import yaml
-import json
 from typing import Dict, Any, Optional
 from pathlib import Path
 from jsonschema import validate, ValidationError
@@ -18,26 +16,12 @@ CONFIG_SCHEMA = {
     "type": "object",
     "required": ["project_id", "project_slug", "mode"],
     "properties": {
-        "project_id": {
-            "type": "string",
-            "pattern": "^[a-zA-Z0-9-]+$"
-        },
-        "project_slug": {
-            "type": "string",
-            "pattern": "^[a-z0-9-]+$"
-        },
-        "mode": {
-            "type": "string",
-            "enum": ["framework", "application"]
-        },
-        "artifact_registry_path": {
-            "type": "string"
-        },
-        "legacy_boundaries": {
-            "type": "array",
-            "items": {"type": "string"}
-        }
-    }
+        "project_id": {"type": "string", "pattern": "^[a-zA-Z0-9-]+$"},
+        "project_slug": {"type": "string", "pattern": "^[a-z0-9-]+$"},
+        "mode": {"type": "string", "enum": ["framework", "application"]},
+        "artifact_registry_path": {"type": "string"},
+        "legacy_boundaries": {"type": "array", "items": {"type": "string"}},
+    },
 }
 
 
@@ -60,7 +44,9 @@ def _find_project_root() -> Path:
             break
         current = parent
 
-    raise FileNotFoundError("Could not find project root (no .omp/config.yml or .git directory)")
+    raise FileNotFoundError(
+        "Could not find project root (no .omp/config.yml or .git directory)"
+    )
 
 
 def load_project_config(config_path: Optional[str] = None) -> Dict[str, Any]:
@@ -83,7 +69,7 @@ def load_project_config(config_path: Optional[str] = None) -> Dict[str, Any]:
     if not config_file.exists():
         raise FileNotFoundError(f"Project configuration file not found: {config_file}")
 
-    with open(config_file, 'r', encoding='utf-8') as f:
+    with open(config_file, "r", encoding="utf-8") as f:
         config = yaml.safe_load(f)
 
     if not isinstance(config, dict):
@@ -117,7 +103,9 @@ def validate_config(config: Dict[str, Any]) -> bool:
         return False
 
 
-def save_project_config(config: Dict[str, Any], config_path: Optional[str] = None) -> None:
+def save_project_config(
+    config: Dict[str, Any], config_path: Optional[str] = None
+) -> None:
     """
     Save project configuration to file.
 
@@ -133,11 +121,13 @@ def save_project_config(config: Dict[str, Any], config_path: Optional[str] = Non
 
     config_file.parent.mkdir(parents=True, exist_ok=True)
 
-    with open(config_file, 'w', encoding='utf-8') as f:
+    with open(config_file, "w", encoding="utf-8") as f:
         yaml.dump(config, f, default_flow_style=False, sort_keys=False)
 
 
-def create_default_config(project_id: str, project_slug: str, mode: str) -> Dict[str, Any]:
+def create_default_config(
+    project_id: str, project_slug: str, mode: str
+) -> Dict[str, Any]:
     """
     Create a default project configuration.
 
@@ -154,5 +144,5 @@ def create_default_config(project_id: str, project_slug: str, mode: str) -> Dict
         "project_slug": project_slug,
         "mode": mode,
         "artifact_registry_path": "artifacts/registry.json",
-        "legacy_boundaries": ["m1", "m2", "m3", "m4", "m5", "m6", "m7", "m8", "m9"]
+        "legacy_boundaries": ["m1", "m2", "m3", "m4", "m5", "m6", "m7", "m8", "m9"],
     }

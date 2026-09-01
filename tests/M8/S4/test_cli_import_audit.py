@@ -47,8 +47,19 @@ def test_cli_py_no_forbidden_imports():
 
 FORBIDDEN_TEST_IMPORTS = {"main", "index.js", "healthcheck", "healthcheck.py"}
 
-ALLOWED_TEST_IMPORTS = {"cli", "pytest", "ast", "sys", "pathlib", "typing",
-                        "unittest", "mock", "io", "json", "subprocess"}
+ALLOWED_TEST_IMPORTS = {
+    "cli",
+    "pytest",
+    "ast",
+    "sys",
+    "pathlib",
+    "typing",
+    "unittest",
+    "mock",
+    "io",
+    "json",
+    "subprocess",
+}
 
 TEST_DIR = Path("tests/M8/S4")
 
@@ -61,10 +72,9 @@ def test_test_files_no_forbidden_imports():
     for test_file in test_files:
         imports = _extract_imports(test_file)
         forbidden_found = imports & FORBIDDEN_TEST_IMPORTS
-        assert not forbidden_found, (
-            f"Forbidden imports in {test_file}: {forbidden_found}"
-        )
-
+        assert (
+            not forbidden_found
+        ), f"Forbidden imports in {test_file}: {forbidden_found}"
 
 
 if __name__ == "__main__":

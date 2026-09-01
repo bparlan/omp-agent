@@ -19,6 +19,7 @@ def _invoke_parse(argv):
     try:
         sys.argv = argv
         from cli import parse_arguments
+
         return vars(parse_arguments())
     finally:
         sys.argv = old_argv

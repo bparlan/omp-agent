@@ -6,24 +6,16 @@ Coordinates all modular components and maintains backward compatibility.
 
 import sys
 import importlib.util
-from pathlib import Path
 
 # Import modular components - ALL FROM PROJECT ROOT as per M8S4 requirements
 from core.validation import SkillValidator
 from discovery import get_skills_directory, discover_skills, discover_skill_by_name
-from reporting import (
-    generate_badges,
-    generate_health_report,
-    generate_processed_skills,
-    generate_skills_summary
-)
+from reporting import generate_badges, generate_health_report, generate_skills_summary
+
 # Import cli from project root (not local directory) - updated for M8S4
-from cli import (
-    parse_arguments,
-    run_health_check,
-    print_help,
-    execute_skill
-)
+from cli import parse_arguments, run_health_check, print_help
+
+
 def run_single_skill_execution(skill_name: str) -> dict:
     """Execute a single skill using dynamic import"""
     try:
@@ -36,25 +28,36 @@ def run_single_skill_execution(skill_name: str) -> dict:
         # Use importlib to execute the skill
         spec = importlib.util.spec_from_file_location(skill_name, skill_file)
         if spec is None or spec.loader is None:
-            return {"status": "error", "message": f"Cannot load skill module: {skill_name}"}
+            return {
+                "status": "error",
+                "message": f"Cannot load skill module: {skill_name}",
+            }
 
         module = importlib.util.module_from_spec(spec)
         spec.loader.exec_module(module)
 
         # Call main() if available
-        if hasattr(module, 'main'):
+        if hasattr(module, "main"):
             print(f"Executing {skill_name}...")
             exit_code = module.main()
             return {
                 "status": "success" if exit_code == 0 else "error",
                 "exit_code": exit_code,
-                "message": f"Skill executed with exit code: {exit_code}"
+                "message": f"Skill executed with exit code: {exit_code}",
             }
         else:
-            return {"status": "error", "message": f"Skill {skill_name} has no main() function"}
+            return {
+                "status": "error",
+                "message": f"Skill {skill_name} has no main() function",
+            }
 
     except Exception as e:
-        return {"status": "error", "message": f"Error executing skill '{skill_name}': {e}"}
+        return {
+            "status": "error",
+            "message": f"Error executing skill '{skill_name}': {e}",
+        }
+
+
 def run_single_skill_validation(skill_name: str) -> dict:
     """Validate a single skill using the modular validation system."""
     skill_file = discover_skill_by_name(skill_name)
@@ -65,6 +68,8 @@ def run_single_skill_validation(skill_name: str) -> dict:
     validator = SkillValidator()
     result = validator.validate_skill_file(skill_file)
     return result
+
+
 def run_batch_validation() -> list:
     """Run batch validation in 3 systematic batches."""
     try:
@@ -80,8 +85,8 @@ def run_batch_validation() -> list:
         # Split into 3 batches (deterministic)
         batch_size = (len(all_skills) + 2) // 3
         batch1 = all_skills[:batch_size]
-        batch2 = all_skills[batch_size:2 * batch_size]
-        batch3 = all_skills[2 * batch_size:]
+        batch2 = all_skills[batch_size : 2 * batch_size]
+        batch3 = all_skills[2 * batch_size :]
 
         # Process each batch
         for batch in [batch1, batch2, batch3]:
@@ -96,6 +101,8 @@ def run_batch_validation() -> list:
     except Exception as e:
         print(f"Error in batch validation: {e}", file=sys.stderr)
         return []
+
+
 def run_all_skills_validation() -> list:
     """Run health check on all discovered skills."""
     try:
@@ -115,6 +122,8 @@ def run_all_skills_validation() -> list:
     except Exception as e:
         print(f"Error in all skills validation: {e}", file=sys.stderr)
         return []
+
+
 def legacy_healthcheck_main():
     """Legacy main function for backward compatibility."""
     try:
@@ -130,9 +139,11 @@ def legacy_healthcheck_main():
         )
 
         if results:
-            print(f"\n=== Health Check Results ===")
+            print("\n=== Health Check Results ===")
             for result in results:
-                print(f"  - {result.get('name', 'Unknown')}: {result.get('status', 'unknown')}")
+                print(
+                    f"  - {result.get('name', 'Unknown')}: {result.get('status', 'unknown')}"
+                )
         else:
             print("No skills found or validation failed.")
 
@@ -148,6 +159,8 @@ def legacy_healthcheck_main():
     except Exception as e:
         print(f"Error: {e}", file=sys.stderr)
         return 1
+
+
 def generate_all_reports(results: list) -> None:
     """Generate all reports from validation results"""
     try:
@@ -165,9 +178,12 @@ def generate_all_reports(results: list) -> None:
 
     except Exception as e:
         print(f"Error generating reports: {e}", file=sys.stderr)
+
+
 def main():
     """Main entry point - supports both legacy and modular execution."""
     return legacy_healthcheck_main()
+
 
 if __name__ == "__main__":
     exit(main())

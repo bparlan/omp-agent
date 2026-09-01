@@ -21,23 +21,20 @@ def main():
             "source_id": "HC-skill-2",
             "target_id": "SKILL-skill",
             "type": "derived_from",
-            "metadata": {"timestamp": "2024-01-01T00:00:00Z"}
+            "metadata": {"timestamp": "2024-01-01T00:00:00Z"},
         },
         {
             "source_id": "HC-skill-1",
             "target_id": "SKILL-skill",
             "type": "derived_from",
-            "metadata": {"timestamp": "2024-01-02T00:00:00Z"}
-        }
+            "metadata": {"timestamp": "2024-01-02T00:00:00Z"},
+        },
     ]
 
     # Store relationships
     for rel in relationships:
         success = registry.store_relationship(
-            rel["source_id"],
-            rel["target_id"],
-            rel["type"],
-            rel["metadata"]
+            rel["source_id"], rel["target_id"], rel["type"], rel["metadata"]
         )
         if not success:
             print(f"FAIL: Failed to store relationship {rel}")
@@ -79,5 +76,7 @@ def main():
 
     print("PASS: Chronological relationships stored and retrievable")
     sys.exit(0)
+
+
 if __name__ == "__main__":
     main()

@@ -10,6 +10,8 @@ from typing import List, Optional
 
 # Global skills directory discovery
 skills_dir: Optional[Path] = None
+
+
 def discover_skills_directory() -> Path:
     """Find skills directory using multiple strategies"""
     script_dir = Path(__file__).parent.absolute()
@@ -42,6 +44,8 @@ def discover_skills_directory() -> Path:
 
     # Default fallback
     return script_dir
+
+
 def get_skills_directory() -> Path:
     """Get the global skills directory, discovering if not already set"""
     global skills_dir
@@ -49,6 +53,8 @@ def get_skills_directory() -> Path:
         skills_dir = discover_skills_directory()
         print(f"Skills directory: {skills_dir}", file=sys.stderr)
     return skills_dir
+
+
 def discover_skills() -> List[Path]:
     """Discover all skill directories"""
     skills = []
@@ -64,6 +70,8 @@ def discover_skills() -> List[Path]:
             if skill_file.exists():
                 skills.append(skill_file)
     return skills
+
+
 def discover_skill_by_name(skill_name: str) -> Optional[Path]:
     """Discover a specific skill by name"""
     skills = discover_skills()
@@ -71,11 +79,13 @@ def discover_skill_by_name(skill_name: str) -> Optional[Path]:
         if skill_file.parent.name == skill_name:
             return skill_file
     return None
+
+
 def get_skills_summary() -> dict:
     """Get summary information about discovered skills"""
     skills = discover_skills()
     return {
         "total_skills": len(skills),
         "skills_directory": str(get_skills_directory()),
-        "skills_list": [s.parent.name for s in skills]
+        "skills_list": [s.parent.name for s in skills],
     }

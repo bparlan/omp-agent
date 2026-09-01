@@ -18,7 +18,7 @@ from typing import Any, Dict, List, Optional
 
 import yaml
 from core.artifacts.errors import ArtifactNotFoundError
-from core.artifacts.artifact_types import get_type_definition, get_artifact_type
+from core.artifacts.artifact_types import get_type_definition
 from core.validation import validate_metadata
 
 
@@ -100,7 +100,9 @@ def _build_migration_frontmatter(
             "artifact_type": artifact_type,
         },
         "relationships": {
-            "derived_from": [f"legacy:{os.path.basename(legacy_metadata.get('_legacy_path', ''))}"],
+            "derived_from": [
+                f"legacy:{os.path.basename(legacy_metadata.get('_legacy_path', ''))}"
+            ],
         },
     }
 
@@ -127,7 +129,11 @@ def migrate_legacy_artifact(
             success=False,
             original_path=original_path,
             migrated_path=None,
-            validation_result={"valid": False, "errors": [str(exc)], "missing_fields": []},
+            validation_result={
+                "valid": False,
+                "errors": [str(exc)],
+                "missing_fields": [],
+            },
             provenance={},
             errors=[str(exc)],
         )
@@ -165,11 +171,18 @@ def migrate_legacy_artifact(
     migrated_content = frontmatter_block + legacy["body"]
 
     if storage_template:
-        migrated_path = storage_template.replace("<M_ID>", frontmatter.get("milestone_id", "")).replace("<SPEC_ID>", canonical_identity)
+        migrated_path = storage_template.replace(
+            "<M_ID>", frontmatter.get("milestone_id", "")
+        ).replace("<SPEC_ID>", canonical_identity)
     else:
         type_dir = artifact_type + "s"
         milestone_id = frontmatter.get("milestone_id", "")
-        migrated_path = os.path.join(destination_root or "milestones", milestone_id, type_dir, f"{canonical_identity}.md")
+        migrated_path = os.path.join(
+            destination_root or "milestones",
+            milestone_id,
+            type_dir,
+            f"{canonical_identity}.md",
+        )
 
     migrated_dir = os.path.dirname(migrated_path)
     if migrated_dir:
@@ -183,7 +196,11 @@ def migrate_legacy_artifact(
             success=False,
             original_path=original_path,
             migrated_path=migrated_path,
-            validation_result={"valid": False, "errors": [f"Failed to write migrated artifact: {exc}"], "missing_fields": []},
+            validation_result={
+                "valid": False,
+                "errors": [f"Failed to write migrated artifact: {exc}"],
+                "missing_fields": [],
+            },
             provenance={},
             errors=[f"Failed to write migrated artifact: {exc}"],
         )
@@ -198,7 +215,11 @@ def migrate_legacy_artifact(
         "original_preserved": os.path.exists(original_path),
     }
 
-    success = bool(validation_result.get("valid", False)) and os.path.exists(migrated_path) and os.path.exists(original_path)
+    success = (
+        bool(validation_result.get("valid", False))
+        and os.path.exists(migrated_path)
+        and os.path.exists(original_path)
+    )
 
     return MigrationResult(
         success=success,

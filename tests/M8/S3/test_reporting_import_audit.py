@@ -39,7 +39,6 @@ def test_reporting_py_import_audit():
 
     Pre-implementation: ModuleNotFoundError is the expected VALID_INITIAL_FAILURE.
     """
-    import reporting
 
     imports = _extract_imports(REPORTING_PY)
     forbidden_found = imports & FORBIDDEN_MODULES

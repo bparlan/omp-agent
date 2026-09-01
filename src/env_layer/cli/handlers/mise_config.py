@@ -8,11 +8,8 @@ Implements the observable contracts for:
 """
 
 import json
-import os
-import subprocess
 import sys
 from pathlib import Path
-from typing import Dict, Any, List
 
 
 def handle_mise_validate(args):
@@ -27,7 +24,7 @@ def handle_mise_validate(args):
 
     # Read config file
     try:
-        with open(config_path, 'r') as f:
+        with open(config_path, "r") as f:
             content = f.read()
     except Exception as e:
         print(f"Error: Could not read config file {config_path}: {e}", file=sys.stderr)
@@ -38,13 +35,13 @@ def handle_mise_validate(args):
     warnings = []
 
     # Check if it's TOML format (simplified check)
-    if not content.strip().startswith('[') and '=' in content:
+    if not content.strip().startswith("[") and "=" in content:
         # This looks like TOML
-        if 'environment =' not in content:
+        if "environment =" not in content:
             warnings.append("Missing 'environment' section")
-        if 'runtime =' not in content:
+        if "runtime =" not in content:
             warnings.append("Missing 'runtime' in environment section")
-        if 'version =' not in content:
+        if "version =" not in content:
             warnings.append("Missing 'version' in environment section")
     else:
         # Try to parse as JSON (for schema validation)
@@ -62,7 +59,9 @@ def handle_mise_validate(args):
 
     # Schema-specific validation
     if schema_version != "1.0.0":
-        warnings.append(f"Schema version {schema_version} not officially supported (using 1.0.0)")
+        warnings.append(
+            f"Schema version {schema_version} not officially supported (using 1.0.0)"
+        )
 
     # Output results
     result = {
@@ -111,7 +110,7 @@ def handle_mise_generate(args):
 
     # Generate TOML content based on runtime and template type
     if template_type == "minimal":
-        content = f"environment = {{ runtime = \"{runtime}\", version = \"latest\" }}\n"
+        content = f'environment = {{ runtime = "{runtime}", version = "latest" }}\n'
     elif template_type == "full":
         content = f"""# .mise.toml - Mise configuration for {runtime}
 environment = {{
@@ -163,19 +162,19 @@ workspace = {{
 """
     else:
         print(f"Error: Unknown template type: {template_type}", file=sys.stderr)
-        print(f"Supported template types: minimal, full, custom", file=sys.stderr)
+        print("Supported template types: minimal, full, custom", file=sys.stderr)
         sys.exit(1)
 
     # Write to file
-    with open(output_path, 'w') as f:
+    with open(output_path, "w") as f:
         f.write(content)
 
     print(f"Generated {template_type} {runtime} configuration")
     print(f"Output file: {output_path}")
-    print(f"Content preview:")
+    print("Content preview:")
     print("-" * 40)
     # Show first few lines
-    with open(output_path, 'r') as f:
+    with open(output_path, "r") as f:
         preview_lines = f.readlines()[:10]
         for line in preview_lines:
             print(line.rstrip())
@@ -200,21 +199,21 @@ def handle_mise_merge(args):
     output_path.parent.mkdir(parents=True, exist_ok=True)
 
     # Read base configuration
-    with open(base_path, 'r') as f:
+    with open(base_path, "r") as f:
         base_content = f.read()
 
     # Read override configuration
-    with open(override_path, 'r') as f:
+    with open(override_path, "r") as f:
         override_content = f.read()
 
     # Simple merging logic - in production would use proper TOML parser
     merged_content = base_content + "\n\n# Override configuration\n" + override_content
 
     # Write merged content
-    with open(output_path, 'w') as f:
+    with open(output_path, "w") as f:
         f.write(merged_content)
 
-    print(f"Merged configuration successfully")
+    print("Merged configuration successfully")
     print(f"Base: {base_path}")
     print(f"Override: {override_path}")
     print(f"Output: {output_path}")

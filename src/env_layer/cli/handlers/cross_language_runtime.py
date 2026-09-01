@@ -13,7 +13,7 @@ import json
 import subprocess
 import sys
 from pathlib import Path
-from typing import Dict, Any, List, Optional
+from typing import Dict, Any, Optional
 
 
 def handle_runtime_switch(args):
@@ -50,7 +50,7 @@ def handle_runtime_switch(args):
     compatibility_result = validate_runtime_switch(source_runtime, target_runtime)
 
     if not compatibility_result["compatible"]:
-        print(f"Runtime switch validation failed")
+        print("Runtime switch validation failed")
         print(f"Source: {source_runtime} -> Target: {target_runtime}")
         print("Issues:")
         for issue in compatibility_result["issues"]:
@@ -61,7 +61,12 @@ def handle_runtime_switch(args):
         sys.exit(1)
 
     # Create target workspace
-    target_workspace_dir = project_path / ".aef-env" / "workspaces" / f"proj_{project_path.name}_{target_runtime}"
+    target_workspace_dir = (
+        project_path
+        / ".aef-env"
+        / "workspaces"
+        / f"proj_{project_path.name}_{target_runtime}"
+    )
     target_workspace_dir.mkdir(parents=True, exist_ok=True)
 
     # Update runtime in target workspace
@@ -75,28 +80,30 @@ def handle_runtime_switch(args):
         "current_workspace": str(target_workspace_dir),
     }
 
-    with open(workspace_config_file, 'w') as f:
+    with open(workspace_config_file, "w") as f:
         json.dump(switch_config, f, indent=2)
 
     # Activate target workspace
     status_file = target_workspace_dir / "status.json"
     if status_file.exists():
-        with open(status_file, 'r') as f:
+        with open(status_file, "r") as f:
             status = json.load(f)
     else:
         status = {}
 
-    status.update({
-        "active": True,
-        "switched_from": source_runtime,
-        "switched_to": target_runtime,
-        "switched_timestamp": "2024-01-01T00:00:00Z",
-    })
+    status.update(
+        {
+            "active": True,
+            "switched_from": source_runtime,
+            "switched_to": target_runtime,
+            "switched_timestamp": "2024-01-01T00:00:00Z",
+        }
+    )
 
-    with open(status_file, 'w') as f:
+    with open(status_file, "w") as f:
         json.dump(status, f, indent=2)
 
-    print(f"Runtime switch successful")
+    print("Runtime switch successful")
     print(f"Source: {source_runtime} -> Target: {target_runtime}")
     print(f"Previous workspace: {source_workspace}")
     print(f"Current workspace: {target_workspace_dir}")
@@ -109,7 +116,7 @@ def handle_runtime_exec(args):
     project_path = Path(args.project)
     runtime = args.runtime
     command = args.command
-    command_args = getattr(args, 'args', []) or []
+    command_args = getattr(args, "args", []) or []
 
     # Basic validation
     if not project_path.exists():
@@ -162,7 +169,7 @@ def handle_runtime_exec(args):
         sys.exit(e.returncode)
 
     except subprocess.TimeoutExpired:
-        print(f"Command timed out (1 hour limit)")
+        print("Command timed out (1 hour limit)")
         sys.exit(124)
 
     except Exception as e:
@@ -174,8 +181,8 @@ def handle_runtime_list(args):
     """Implement runtime-list --project <project_path> --runtime <runtime> [--all]."""
     project_path = Path(args.project)
     runtime = args.runtime
-    all_runtimes = getattr(args, 'all', False)
-    output_json = getattr(args, 'json', False)
+    all_runtimes = getattr(args, "all", False)
+    output_json = getattr(args, "json", False)
 
     # Available runtime information
     runtime_info = {
@@ -222,14 +229,18 @@ def handle_runtime_list(args):
             result = {runtime: runtime_info[runtime]}
         else:
             print(f"Error: Unknown runtime: {runtime}", file=sys.stderr)
-            print(f"Supported runtimes: {', '.join(runtime_info.keys())}", file=sys.stderr)
+            print(
+                f"Supported runtimes: {', '.join(runtime_info.keys())}", file=sys.stderr
+            )
             sys.exit(1)
 
     # Output based on format
     if output_json:
         print(json.dumps(result, indent=2))
     else:
-        print(f"Available {runtime if not all_runtimes else 'all'} runtime information:")
+        print(
+            f"Available {runtime if not all_runtimes else 'all'} runtime information:"
+        )
         for rt, info in result.items():
             print(f"\n{rt.upper()}:")
             print(f"  Description: {info['description']}")
@@ -272,18 +283,22 @@ def handle_runtime_validate(args):
         # Parse version
         output = result.stdout.strip()
 
-        print(f"Runtime validation successful")
+        print("Runtime validation successful")
         print(f"Runtime: {runtime}")
         print(f"Version: {output}")
-        print(f"Status: INSTALLED")
+        print("Status: INSTALLED")
 
         sys.exit(0)
 
-    except (subprocess.CalledProcessError, subprocess.TimeoutExpired, FileNotFoundError):
-        print(f"Runtime validation failed")
+    except (
+        subprocess.CalledProcessError,
+        subprocess.TimeoutExpired,
+        FileNotFoundError,
+    ):
+        print("Runtime validation failed")
         print(f"Runtime: {runtime}")
-        print(f"Status: NOT_INSTALLED")
-        print(f"Error: Runtime is not available in the system")
+        print("Status: NOT_INSTALLED")
+        print("Error: Runtime is not available in the system")
         sys.exit(1)
 
 
@@ -308,7 +323,7 @@ def handle_runtime_install(args):
     # In production, would use mise or similar tool to install runtime
     # For now, simulate successful installation
 
-    print(f"Runtime installation initiated")
+    print("Runtime installation initiated")
     print(f"Runtime: {runtime}")
     print(f"Version: {version}")
     print(f"Project: {project_path}")
@@ -326,7 +341,7 @@ def handle_runtime_install(args):
         "installation_method": "mise",
     }
 
-    with open(runtime_config_file, 'w') as f:
+    with open(runtime_config_file, "w") as f:
         json.dump(runtime_config, f, indent=2)
 
     print(f"Runtime {runtime} version {version} installation completed successfully")
@@ -347,7 +362,7 @@ def find_active_workspace(project_path: Path, runtime: str) -> Optional[Path]:
     status_file = workspace_dir / "status.json"
     if status_file.exists():
         try:
-            with open(status_file, 'r') as f:
+            with open(status_file, "r") as f:
                 status = json.load(f)
             if status.get("active", False):
                 return workspace_dir
@@ -378,15 +393,21 @@ def validate_runtime_switch(source_runtime: str, target_runtime: str) -> Dict[st
     transition_key = f"{source_runtime}_to_{target_runtime}"
     if not supported_transitions.get(transition_key, False):
         compatibility["compatible"] = False
-        compatibility["issues"].append(f"Unsupported runtime switch: {source_runtime} -> {target_runtime}")
+        compatibility["issues"].append(
+            f"Unsupported runtime switch: {source_runtime} -> {target_runtime}"
+        )
         compatibility["recommendations"].append("Use a supported runtime transition")
 
     # Check for potential compatibility issues
     if source_runtime in ["rust", "go"] and target_runtime in ["python", "node"]:
-        compatibility["recommendations"].append(f"Ensure cross-language dependencies are properly managed")
+        compatibility["recommendations"].append(
+            "Ensure cross-language dependencies are properly managed"
+        )
 
     if source_runtime in ["python", "node"] and target_runtime in ["rust", "go"]:
-        compatibility["recommendations"].append(f"Consider language-specific build steps")
+        compatibility["recommendations"].append(
+            "Consider language-specific build steps"
+        )
 
     return compatibility
 

@@ -4,14 +4,16 @@
 
 import argparse
 import sys
-import os
 import subprocess
 import json
 import re
 from pathlib import Path
 import time
 
-def print_summary(tests_run, tests_passed, tests_failed, valid_tests, invalid_tests, exit_code):
+
+def print_summary(
+    tests_run, tests_passed, tests_failed, valid_tests, invalid_tests, exit_code
+):
     """Prints the standardized, machine-readable summary block required by the framework."""
     print(f"TESTS_RUN={tests_run}")
     print(f"TESTS_PASSED={tests_passed}")
@@ -20,18 +22,29 @@ def print_summary(tests_run, tests_passed, tests_failed, valid_tests, invalid_te
     print(f"INVALID_TESTS={invalid_tests}")
     print(f"EXIT_CODE={exit_code}")
 
+
 def parse_args():
     parser = argparse.ArgumentParser(description="OMP Project-Agnostic Test Runner")
-    parser.add_argument("--path", "--project-path", default=".", help="Path to the project under test")
-    parser.add_argument("--test-dir", default=None, help="Directory containing the tests")
+    parser.add_argument(
+        "--path", "--project-path", default=".", help="Path to the project under test"
+    )
+    parser.add_argument(
+        "--test-dir", default=None, help="Directory containing the tests"
+    )
     return parser.parse_args()
 
+
 def log_debug(message):
-    log_dir = Path("/workspace/scratch") if Path("/workspace/scratch").exists() else Path("./scratch")
+    log_dir = (
+        Path("/workspace/scratch")
+        if Path("/workspace/scratch").exists()
+        else Path("./scratch")
+    )
     log_dir.mkdir(parents=True, exist_ok=True)
     log_file = log_dir / "omp_test_run.log"
     with open(log_file, "a", encoding="utf-8") as lf:
         lf.write(f"[{time.strftime('%Y-%m-%d %H:%M:%S')}] {message}\n")
+
 
 def detect_project_kind(project_path: Path):
     discover_bin = Path("bin/omp-discover")
@@ -40,7 +53,9 @@ def detect_project_kind(project_path: Path):
 
     if not discover_bin.exists():
         # Heuristic fallback if discoverer is missing
-        if (project_path / "pytest.ini").exists() or list(project_path.glob("**/test_*.py")):
+        if (project_path / "pytest.ini").exists() or list(
+            project_path.glob("**/test_*.py")
+        ):
             return "python"
         elif list(project_path.glob("**/*.html")):
             return "static"
@@ -48,8 +63,15 @@ def detect_project_kind(project_path: Path):
 
     try:
         res = subprocess.run(
-            ["python3" if discover_bin.suffix == ".py" else "bash", str(discover_bin), "--path", str(project_path)],
-            capture_output=True, text=True, timeout=5
+            [
+                "python3" if discover_bin.suffix == ".py" else "bash",
+                str(discover_bin),
+                "--path",
+                str(project_path),
+            ],
+            capture_output=True,
+            text=True,
+            timeout=5,
         )
         if res.returncode == 0:
             data = json.loads(res.stdout)
@@ -57,6 +79,7 @@ def detect_project_kind(project_path: Path):
     except Exception as e:
         log_debug(f"Discovery failed: {e}")
     return "generic"
+
 
 def run_markdown_strategy(project_path: Path):
     tests_run = 0
@@ -71,18 +94,23 @@ def run_markdown_strategy(project_path: Path):
         tests_run += 1
         try:
             content = file.read_text(encoding="utf-8")
-            match = re.match(r"^---\s*\n(.*?)\n---\s*\n", content, re.DOTALL | re.MULTILINE)
+            match = re.match(
+                r"^---\s*\n(.*?)\n---\s*\n", content, re.DOTALL | re.MULTILINE
+            )
             if match:
                 # Valid frontmatter found
                 passed += 1
             else:
                 failed += 1
-                log_debug(f"Markdown validation failed: {file.name} lacks valid frontmatter structure.")
+                log_debug(
+                    f"Markdown validation failed: {file.name} lacks valid frontmatter structure."
+                )
         except Exception as e:
             failed += 1
             log_debug(f"Error parsing Markdown file {file.name}: {e}")
 
     return tests_run, passed, failed
+
 
 def run_static_html_strategy(project_path: Path):
     tests_run = 0
@@ -101,12 +129,15 @@ def run_static_html_strategy(project_path: Path):
                 passed += 1
             else:
                 failed += 1
-                log_debug(f"HTML DOM check failed: {file.name} lacks layout ID/class definitions.")
+                log_debug(
+                    f"HTML DOM check failed: {file.name} lacks layout ID/class definitions."
+                )
         except Exception as e:
             failed += 1
             log_debug(f"Error checking HTML file {file.name}: {e}")
 
     return tests_run, passed, failed
+
 
 def run_python_strategy(test_dir: Path):
     if not test_dir.exists():
@@ -114,7 +145,9 @@ def run_python_strategy(test_dir: Path):
 
     try:
         # Run pytest inside subprocess
-        res = subprocess.run(["pytest", "-q", str(test_dir)], capture_output=True, text=True, timeout=30)
+        res = subprocess.run(
+            ["pytest", "-q", str(test_dir)], capture_output=True, text=True, timeout=30
+        )
         # Parse pytest output count
         passed_match = re.search(r"(\d+) passed", res.stdout)
         failed_match = re.search(r"(\d+) failed", res.stdout)
@@ -124,7 +157,7 @@ def run_python_strategy(test_dir: Path):
         total = passed + failed
 
         if total == 0 and res.returncode != 0:
-            return 1, 0, 1 # Generic Pytest execution failure
+            return 1, 0, 1  # Generic Pytest execution failure
 
         return total, passed, failed
     except subprocess.TimeoutExpired:
@@ -133,6 +166,7 @@ def run_python_strategy(test_dir: Path):
     except Exception as e:
         log_debug(f"Pytest launch error: {e}")
         return 0, 0, 0
+
 
 def run_aef_task_strategy(test_dir: Path):
     tests_run = 0
@@ -146,12 +180,16 @@ def run_aef_task_strategy(test_dir: Path):
             continue
         tests_run += 1
         try:
-            res = subprocess.run(["bash", str(script)], capture_output=True, text=True, timeout=30)
+            res = subprocess.run(
+                ["bash", str(script)], capture_output=True, text=True, timeout=30
+            )
             if res.returncode == 0:
                 passed += 1
             else:
                 failed += 1
-                log_debug(f"Shell script {script.name} exited with non-zero code {res.returncode}")
+                log_debug(
+                    f"Shell script {script.name} exited with non-zero code {res.returncode}"
+                )
         except subprocess.TimeoutExpired:
             failed += 1
             log_debug(f"Shell script {script.name} execution boundary timed out (30s).")
@@ -161,12 +199,16 @@ def run_aef_task_strategy(test_dir: Path):
 
     return tests_run, passed, failed
 
+
 def main():
     args = parse_args()
     project_path = Path(args.path).resolve()
 
     if not project_path.exists() or not project_path.is_dir():
-        print(f"Error: Project path '{args.path}' not found or is not a directory.", file=sys.stderr)
+        print(
+            f"Error: Project path '{args.path}' not found or is not a directory.",
+            file=sys.stderr,
+        )
         sys.exit(2)
 
     test_dir_str = args.test_dir if args.test_dir else "tests"
@@ -191,7 +233,7 @@ def main():
     elif project_kind == "python":
         tests_run, tests_passed, tests_failed = run_python_strategy(test_dir)
         valid_tests = tests_run
-    else: # Default Framework / AEF Task strategy
+    else:  # Default Framework / AEF Task strategy
         tests_run, tests_passed, tests_failed = run_aef_task_strategy(test_dir)
         valid_tests = tests_run
 
@@ -203,7 +245,10 @@ def main():
     else:
         exit_code = 0
 
-    print_summary(tests_run, tests_passed, tests_failed, valid_tests, invalid_tests, exit_code)
+    print_summary(
+        tests_run, tests_passed, tests_failed, valid_tests, invalid_tests, exit_code
+    )
+
 
 if __name__ == "__main__":
     main()

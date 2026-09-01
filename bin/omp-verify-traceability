@@ -6,10 +6,11 @@ import os
 import yaml
 import re
 
+
 def parse_frontmatter(filepath):
     """Extract and parse YAML frontmatter from a Markdown file."""
     try:
-        with open(filepath, 'r') as f:
+        with open(filepath, "r") as f:
             content = f.read()
     except FileNotFoundError:
         raise FileNotFoundError(f"File not found: {filepath}")
@@ -17,9 +18,11 @@ def parse_frontmatter(filepath):
         raise IOError(f"Error reading file {filepath}: {e}")
 
     # Match content between first `---` and second `---`
-    match = re.match(r'^---\s*\n(.*?)\n---', content, re.DOTALL)
+    match = re.match(r"^---\s*\n(.*?)\n---", content, re.DOTALL)
     if not match:
-        raise ValueError(f"No valid YAML frontmatter found in {filepath} (must be delimited by `---`)")
+        raise ValueError(
+            f"No valid YAML frontmatter found in {filepath} (must be delimited by `---`)"
+        )
 
     frontmatter_text = match.group(1)
     try:
@@ -31,17 +34,19 @@ def parse_frontmatter(filepath):
 
     return data
 
+
 def validate_frontmatter_keys(data, label):
     """Check that required fields exist in frontmatter."""
-    required_keys = ('id', 'type', 'milestone_id')
+    required_keys = ("id", "type", "milestone_id")
     for key in required_keys:
         if key not in data:
             raise ValueError(f"'{label}' missing required frontmatter key: {key}")
 
+
 def extract_functional_requirements(spec_path):
     """Extract Functional Requirements (FRs) from the specification file."""
     try:
-        with open(spec_path, 'r') as f:
+        with open(spec_path, "r") as f:
             content = f.read()
     except FileNotFoundError:
         print(f"Error: Specification file not found at '{spec_path}'.", file=sys.stderr)
@@ -60,14 +65,15 @@ def extract_functional_requirements(spec_path):
         description = match.group(2).strip()
         # Heuristic: If it mentions 'CLI', 'executable', 'API', 'contract', it's likely active.
         # For this specific case, we know FR-1, FR-2, FR-3 are active.
-        is_active = True # Defaulting to active for all FRs in this spec.
-        frs[fr_id] = {'description': description, 'is_active': is_active}
+        is_active = True  # Defaulting to active for all FRs in this spec.
+        frs[fr_id] = {"description": description, "is_active": is_active}
     return frs
+
 
 def extract_verification_items(ver_path):
     """Extract Verification Items (V-FRs) from the verification file table."""
     try:
-        with open(ver_path, 'r') as f:
+        with open(ver_path, "r") as f:
             content = f.read()
     except FileNotFoundError:
         print(f"Error: Verification file not found at '{ver_path}'.", file=sys.stderr)
@@ -86,7 +92,7 @@ def extract_verification_items(ver_path):
         r"\\s*\\n(.*?)",
         r"(?:\\n\\s*\\|\\s*Requirement\\s*\\|\\s*Verification(?: ID)?\\s*\\|\\s*Method\\s*\\|\\s*Test File\\s*\\|\\s*Initial Failure\\s*\\|\\s*Status\\s*\\|)?$",
         content,
-        re.DOTALL | re.MULTILINE | re.IGNORECASE
+        re.DOTALL | re.MULTILINE | re.IGNORECASE,
     )
     if not table_match:
         raise ValueError("No verification table found in verification file.")
@@ -95,23 +101,34 @@ def extract_verification_items(ver_path):
 
     for row in rows:
         # Split row by '|', skip first and last empty strings, strip whitespace
-        cells = [cell.strip() for cell in row.split('|')[1:-1]]
-        if len(cells) == 6 and cells[0].startswith('FR-'): # Ensure it's a valid FR row
+        cells = [cell.strip() for cell in row.split("|")[1:-1]]
+        if len(cells) == 6 and cells[0].startswith("FR-"):  # Ensure it's a valid FR row
             req_id = cells[0]
             ver_id = cells[1]
             method = cells[2]
             # Simple check for method validity
-            if method not in ['SCRIPT_EXECUTION', 'UNIT_TEST', 'DOCUMENT_CHECK', 'FILE_STRUCTURE_CHECK', 'FRONTMATTER_CHECK', 'MANUAL_CHECK']:
-                print(f"Warning: Unknown verification method '{method}' for V-FR '{ver_id}' associated with {req_id}. Treating as valid for now.", file=sys.stderr)
-            vfrs[ver_id] = {'source_req_id': req_id, 'method': method}
+            if method not in [
+                "SCRIPT_EXECUTION",
+                "UNIT_TEST",
+                "DOCUMENT_CHECK",
+                "FILE_STRUCTURE_CHECK",
+                "FRONTMATTER_CHECK",
+                "MANUAL_CHECK",
+            ]:
+                print(
+                    f"Warning: Unknown verification method '{method}' for V-FR '{ver_id}' associated with {req_id}. Treating as valid for now.",
+                    file=sys.stderr,
+                )
+            vfrs[ver_id] = {"source_req_id": req_id, "method": method}
     return vfrs
+
 
 def main():
     parser = argparse.ArgumentParser(
-        description='Verifies traceability between specification and verification documents.'
+        description="Verifies traceability between specification and verification documents."
     )
-    parser.add_argument('--spec', required=True)
-    parser.add_argument('--verification', required=True)
+    parser.add_argument("--spec", required=True)
+    parser.add_argument("--verification", required=True)
     args = parser.parse_args()
 
     spec_path = args.spec
@@ -122,21 +139,29 @@ def main():
         print(f"Error: Specification file not found at '{spec_path}'.", file=sys.stderr)
         sys.exit(1)
     if not os.path.isfile(verification_path):
-        print(f"Error: Verification file not found at '{verification_path}'.", file=sys.stderr)
+        print(
+            f"Error: Verification file not found at '{verification_path}'.",
+            file=sys.stderr,
+        )
         sys.exit(1)
 
     try:
         spec_frontmatter = parse_frontmatter(spec_path)
-        validate_frontmatter_keys(spec_frontmatter, 'spec')
+        validate_frontmatter_keys(spec_frontmatter, "spec")
     except Exception as e:
-        print(f"Error processing specification file '{spec_path}': {e}", file=sys.stderr)
+        print(
+            f"Error processing specification file '{spec_path}': {e}", file=sys.stderr
+        )
         sys.exit(1)
 
     try:
         ver_frontmatter = parse_frontmatter(verification_path)
-        validate_frontmatter_keys(ver_frontmatter, 'verification')
+        validate_frontmatter_keys(ver_frontmatter, "verification")
     except Exception as e:
-        print(f"Error processing verification file '{verification_path}': {e}", file=sys.stderr)
+        print(
+            f"Error processing verification file '{verification_path}': {e}",
+            file=sys.stderr,
+        )
         sys.exit(1)
 
     # --- Core Traceability and Method Checks (FR-2, FR-3 detailed cases) ---
@@ -149,34 +174,49 @@ def main():
 
     fr_ids_in_spec = set(functional_requirements.keys())
     vfr_ids_in_ver = set(verification_items.keys())
-    source_req_ids_in_vfr = set(item['source_req_id'] for item in verification_items.values())
+    source_req_ids_in_vfr = set(
+        item["source_req_id"] for item in verification_items.values()
+    )
 
     # --- Bi-directional Mapping Checks ---
     # Check for orphan FRs (present in spec but not in verification items)
     orphaned_frs = fr_ids_in_spec - source_req_ids_in_vfr
     if orphaned_frs:
-        print(f"Error: Found functional requirements without corresponding verification items: {', '.join(orphaned_frs)}", file=sys.stderr)
+        print(
+            f"Error: Found functional requirements without corresponding verification items: {', '.join(orphaned_frs)}",
+            file=sys.stderr,
+        )
         sys.exit(1)
 
     # Check for orphan V-FRs (present in verification but not mapping to any FR)
     orphaned_vfrs = vfr_ids_in_ver - set(functional_requirements.keys())
     if orphaned_vfrs:
-        print(f"Error: Found verification items referencing non-existent functional requirements: {', '.join(orphaned_vfrs)}", file=sys.stderr)
+        print(
+            f"Error: Found verification items referencing non-existent functional requirements: {', '.join(orphaned_vfrs)}",
+            file=sys.stderr,
+        )
         sys.exit(1)
 
     # --- Verification Method Checks ---
     # Check that active requirements do not use DOCUMENT_CHECK
     for vfr_id, vfr_data in verification_items.items():
-        source_req_id = vfr_data['source_req_id']
-        method = vfr_data['method']
+        source_req_id = vfr_data["source_req_id"]
+        method = vfr_data["method"]
 
-        if source_req_id in functional_requirements and functional_requirements[source_req_id]['is_active']:
-            if method == 'DOCUMENT_CHECK':
-                print(f"Error: Active requirement '{source_req_id}' (referenced by V-FR '{vfr_id}') cannot use 'DOCUMENT_CHECK' method. Use 'SCRIPT_EXECUTION' or 'UNIT_TEST'.", file=sys.stderr)
+        if (
+            source_req_id in functional_requirements
+            and functional_requirements[source_req_id]["is_active"]
+        ):
+            if method == "DOCUMENT_CHECK":
+                print(
+                    f"Error: Active requirement '{source_req_id}' (referenced by V-FR '{vfr_id}') cannot use 'DOCUMENT_CHECK' method. Use 'SCRIPT_EXECUTION' or 'UNIT_TEST'.",
+                    file=sys.stderr,
+                )
                 sys.exit(1)
 
     # If all checks pass
     sys.exit(0)
+
 
 if __name__ == "__main__":
     main()

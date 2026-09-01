@@ -29,14 +29,18 @@ class TestProjectConfigSchemaValidation(unittest.TestCase):
 
     def test_valid_config_passes(self):
         """FR-PROJECT_CONFIG_SCHEMA: Valid config.yml passes validation."""
-        self._write_config("project_id: test-project-1\nproject_slug: test-project\nversion: 1.0.0-stable\n")
+        self._write_config(
+            "project_id: test-project-1\nproject_slug: test-project\nversion: 1.0.0-stable\n"
+        )
         result = validate_project_config(self.test_dir)
         self.assertTrue(result["valid"])
         self.assertEqual(result["errors"], [])
 
     def test_version_with_stable_suffix_passes(self):
         """FR-PROJECT_CONFIG_SCHEMA: Version with -stable suffix is valid."""
-        self._write_config("project_id: test-2\nproject_slug: test-project\nversion: 2.1.0-stable\n")
+        self._write_config(
+            "project_id: test-2\nproject_slug: test-project\nversion: 2.1.0-stable\n"
+        )
         result = validate_project_config(self.test_dir)
         self.assertTrue(result["valid"])
 
@@ -63,25 +67,33 @@ class TestProjectConfigSchemaValidation(unittest.TestCase):
 
     def test_mode_field_rejected(self):
         """NFR-MINIMALISM: mode field is rejected by schema."""
-        self._write_config("project_id: test-5\nproject_slug: test-project\nversion: 1.0.0-stable\nmode: application\n")
+        self._write_config(
+            "project_id: test-5\nproject_slug: test-project\nversion: 1.0.0-stable\nmode: application\n"
+        )
         result = validate_project_config(self.test_dir)
         self.assertFalse(result["valid"])
 
     def test_technology_stack_field_rejected(self):
         """NFR-MINIMALISM: Extra field is rejected by schema."""
-        self._write_config("project_id: test-6\nproject_slug: test-project\nversion: 1.0.0-stable\ntechnology: python\n")
+        self._write_config(
+            "project_id: test-6\nproject_slug: test-project\nversion: 1.0.0-stable\ntechnology: python\n"
+        )
         result = validate_project_config(self.test_dir)
         self.assertFalse(result["valid"])
 
     def test_invalid_slug_uppercase_rejected(self):
         """FR-PROJECT_CONFIG_SCHEMA: Uppercase letters in slug are rejected."""
-        self._write_config("project_id: test-7\nproject_slug: TestProject\nversion: 1.0.0-stable\n")
+        self._write_config(
+            "project_id: test-7\nproject_slug: TestProject\nversion: 1.0.0-stable\n"
+        )
         result = validate_project_config(self.test_dir)
         self.assertFalse(result["valid"])
 
     def test_invalid_version_format_rejected(self):
         """FR-PROJECT_CONFIG_SCHEMA: Invalid version format is rejected."""
-        self._write_config("project_id: test-8\nproject_slug: test-project\nversion: 1.0.0\n")
+        self._write_config(
+            "project_id: test-8\nproject_slug: test-project\nversion: 1.0.0\n"
+        )
         result = validate_project_config(self.test_dir)
         self.assertTrue(result["valid"])
 

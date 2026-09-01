@@ -69,7 +69,7 @@ HEADING_TO_TYPE = {
 # Legacy filename suffix → artifact type (Tier 4)
 # Format: M{X}S{Y}[SUFFIX][N].md
 LEGACY_FILENAME_TYPE = {
-    "": "specification",   # M1S1.md
+    "": "specification",  # M1S1.md
     "V": "verification",
     "T": "test_set",
     "C": "completion",
@@ -80,19 +80,16 @@ LEGACY_FILENAME_TYPE = {
 }
 
 # Legacy filename pattern: M{X}S{Y}[SUFFIX][{Z}].md
-LEGACY_FILENAME_PATTERN = re.compile(
-    r"^M(\d+)S(\d+)([A-Z]*?)(\d+)?\.md$"
-)
+LEGACY_FILENAME_PATTERN = re.compile(r"^M(\d+)S(\d+)([A-Z]*?)(\d+)?\.md$")
 
 # Valid single-letter suffixes for legacy filenames
 VALID_LEGACY_SUFFIXES = frozenset({"V", "T", "C", "E", "R", "I", "H"})
 
 
-
-
 # ---------------------------------------------------------------------------
 # Classification helpers
 # ---------------------------------------------------------------------------
+
 
 def classify_tier1(filepath, verbose):
     """Tier 1: Classify via YAML frontmatter metadata.
@@ -107,13 +104,17 @@ def classify_tier1(filepath, verbose):
         # Check explicit 'type' field
         if "type" in metadata and isinstance(metadata["type"], str):
             if verbose:
-                print(f"  Tier 1: '{os.path.basename(filepath)}' type={metadata['type']}",
-                      file=sys.stderr)
+                print(
+                    f"  Tier 1: '{os.path.basename(filepath)}' type={metadata['type']}",
+                    file=sys.stderr,
+                )
             return metadata["type"], "frontmatter.type"
         # Fall back to inferring from 'id' field (e.g., SPEC-001 → specification)
         if "id" in metadata and isinstance(metadata["id"], str):
             id_str = str(metadata["id"])
-            prefix_match = re.match(r"^(SPEC|VER|TEST|INV|COMP|EVAL|REVIEW|AUDIT|HOT)-\d+$", id_str)
+            prefix_match = re.match(
+                r"^(SPEC|VER|TEST|INV|COMP|EVAL|REVIEW|AUDIT|HOT)-\d+$", id_str
+            )
             if prefix_match:
                 prefix = prefix_match.group(1)
                 TYPE_PREFIX_TO_DIR = {
@@ -130,8 +131,10 @@ def classify_tier1(filepath, verbose):
                 dir_name = TYPE_PREFIX_TO_DIR.get(prefix)
                 if dir_name and dir_name in DIR_TO_TYPE:
                     if verbose:
-                        print(f"  Tier 1: '{os.path.basename(filepath)}' id={id_str} → {DIR_TO_TYPE[dir_name]}",
-                              file=sys.stderr)
+                        print(
+                            f"  Tier 1: '{os.path.basename(filepath)}' id={id_str} → {DIR_TO_TYPE[dir_name]}",
+                            file=sys.stderr,
+                        )
                     return DIR_TO_TYPE[dir_name], "frontmatter.id"
     return None, None
 
@@ -145,8 +148,10 @@ def classify_tier2(filepath, verbose):
     parent = os.path.basename(os.path.dirname(filepath))
     if parent in DIR_TO_TYPE:
         if verbose:
-            print(f"  Tier 2: '{os.path.basename(filepath)}' dir={parent} → {DIR_TO_TYPE[parent]}",
-                  file=sys.stderr)
+            print(
+                f"  Tier 2: '{os.path.basename(filepath)}' dir={parent} → {DIR_TO_TYPE[parent]}",
+                file=sys.stderr,
+            )
         return DIR_TO_TYPE[parent], "directory"
     return None, None
 
@@ -171,8 +176,10 @@ def classify_tier3(filepath, verbose):
         heading = first_line[2:].strip().lower()
         if heading in HEADING_TO_TYPE:
             if verbose:
-                print(f"  Tier 3: '{os.path.basename(filepath)}' heading='{heading}' → {HEADING_TO_TYPE[heading]}",
-                      file=sys.stderr)
+                print(
+                    f"  Tier 3: '{os.path.basename(filepath)}' heading='{heading}' → {HEADING_TO_TYPE[heading]}",
+                    file=sys.stderr,
+                )
             return HEADING_TO_TYPE[heading], "heading"
     return None, None
 
@@ -191,13 +198,17 @@ def classify_tier4(filepath, verbose):
         if suffix == "":
             # M1S1.md → specification
             if verbose:
-                print(f"  Tier 4: '{fname}' stem match → specification", file=sys.stderr)
+                print(
+                    f"  Tier 4: '{fname}' stem match → specification", file=sys.stderr
+                )
             return "specification", "filename"
         elif suffix in VALID_LEGACY_SUFFIXES:
             if suffix in LEGACY_FILENAME_TYPE:
                 if verbose:
-                    print(f"  Tier 4: '{fname}' suffix={suffix} → {LEGACY_FILENAME_TYPE[suffix]}",
-                          file=sys.stderr)
+                    print(
+                        f"  Tier 4: '{fname}' suffix={suffix} → {LEGACY_FILENAME_TYPE[suffix]}",
+                        file=sys.stderr,
+                    )
                 return LEGACY_FILENAME_TYPE[suffix], "filename"
     return None, None
 
@@ -243,6 +254,7 @@ def load_pattern_map(pattern_map_path):
 # Core indexing
 # ---------------------------------------------------------------------------
 
+
 def is_pre_m10(dirname):
     """Check if a directory name matches M1-M9 pattern."""
     return re.match(r"^M([1-9])$", dirname) is not None
@@ -271,7 +283,9 @@ def index_milestones(milestone_dir, output_path, verbose, pattern_map_path):
 
     if verbose:
         print(f"Legacy Indexer: Scanning {base_dir}", file=sys.stderr)
-        print(f"Legacy Indexer: Output → {os.path.abspath(output_path)}", file=sys.stderr)
+        print(
+            f"Legacy Indexer: Output → {os.path.abspath(output_path)}", file=sys.stderr
+        )
 
     # Load custom pattern map (Tier 5)
     pattern_map = load_pattern_map(pattern_map_path)
@@ -318,11 +332,12 @@ def index_milestones(milestone_dir, output_path, verbose, pattern_map_path):
                 f.write(f"{sha} {rel_path}\n")
 
     if verbose:
-        print(f"\nLegacy Indexer: Wrote {len(entries)} entries to {os.path.abspath(output_path)}",
-              file=sys.stderr)
+        print(
+            f"\nLegacy Indexer: Wrote {len(entries)} entries to {os.path.abspath(output_path)}",
+            file=sys.stderr,
+        )
 
     return 0
-
 
 
 def _classify_file(fpath, rel_path, base_dir, entries, pattern_map, verbose):
@@ -375,11 +390,17 @@ def _classify_file(fpath, rel_path, base_dir, entries, pattern_map, verbose):
 
     # Tier 6: Human review / AMBIGUOUS_LEGACY_ARTIFACT
     if verbose:
-        print(f"  Tier 6: '{fname}' → AMBIGUOUS_LEGACY_ARTIFACT (requires manual review)",
-              file=sys.stderr)
-        print(f"AMBIGUOUS_LEGACY_ARTIFACT: {rel_path} — requires manual review",
-              file=sys.stderr)
+        print(
+            f"  Tier 6: '{fname}' → AMBIGUOUS_LEGACY_ARTIFACT (requires manual review)",
+            file=sys.stderr,
+        )
+        print(
+            f"AMBIGUOUS_LEGACY_ARTIFACT: {rel_path} — requires manual review",
+            file=sys.stderr,
+        )
     _add_entry(entries, fpath, rel_path, "AMBIGUOUS_LEGACY_ARTIFACT", verbose)
+
+
 def _add_entry(entries, fpath, rel_path, atype, verbose):
     """Compute SHA-256 and add entry to the entries list."""
     try:
@@ -394,10 +415,11 @@ def _add_entry(entries, fpath, rel_path, atype, verbose):
 # CLI entry point
 # ---------------------------------------------------------------------------
 
+
 def main():
     parser = argparse.ArgumentParser(
         description="OMP AEF Legacy Artifact Indexer — maps M1-M9 files to SHA-256 checksums "
-                    "with 6-tier classification fallback.",
+        "with 6-tier classification fallback.",
         epilog="Exit codes: 0=success, 1=failure",
     )
     parser.add_argument(
@@ -411,7 +433,8 @@ def main():
         help="Output path for legacy manifest (default: milestones/M7/legacy_manifest.txt)",
     )
     parser.add_argument(
-        "--verbose", "-v",
+        "--verbose",
+        "-v",
         action="store_true",
         help="Print classification trace per file to stderr",
     )
