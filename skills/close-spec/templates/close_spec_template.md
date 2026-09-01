@@ -1,5 +1,5 @@
 ---
-id: CLOSE-M{X}S{Y}-{N}
+id: CLOSE-M{X}S{Y}
 type: closure
 title: "Spec Closure Report for M{X}S{Y}"
 milestone_id: M{X}
@@ -16,18 +16,16 @@ derived_from:
   # - HOT-{N_HOT}
   # - EVAL-{N_RE_EVAL}
   # - REVIEW-M{X}S{Y}-V{N_REVIEW}
-supersedes: []  # e.g., [CLOSE-M{X}S{Y}-{N_PREVIOUS}] if this replaces an earlier closure
+supersedes: []  # e.g., [CLOSE-M{X}S{Y}] if this replaces an earlier closure
 template_version: 1.0.0
 ---
-
 # Spec Closure Report — M{X}S{Y}
 
-**Closure ID:** CLOSE-M{X}S{Y}-{N}
+**Closure ID:** CLOSE-M{X}S{Y}
 **Status:** CLOSED | CLOSED_WITH_DEFECTS | REFUSED
 **Date:** {YYYY-MM-DD}
 
 ---
-
 ## 1. Loop-Closure Assurance
 
 ### Investigation / Hotfix Detection
@@ -53,7 +51,6 @@ template_version: 1.0.0
 > **No fixes were applied during this spec's development cycle.** The standard spec → verification → tests → implementation → evaluation → review pipeline completed without deviation.
 
 ---
-
 ## 2. Mechanical Validation Results
 
 ### 2a. Lint Evaluation Gate
@@ -110,8 +107,7 @@ else:
 ```
 
 ### 2c. Artifact Naming / Sequentialization Check
-
-Verify that artifact filenames follow the canonical sequential pattern and do not collide:
+Verify that artifact filenames follow the canonical pattern and do not collide:
 
 - `M{X}S{Y}.md` — milestone spec
 - `M{X}S{Y}V1.md`, `M{X}S{Y}V2.md` — verification artifacts
@@ -120,6 +116,13 @@ Verify that artifact filenames follow the canonical sequential pattern and do no
 
 Reject bare repeated forms such as `M9S1C.md`, `VER-M9S1V.md`, `M9S1E.md`, or `M9S1R.md` when multiple artifacts of the same type exist, or when the same base name would otherwise collide with another artifact in the same spec sequence.
 
+Write to `milestones/M{X}/CLOSE-M{X}S{Y}.md` using the template at `templates/close_spec_template.md`.
+
+...
+
+The `id` field uses the pattern `CLOSE-M{X}S{Y}` — no semantic qualifiers (`-FINAL`, `-V2`). Replacements use the `supersedes` metadata field.
+
+This rule prevents duplicate IDs and naming collisions across the spec lifecycle.
 
 ### 2d. Artifact Completeness Check
 ```
@@ -175,6 +178,7 @@ else:
 "]
 [exit code: N]
 ```
+
 M{X}/  (Milestone)
 │
 ├── M{X}S{Y}.md              — SPEC-{Y}  (specification)
@@ -187,11 +191,10 @@ M{X}/  (Milestone)
 │                           └── (fix cycle, if applicable)
 │                               ├── M{X}S{Y}I{Z}.md  — INV-{N}  (investigation)
 │                               ├── M{X}H{Z}.md       — HOT-{N}  (hotfix)
-│                               ├── M{X}S{Y}E-V{N}.md — EVAL-{N}  (re-evaluation)
-│                               └── M{X}S{Y}R-V{N}.md — REVIEW-M{X}S{Y}-V{N}  (re-review)
+│                               ├── M{X}S{Y}E-V{Z}.md — EVAL-{N}  (re-evaluation)
+│                               └── M{X}S{Y}R-V{Z}.md — REVIEW-M{X}S{Y}-V{Z}  (re-review)
 │
-└── M{X}S{Y}CLOSE-{N}.md         — CLOSE-M{X}S{Y}-{N}  (closure)
-```
+└── CLOSE-M{X}S{Y}.md         — CLOSE-M{X}S{Y}  (closure)
 
 ### Full Artifact Table
 | File | ID | Type | Status | derived_from | Filepath |
@@ -199,7 +202,6 @@ M{X}/  (Milestone)
 | (filename) | (id) | (type) | (status) | [sources] | (relative path) |
 
 ---
-
 ## 4. Status Assertion
 
 **Spec M{X}S{Y} is [CLOSED | CLOSED_WITH_DEFECTS | REFUSED].**
@@ -209,7 +211,6 @@ M{X}/  (Milestone)
 - [If REFUSED]: The loop-closure gate was not satisfied. See section 1 for details.
 
 ---
-
 ## 5. Raw Evidence
 
 Every claim above is backed by the exact command that produced it and its captured output.

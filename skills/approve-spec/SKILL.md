@@ -29,21 +29,30 @@ Formulate a concise summary covering:
 
 #### 4. Mandatory User Approval (Interactive)
 
-You MUST use the `ask` tool to present your summary to the user and ask: "Do you approve this execution and verification plan for implementation?"
+You MUST use the `ask` tool with `multi: true` to present your summary and offer the following selection options:
 
-| Option Label | Action |
+| Option Label | Description |
 | :--- | :--- |
-| Approve | I approve this specification for implementation. Proceed with `/implement-specification`. |
-| Other... | Let me specify a custom decision. |
+| Approve | Approve this specification for implementation. Proceed with `/implement-specification`. |
+| Reject | Reject this specification. Do not proceed with implementation. |
+| Request Changes | Provide feedback and request modifications to the specification before re-approval. |
 
-#### 5. Stamp Approval
+#### 5. Handle Approval Outcome
 
-If the user selects "Approve":
-- Use `edit` to append exactly to the bottom of `M{X}S{Y}.md`:
-```
-#### User Approval
-* [x] Approved for implementation by user
-```
+- **If the user selects "Approve":**
+  - Use `edit` to append exactly to the bottom of `M{X}S{Y}.md`:
+    ```
+    #### User Approval
+    * [x] Approved for implementation by user
+    ```
+  - Then proceed to `/implement-specification`.
+
+- **If the user selects "Reject":**
+  - Do not stamp approval. Halt the pipeline and report the rejection to the user.
+  - Optionally record the rejection reason in `M{X}S{Y}R.md` or a rejection note.
+
+- **If the user selects "Request Changes":**
+  - Do not stamp approval. Collect the user's feedback, apply the requested modifications to the specification artifacts, then re-run the approval step.
 
 #### Notes
 

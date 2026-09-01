@@ -1,7 +1,7 @@
 """
 Fixture Validator for the AEF Environment Layer.
 
-This module validates fixture contracts as specified in the M11S1 specification.
+This module validates fixture contracts as specified in milestone specifications.
 """
 
 import json
@@ -16,7 +16,7 @@ class FixtureValidator:
     Validates fixture contracts for the AEF 6-layer substrate architecture.
 
     Provides deterministic validation of all fixture contracts (CLI, Schema, Fixture)
-    as specified in the M11S1 Environment Layer specification.
+    as specified in Environment Layer specifications.
     """
 
     def __init__(self, fixtures_dir: Path = None):
@@ -72,7 +72,7 @@ class FixtureValidator:
         }
 
         # For schema validation, we validate the schema definitions themselves
-        schema_dir = self.fixtures_dir.parent / "milestones" / "M11"
+        schema_dir = self.fixtures_dir.parent / "milestones" / milestone_id
         if not schema_dir.exists():
             result["errors"].append(f"Schema directory not found: {schema_dir}")
             result["valid"] = False

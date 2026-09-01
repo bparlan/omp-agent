@@ -1,0 +1,6 @@
+{
+  "runtime": "python",
+  "setup_timestamp": "2024-01-01T00:00:00Z",
+  "isolation_mode": "workspace_per_project",
+  "environment_prefix": "AEF_"
+}

@@ -2,24 +2,84 @@
 """
 Generate Spec Skill Implementation
 
-Transform an approved milestone document into a detailed implementation specification with strict, machine-readable requirement traceability and semantic FR IDs.
+Transform an approved milestone document into a detailed implementation specification
+with strict, machine-readable requirement traceability and semantic FR IDs.
 """
 
-import os
 import sys
 from pathlib import Path
 from typing import Dict, Any, List, Optional
 import re
-import json
 from datetime import datetime
-
+import importlib.util
 def read_milestone_file(milestone_id: str) -> Optional[str]:
-    """Read milestone file"""
+    """Read milestone file from standard milestones directory"""
     milestone_path = Path(f"milestones/{milestone_id}/{milestone_id}.md")
     if milestone_path.exists():
         return milestone_path.read_text()
     return None
+def read_specification_template() -> str:
+    """Read the specification template from the templates directory"""
+    # Try multiple template locations
+    possible_paths = [
+        Path(__file__).parent / "templates" / "specification_template.md",
+        Path("skills/generate-spec/templates/specification_template.md"),
+        Path("/Users/bparlan/devcode/aef/agent/skills/generate-spec/templates/specification_template.md"),
+        Path("/generate-spec/templates/specification_template.md")
+    ]
+    
+    for template_path in possible_paths:
+        if template_path.exists():
+            return template_path.read_text()
+    
+    # If no template exists, return minimal template
+    return """---
+id: SPEC-{X}S{Y}
+type: specification
+title: "Template Specification"
+milestone_id: M{X}
+status: draft
+derived_from: []
+template_version: 1.3.0
+---
 
+#### Objective
+*(A clear, concise, implementation-independent summary of what this specification accomplishes. Reference the milestone's Goal and Motivation.)*
+
+#### Functional Requirements
+*(Translate the milestone's Scope into concrete, observable contracts. Every functional requirement MUST have a descriptive, stable Semantic FR ID. Do NOT use sequential numeric IDs like FR-1 or FR-2.)*
+
+--------------------------------------------------------------------------------
+
+#### Non-Functional Requirements
+*(Explicit constraints governing safety, runtime performance, environment, or error-handling rules. If none are applicable from the milestone, mark as N/A.)*
+
+--------------------------------------------------------------------------------
+
+#### Architecture Impact
+
+#### Implementation Tasks
+*(Provide a concrete technical roadmap. Every task MUST map directly to a defined Semantic FR ID.)*
+
+--------------------------------------------------------------------------------
+
+#### Constraints
+*(Out-of-scope items and explicit negative constraints inherited from the milestone.)*
+
+--------------------------------------------------------------------------------
+
+#### Assumptions
+*(Core technical and environmental assumptions validated from the milestone.)*
+
+--------------------------------------------------------------------------------
+
+#### Acceptance Criteria
+*(Observable system states or artifacts verifiable via framework validators. Must reference Semantic FR IDs or module boundaries. No mock command instructions or prose claims.)*
+
+--------------------------------------------------------------------------------
+
+#### Next Steps
+Advise running `generate-verification` to create the verification protocol."""
 def extract_functional_requirements(milestone_content: str) -> List[Dict[str, Any]]:
     """Extract functional requirements from milestone content"""
     frs = []
@@ -32,16 +92,19 @@ def extract_functional_requirements(milestone_content: str) -> List[Dict[str, An
         line = line.strip()
 
         # Match functional requirement headers (M11S1, M11S2, etc.)
-        if line.startswith('### M11S'):
-            current_fr = {
-                "id": f"FR-{fr_id_counter:02d}",
-                "spec_id": line.replace('### ', ''),
-                "title": "",
-                "requirements": [],
-                "acceptance_criteria": []
-            }
-            fr_id_counter += 1
-            frs.append(current_fr)
+        if line.startswith('### M') and 'S' in line:
+            # Match pattern like M11S1, M11S2, etc.
+            match = re.match(r'M(\d+)S(\d+)', line)
+            if match:
+                current_fr = {
+                    "id": f"FR-{fr_id_counter:02d}",
+                    "spec_id": line.replace('### ', ''),
+                    "title": "",
+                    "requirements": [],
+                    "acceptance_criteria": []
+                }
+                fr_id_counter += 1
+                frs.append(current_fr)
 
         # Match requirement bullet points
         elif current_fr and line.startswith('- **FR-'):
@@ -69,15 +132,15 @@ def extract_functional_requirements(milestone_content: str) -> List[Dict[str, An
             current_fr["acceptance_criteria"].append(criterion)
 
     return frs
-
 def generate_yaml_frontmatter(spec_id: str, milestone_id: str) -> str:
     """Generate YAML frontmatter for specification"""
     return f"""---
 id: {spec_id}
 type: specification
-title: "{spec_id} - {spec_id.split('S')[0]} Specification"
+title: "{spec_id} - {milestone_id} Specification"
 milestone_id: {milestone_id}
 status: draft
+derived_from: []
 template_version: 1.3.0
 ---"""
 
@@ -141,8 +204,8 @@ def generate_specification(milestone_id: str, spec_id: str) -> Dict[str, Any]:
                 "public_interface": True,
                 "exports": [
                     f"class {spec_id.title().replace('-', '')}Impl",
-                    f"function execute{spectral_id.upper()}",
-                    f"function validate{spectral_id.upper()}"
+                    f"function execute{spec_id.upper()}",
+                    f"function validate{spec_id.upper()}"
                 ]
             }
         ],
@@ -163,7 +226,6 @@ def generate_specification(milestone_id: str, spec_id: str) -> Dict[str, Any]:
     }
 
     return spec
-
 def write_specification_file(spec: Dict[str, Any]) -> str:
     """Write specification to file"""
     milestone_id = spec["metadata"]["milestone_id"]
@@ -190,11 +252,7 @@ def write_specification_file(spec: Dict[str, Any]) -> str:
 """
 
     for fr in spec['functional_requirements']:
-        content += f"### {fr['semantic_id']}
-
-{fr['text']}
-
-"
+        content += f"### {fr['semantic_id']}\n\n{fr['text']}\n\n"
 
     content += "\n## Interface Contracts\n\n"
 
@@ -202,11 +260,11 @@ def write_specification_file(spec: Dict[str, Any]) -> str:
         content += f"- **{contract['type'].title()}**: {contract['description']}\n"
 
     content += "\n## Strict File Scope\n\n"
-    content += "### Allowlist (Files permitted to change):")
+    content += "### Allowlist (Files permitted to change):\n"
     for file in spec['strict_file_scope']['allowlist']:
         content += f"\n- {file}"
 
-    content += "\n\n### Denylist (Do NOT Touch):")
+    content += "\n\n### Denylist (Do NOT Touch):\n"
     for file in spec['strict_file_scope']['denylist']:
         content += f"\n- {file}"
 
@@ -231,7 +289,34 @@ def write_specification_file(spec: Dict[str, Any]) -> str:
     spec_file_path.write_text(content)
 
     return str(spec_file_path)
+def ask_user_for_next_steps(specs_generated: List[str]) -> None:
+    """Ask user for next steps (interactive)"""
+    try:
+        print(f"\n=== Specification Generation Complete ===")
+        print(f"Specifications generated: {len(specs_generated)}")
+        for spec_path in specs_generated:
+            print(f"  - {spec_path}")
 
+        print("\nWhat would you like to do next?")
+        print("1. Generate verification protocols")
+        print("2. Review specifications")
+        print("3. Exit")
+
+        choice = input("Enter choice (1-3): ").strip()
+
+        if choice == "1":
+            print("Please run '/healthcheck generate-verification --execute' to generate verification protocols")
+            return
+        elif choice == "2":
+            print("Please review the generated specification files manually")
+            return
+        else:
+            print("Exiting...")
+            return
+
+    except Exception as e:
+        print(f"Error in interactive mode: {e}")
+        return
 def main() -> int:
     """Main skill execution function"""
     print("=== Generate Spec Skill ===")
@@ -283,7 +368,9 @@ def main() -> int:
     for spec_path in specs_generated:
         print(f"  - {spec_path}")
 
-    return 0
+    # Ask user for next steps
+    ask_user_for_next_steps(specs_generated)
 
+    return 0
 if __name__ == "__main__":
     sys.exit(main())

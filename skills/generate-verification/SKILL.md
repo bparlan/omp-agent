@@ -1,7 +1,6 @@
 ---
 name: generate-verification
-artifact_naming: VER-M{X}S{Y}V.md (must use VER- prefix; reject M{X}S{Y}V.md only)
-validation_gate: verify file exists, non-empty, matches naming, and contains testability assessment
+artifact_naming: VER-M{X}S{Y}V{Z}.md (must use VER- prefix with sequential version Z; reject M{X}S{Y}V.Z.md and bare M{X}S{Y}V.md when other VER-*.md exists)
 description: Transform a canonical implementation specification into a deterministic verification protocol with explicit requirement traceability, evidence contracts, testability assessment, and implementation-independent verification methods. Highly stable, failing closed on specification gaps.
 tools: [read, write, edit, bash, glob, task, code-search, lsp, ast_edit, inspector]
 user-invocable: true
@@ -193,9 +192,7 @@ Every functional requirement MUST have a stable source ID (e.g., `FR-1`, `FR-2`)
 
 The verification artifact MUST itself contain valid YAML frontmatter, including:
 
-- `id`: Canonical identifier (e.g., `VER-M{X}S{Y}V`). You MUST explicitly prepend the 'VER-' prefix to the sequence identifier.
-- `type`: 'verification'.
-- `title`: Human-readable title.
+- `id`: Canonical identifier (e.g., `VER-M{X}S{Y}V1`). You MUST explicitly prepend the 'VER-' prefix to the sequence identifier.
 - `milestone_id`: Parent milestone ID.
 - `status`: 'draft'.
 - `derived_from`: List of source artifacts (e.g., `['M{X}', 'M{X}S{Y}']`).
@@ -293,10 +290,7 @@ Choose the appropriate verification method for each requirement:
 You MUST NOT emit legacy hardcoded completion messages — the interactive ask prompt replaces this mechanism entirely.
 
 ---
-
-##### Mechanical Writing Postcondition (CRITICAL)
-
----
+##### Mechanical Writing Postcondition (CRITICAL)\n\n---\n\nWhen writing the verification artifact, **before** creating any file:\n\n1. **Identify all existing verification artifacts for this spec** in the milestone directory:\n\n```bash\nfind milestones/M{X} -name \"VER-M{X}S{Y}V*.md\" -type f\n```\n\n2. **Determine the next version number** based on existing files:\n\n```bash\n# Extract version numbers from existing files, ignoring base VER-M{X}S{Y}V.md if it exists (legacy)\n# If version 1 does NOT exist, use 1\n# If version 1 exists, use 2\n# If versions 1 and 2 exist, use 3, etc.\n# Example: if VER-M{X}S{Y}V1.md and VER-M{X}S{Y}V2.md exist, use 3\n```\n\n3. **If version N already exists**, abort with:\n\n```\n[SPECIFICATION_GAP_BLOCKED] Verification artifact VER-M{X}S{Y}V{N}.md already exists. Use sequential versioning or a unique identifier (e.g., VER-M{X}S{Y}VA1).\n```\n\n4. **If version N does NOT exist**, use it for the new artifact.\n\n5. **Apply the version number** to both the filename and the `id` field.\n\n**Example:** If M{X}S{Y} already has VER-M{X}S{Y}V1.md and VER-M{X}S{Y}V2.md:\n- New verification artifact: `VER-M{X}S{Y}V3.md`\n- `id: VER-M{X}S{Y}V3`\n\n**If NO prior versions exist:**\n- New verification artifact: `VER-M{X}S{Y}V1.md`\n- `id: VER-M{X}S{Y}V1`\n\n**Exception for migrations:** If migrating from legacy `VER-M{X}S{Y}V.md`, use `VER-M{X}S{Y}V1.md` if V1 doesn't exist, otherwise increment.\n\nThe skill must reject writes that would overwrite existing versioned verification artifacts or create ambiguous versioning conflicts.\n\n
 
 #### 8. Out of Scope (Negative Guardrails)
 

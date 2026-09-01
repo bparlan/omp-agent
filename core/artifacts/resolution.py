@@ -2,7 +2,7 @@ import os
 import yaml
 from typing import Dict, Any, Optional, List
 
-from core.artifacts.artifact_types import get_type_definition
+from core.artifacts.artifact_types import get_type_definition, get_artifact_type
 from core.artifacts.metadata import parse_metadata, get_metadata_from_file
 from core.artifacts.errors import AmbiguousResolutionError, ValidationError, ArtifactNotFoundError
 from core.validation import validate_metadata

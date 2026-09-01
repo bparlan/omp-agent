@@ -1,0 +1,329 @@
+---
+id: VER-M9S3V
+type: verification
+title: "M9S3 Verification Protocol - Skill Integration & Healthcenter"
+milestone_id: M9
+status: draft
+derived_from:
+  - MILESTONE-M9
+  - M9S3
+template_version: 1.3.0
+---
+
+# M9S3 Verification Protocol
+
+## Overview
+This document defines the deterministic verification protocol for M9S3: Skill Integration & Healthcenter: Canonical Artifact Adoption and Healthcenter Skill. It translates the specification's requirements into testable verification items.
+
+## Verification Items
+
+### FR-HEALTHCENTER-ARTIFACT_CREATION
+
+- id: VER-M9S3-FR-ARTIFACT_CREATION-1
+  source_requirement_id: FR-HEALTHCENTER-ARTIFACT_CREATION
+  verification_method: SCRIPT_EXECUTION
+  target: skills/healthcenter/healthcenter.py --skill <skill_name>
+  preconditions:
+    - A skill with valid SKILL.md exists in skills/ directory
+  input_or_fixture:
+    command: "skills/healthcenter/healthcenter.py --skill example_skill"
+    fixture_path: "tests/fixtures/skills/example_skill"
+  expected_evidence:
+    - Health-check artifact created for skill
+    - Artifact contains required YAML frontmatter fields
+    - Artifact stored in canonical location
+  failure_condition:
+    - No artifact created
+    - Missing required frontmatter fields
+    - Incorrect storage location
+  initial_failure_expectation: Command not found (healthcenter skill doesn't exist yet)
+  post_implementation_success_expectation: Health-check artifact created with valid frontmatter
+
+### FR-HEALTHCENTER-LEDGER_INTEGRATION
+
+- id: VER-M9S3-FR-LEDGER_INTEGRATION-1
+  source_requirement_id: FR-HEALTHCENTER-LEDGER_INTEGRATION
+  verification_method: UNIT_TEST
+  target: core/artifacts/registry.py.ArtifactRegistry.store_relationship
+  preconditions:
+    - Health-check artifact exists for skill
+    - Skill artifact exists in registry
+  input_or_fixture:
+    relationship_test: {"source_id": "HC-skill-1", "target_id": "SKILL-skill", "type": "derived_from"}
+  expected_evidence:
+    - Relationship stored successfully
+    - Relationships retrievable via get_relationships
+    - Both derived_from and evaluates relationships present
+  failure_condition:
+    - Relationship storage fails
+    - Missing expected relationship types
+  initial_failure_expectation: Methods available (registry infrastructure exists)
+  post_implementation_success_expectation: Relationships correctly stored and retrievable
+
+### FR-HEALTHCENTER-BATCH_PROCESSING
+
+- id: VER-M9S3-FR-BATCH_PROCESSING-1
+  source_requirement_id: FR-HEALTHCENTER-BATCH_PROCESSING
+  verification_method: SCRIPT_EXECUTION
+  target: skills/healthcenter/healthcenter.py --all
+  preconditions:
+    - Multiple skills exist in skills/ directory
+    - Skills have valid SKILL.md files
+  input_or_fixture:
+    command: "skills/healthcenter/healthcenter.py --all"
+    fixture_path: "tests/fixtures/skills_batch"
+  expected_evidence:
+    - Batch processing completes successfully
+    - Health-check artifact created for each skill
+    - All artifacts properly registered in ledger
+  failure_condition:
+    - Batch processing fails
+    - Missing artifacts for processed skills
+    - Relationship tracking incomplete
+  initial_failure_expectation: healthcenter skill not implemented
+  post_implementation_success_expectation: All skills processed with artifacts and relationships
+
+### FR-HEALTHCENTER-SINGLE_SKILL
+
+- id: VER-M9S3-FR-SINGLE_SKILL-1
+  source_requirement_id: FR-HEALTHCENTER-SINGLE_SKILL
+  verification_method: SCRIPT_EXECUTION
+  target: skills/healthcenter/healthcenter.py --skill example_skill --fix
+  preconditions:
+    - Non-compliant skill exists (missing -stable suffix)
+    - SKILL.md requires remediation
+  input_or_fixture:
+    command: "skills/healthcenter/healthcenter.py --skill example_skill --fix"
+    fixture_path: "tests/fixtures/skills/example_skill_noncompliant"
+  expected_evidence:
+    - Skill processing completes
+    - Health-check artifact created
+    - Skill fixed if remediation possible
+    - Recommendations provided for non-fixable issues
+  failure_condition:
+    - Processing fails
+    - Artifact not created
+    - Fix not applied when possible
+  initial_failure_expectation: healthcenter skill not available
+  post_implementation_success_expectation: Skill processed with artifact and potential fixes
+
+### FR-HEALTHCENTER-VALIDATION_INTEGRATION
+
+- id: VER-M9S3-FR-VALIDATION_INTEGRATION-1
+  source_requirement_id: FR-HEALTHCENTER-VALIDATION_INTEGRATION
+  verification_method: UNIT_TEST
+  target: core/validation.py.validate_artifact
+  preconditions:
+    - Validation module available
+    - Valid health-check artifact metadata available
+  input_or_fixture:
+    valid_metadata: {"id": "HC-valid-1", "type": "health-check", "validation_score": 100}
+    invalid_metadata: {"id": "HC-invalid-1", "type": "invalid", "validation_score": 101}
+  expected_evidence:
+    - Valid artifact accepted
+    - Invalid artifact rejected with errors
+    - Validation returns structured results
+  failure_condition:
+    - Valid artifact rejected
+    - Invalid artifact accepted
+    - Missing error structure
+  initial_failure_expectation: Module available (validation infrastructure exists)
+  post_implementation_success_expectation: Validation correctly validates artifacts
+
+### FR-HEALTHCENTER-STORAGE_COMPLIANCE
+
+- id: VER-M9S3-FR-STORAGE_COMPLIANCE-1
+  source_requirement_id: FR-HEALTHCENTER-STORAGE_COMPLIANCE
+  verification_method: UNIT_TEST
+  target: core/artifacts/registry.py.get_type("health-check")
+  preconditions:
+    - health-check artifact type registered
+    - Storage rules defined
+  input_or_fixture:
+    type_name: "health-check"
+  expected_evidence:
+    - Artifact type retrieved successfully
+    - Storage rule matches canonical pattern
+    - Type definition complete
+  failure_condition:
+    - Type not found
+    - Incorrect storage rule
+    - Incomplete type definition
+  initial_failure_expectation: health-check type not registered
+  post_implementation_success_expectation: Artifact type correctly defined and retrievable
+
+### FR-HEALTHCENTER-HISTORY_TRACKING
+
+- id: VER-M9S3-FR-HISTORY_TRACKING-1
+  source_requirement_id: FR-HEALTHCENTER-HISTORY_TRACKING
+  verification_method: UNIT_TEST
+  target: core/artifacts/registry.py.get_relationships
+  preconditions:
+    - Multiple health-check artifacts exist
+    - Artifacts have chronological relationships
+  input_or_fixture:
+    chronological_relationships: [
+      {"source": "HC-skill-2", "target": "SKILL-skill", "type": "derived_from"},
+      {"source": "HC-skill-1", "target": "SKILL-skill", "type": "derived_from"}
+    ]
+  expected_evidence:
+    - Chronological relationships stored
+    - Multiple artifacts tracked
+    - History retrievable
+  failure_condition:
+    - Relationships not stored
+    - Missing historical artifacts
+    - Chronology broken
+  initial_failure_expectation: Registry methods available (infrastructure exists)
+  post_implementation_success_expectation: Artifact history correctly tracked and retrievable
+
+### FR-HEALTHCENTER-INSIGHTS_GENERATION
+
+- id: VER-M9S3-FR-INSIGHTS_GENERATION-1
+  source_requirement_id: FR-HEALTHCENTER-INSIGHTS_GENERATION
+  verification_method: UNIT_TEST
+  target: Health-check artifact metadata fields insights and recommendations
+  preconditions:
+    - Health-check artifact created
+    - Issues detected requiring insights
+  input_or_fixture:
+    metadata_with_issues: {
+      "insights": ["Missing -stable suffix"],
+      "recommendations": ["Add -stable to version"]
+    }
+    metadata_no_issues: {
+      "insights": [],
+      "recommendations": []
+    }
+  expected_evidence:
+    - Insights present when issues exist
+    - Recommendations present when issues exist
+    - Empty arrays when no issues
+    - Insights structured as string arrays
+  failure_condition:
+    - Missing insights when needed
+    - Insights not structured correctly
+    - Recommendations missing when required
+  initial_failure_expectation: Insights fields not populated
+  post_implementation_success_expectation: Insights and recommendations correctly generated and structured
+
+### NFR-HEALTHCENTER-COMPLIANCE
+
+- id: VER-M9S3-NFR-COMPLIANCE-1
+  source_requirement_id: NFR-HEALTHCENTER-COMPLIANCE
+  verification_method: IMPLEMENTATION_CHECK
+  target: M9 canonical artifact system compliance
+  preconditions:
+    - health-check artifact created
+    - All core artifact system components available
+  input_or_fixture:
+    compliance_test: "Verify artifact creation, validation, storage, resolution, and relationships"
+  expected_evidence:
+    - Artifact creation follows 7-step protocol
+    - Validation performs schema checks
+    - Storage follows canonical rules
+    - Resolution works through canonical resolver
+    - Relationships tracked in registry
+  failure_condition:
+    - Any aspect violates M9 canonical protocols
+    - Missing compliance with canonical rules
+  initial_failure_expectation: Compliance verification not available
+  post_implementation_success_expectation: All operations fully compliant with M9 canonical protocols
+
+### NFR-HEALTHCENTER-BACKWARD_COMPATIBILITY
+
+- id: VER-M9S3-NFR-BACKWARD_COMPATIBILITY-1
+  source_requirement_id: NFR-HEALTHCENTER-BACKWARD_COMPATIBILITY
+  verification_method: IMPLEMENTATION_CHECK
+  target: skills/healthcheck/healthcheck.py --all (legacy)
+  preconditions:
+    - Legacy healthcheck skill exists
+    - Multiple skills available for testing
+  input_or_fixture:
+    command: "skills/healthcheck/healthcheck.py --all"
+    fixture_path: "tests/fixtures/legacy_skills"
+  expected_evidence:
+    - Legacy skill executes successfully
+    - Performs basic SKILL.md validation
+    - Produces expected output format
+  failure_condition:
+    - Legacy skill not available
+    - Execution fails
+    - Output format incorrect
+  initial_failure_expectation: Legacy skill not available (expected)
+  post_implementation_success_expectation: Legacy skill executes successfully if present
+
+- id: VER-M9S3-NFR-BACKWARD_COMPATIBILITY-2
+  source_requirement_id: NFR-HEALTHCENTER-BACKWARD_COMPATIBILITY
+  verification_method: IMPLEMENTATION_CHECK
+  target: skills/healthcheck/healthcheck.py skill_name
+  preconditions:
+    - Legacy healthcheck skill exists
+    - Specific skill available for testing
+  input_or_fixture:
+    command: "skills/healthcheck/healthcheck.py skill_z"
+    fixture_path: "tests/fixtures/legacy_skills"
+  expected_evidence:
+    - Single skill processing works
+    - Basic validation performed
+    - Correct output format
+  failure_condition:
+    - Legacy skill not available
+    - Processing fails
+    - Incorrect output
+  initial_failure_expectation: Legacy skill not available (expected)
+  post_implementation_success_expectation: Legacy single skill processing works if present
+
+### NFR-HEALTHCENTER-PERFORMANCE
+
+- id: VER-M9S3-NFR-PERFORMANCE-1
+  source_requirement_id: NFR-HEALTHCENTER-PERFORMANCE
+  verification_method: IMPLEMENTATION_CHECK
+  target: Performance of healthcenter --all and --skill commands
+  preconditions:
+    - Synthetic skills available for testing
+    - Performance measurement capabilities
+  input_or_fixture:
+    command_batch: "skills/healthcenter/healthcenter.py --all"
+    command_single: "skills/healthcenter/healthcenter.py --skill skill_a"
+    fixture_large: "tests/fixtures/performance/large_set"
+  expected_evidence:
+    - Linear scaling with skill count
+    - Constant memory usage per skill
+    - Reasonable execution times
+  failure_condition:
+    - Non-linear performance degradation
+    - Memory usage spikes
+    - Unacceptable execution times
+  initial_failure_expectation: Performance measurement not available
+  post_implementation_success_expectation: Performance metrics demonstrate efficient scaling
+
+### NFR-HEALTHCENTER-ERROR_HANDLING
+
+- id: VER-M9S3-NFR-ERROR_HANDLING-1
+  source_requirement_id: NFR-HEALTHCENTER-ERROR_HANDLING
+  verification_method: IMPLEMENTATION_CHECK
+  target: Error handling during batch processing
+  preconditions:
+    - Multiple skills exist in skills/ directory
+    - Some skills have error conditions
+    - Error handling configuration enabled
+  input_or_fixture:
+    error_handling_test: "Verify that individual skill failures don't break batch processing"
+    mixed_skills_fixture: "tests/fixtures/skills/error_handling"
+  expected_evidence:
+    - Failed skills logged but don't stop batch processing
+    - Error information preserved in health check artifacts
+    - System continues processing remaining skills
+    - Clear error reporting for failed skills
+    - Recovery possible from partial batch failures
+  failure_condition:
+    - Failed skills stop batch processing
+    - Error information lost or not preserved
+    - System stops after skill failures
+    - Missing error reporting
+    - No recovery from partial failures
+  initial_failure_expectation: Error handling features not implemented
+  post_implementation_success_expectation: Robust error handling with graceful failure recovery
+
+This verification protocol ensures M9S3 implementation adheres to contracts for canonical artifact adoption and healthcenter skill. Covers artifact creation, ledger integration, batch/single skill processing, validation, storage compliance, history tracking, and insights generation. Non-functional requirements for compliance, backward compatibility, performance, and error handling also addressed with appropriate verification methods.

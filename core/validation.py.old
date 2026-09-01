@@ -1,0 +1,268 @@
+#!/usr/bin/env python3
+"""Artifact validation module - FR-ARTIFACT_VALIDATION
+
+Validates artifact metadata against canonical contract.
+Implements contract: validate_metadata(artifact_path, schema?)
+"""
+
+from __future__ import annotations
+
+from dataclasses import dataclass, field
+from typing import Any, Dict, List, Optional
+import yaml
+from core.artifacts.metadata import extract_frontmatter
+
+
+@dataclass
+class ValidationResult:
+    """M9S1 canonical artifact validation result."""
+    valid: bool = True
+    errors: List[str] = field(default_factory=list)
+    missing_fields: List[str] = field(default_factory=list)
+
+
+@dataclass
+class ArtifactValidationResult:
+    """M9S1 artifact validation result (legacy compatibility)."""
+    valid: bool = True
+    errors: List[str] = field(default_factory=list)
+    missing_fields: List[str] = field(default_factory=list)
+
+
+class Validator:
+    """Abstract base class for skill validation rules (M8S1 FR-VALIDATOR_BASE_CLASS)."""
+    def validate(self, content: str) -> Dict[str, Any]:
+        raise NotImplementedError
+
+
+def _required_artifact_keys() -> List[str]:
+    """Return required artifact metadata keys per canonical contract."""
+    return ["id", "type", "title", "milestone_id", "status", "derived_from", "template_version", "metadata"]
+
+
+def _required_metadata_keys() -> List[str]:
+    """Return required metadata sub-keys."""
+    return ["created_at", "updated_at", "artifact_identity", "artifact_type"]
+
+
+def validate_metadata(artifact_path: str, schema: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+    """Validates artifact frontmatter and metadata against the Artifact Registry schema."""
+
+    try:
+        metadata = extract_frontmatter(artifact_path)
+    except Exception as e:
+        return {"valid": False, "errors": [f"Could not read file: {e}"], "missing_fields": _required_artifact_keys()}
+
+    if metadata is None:
+        return {"valid": False, "errors": ["No valid YAML frontmatter found"], "missing_fields": _required_artifact_keys()}
+
+    required = _required_artifact_keys()
+    missing = [field for field in required if field not in metadata]
+
+    errors: List[str] = []
+
+    if "metadata" in metadata:
+        metadata_obj = metadata["metadata"]
+        if not isinstance(metadata_obj, dict):
+            errors.append("Field 'metadata' must be an object")
+        else:
+            for field in _required_metadata_keys():
+                if field not in metadata_obj:
+                    errors.append(f"metadata.{field} is required")
+
+    if "type" in metadata:
+        artifact_type = metadata["type"]
+        if not isinstance(artifact_type, str) or not artifact_type.strip():
+            errors.append("Field 'type' must be a non-empty string")
+
+    if "milestone_id" in metadata:
+        milestone_id = metadata["milestone_id"]
+        if not isinstance(milestone_id, str) or not milestone_id.strip():
+            errors.append("Field 'milestone_id' must be a non-empty string")
+
+    valid = not missing and not errors
+    return {"valid": valid, "errors": errors, "missing_fields": missing}
+
+
+def _validate_metadata_against_schema(metadata: Dict[str, Any], schema: Dict[str, Any]) -> List[str]:
+    """Validate metadata against schema constraints."""
+    errors = []
+
+    # Check required fields from schema
+    if "required" in schema:
+        for field in schema["required"]:
+            if field not in metadata:
+                errors.append(f"Missing required field: {field}")
+
+    # Check additionalProperties
+    if "additionalProperties" in schema and not schema["additionalProperties"]:
+        allowed_fields = set(schema.get("properties", {}).keys())
+        if "required" in schema:
+            allowed_fields.update(schema["required"])
+        for field in metadata:
+            if field not in allowed_fields:
+                errors.append(f"Unexpected field: {field}")
+
+    # Check type constraints
+    if "properties" in schema:
+        for field, constraints in schema["properties"].items():
+            if field in metadata:
+                type_errors = _validate_field_type(metadata[field], constraints)
+                errors.extend(type_errors)
+
+    return errors
+
+
+def _validate_field_type(value: Any, constraints: Dict[str, Any]) -> List[str]:
+    """Validate a single field against its type constraints."""
+    errors = []
+
+    # Get expected type
+    expected_type = constraints.get("type")
+    if expected_type and not _check_type(value, expected_type):
+        errors.append(f"Field '{constraints.get('description', '')}' expected type {expected_type}")
+
+    # Check pattern constraints
+    if "pattern" in constraints and not _check_pattern(value, constraints["pattern"]):
+        errors.append(f"Field '{constraints.get('description', '')}' does not match pattern")
+
+    return errors
+
+
+def _check_type(value: Any, expected_type: str) -> bool:
+    """Check if value matches expected type."""
+    if expected_type == "string":
+        return isinstance(value, str)
+    elif expected_type == "object":
+        return isinstance(value, dict)
+    elif expected_type == "integer":
+        return isinstance(value, int)
+    return True
+
+
+def _check_pattern(value: str, pattern: str) -> bool:
+    """Check if value matches regex pattern."""
+    import re
+    return bool(re.match(pattern, value))
+
+
+# Project Configuration Validation Functions
+
+def validate_project_config(project_root: str) -> Dict[str, Any]:
+    """Validate project configuration at the project root.
+
+    M9S2 FR-PROJECT_CONFIG_VALIDATION: Validate .omp/config.yml using canonical validation APIs.
+    Returns validation result with structured error reporting.
+    """
+    from pathlib import Path
+
+    config_path = Path(project_root) / ".omp" / "config.yml"
+
+    # Return early for missing configuration
+    if not config_path.exists():
+        return {"valid": False, "errors": ["Project configuration file .omp/config.yml not found"], "missing_fields": ["project_id", "project_slug", "version"]}
+
+    # Use canonical validation API for schema validation
+    project_config_schema = {
+        "type": "object",
+        "required": ["project_id", "project_slug", "version"],
+        "properties": {
+            "project_id": {
+                "type": "string",
+                "description": "Unique project identifier"
+            },
+            "project_slug": {
+                "type": "string",
+                "pattern": "^[a-z0-9-]+$",
+                "description": "URL-safe name for the project"
+            },
+            "version": {
+                "type": "string",
+                "pattern": "^\\d+\\.\\d+\\.\\d+(-stable)?$",
+                "description": "Semantic version of the project"
+            }
+        },
+        "additionalProperties": False
+    }
+
+    # Extract YAML content from .omp/config.yml
+    # Note: .omp/config.yml is a special artifact type that may not have frontmatter delimiters
+    # It's a simple YAML configuration file for the project
+    yaml_content = {}
+    try:
+        with open(config_path, "r", encoding="utf-8") as f:
+            content = f.read()
+
+        # Try to parse as YAML frontmatter first (for canonical artifacts)
+        try:
+            metadata = extract_frontmatter(str(config_path))
+            if metadata is not None:
+                yaml_content = metadata
+        except:
+            pass
+
+        # If no frontmatter found, try to parse the entire file as YAML
+        if not yaml_content:
+            try:
+                yaml_content = yaml.safe_load(content) or {}
+            except:
+                yaml_content = {}
+
+    except Exception as e:
+        return {"valid": False, "errors": [f"Could not read configuration file: {e}"], "missing_fields": ["project_id", "project_slug", "version"]}
+
+    # Apply schema validation using existing validation functions
+    errors = _validate_metadata_against_schema(yaml_content, project_config_schema)
+    missing = []
+    if "required" in project_config_schema:
+        for field in project_config_schema["required"]:
+            if field not in yaml_content:
+                missing.append(field)
+
+    # Add human-readable error context for project config validation
+    if not missing and not errors:
+        return {"valid": True, "errors": [], "missing_fields": []}
+    else:
+        enhanced_errors = []
+        for error in errors:
+            enhanced_errors.append(f"Configuration error: {error}")
+        for missing_field in missing:
+            enhanced_errors.append(f"Missing required field: {missing_field}")
+        return {"valid": False, "errors": enhanced_errors, "missing_fields": missing}
+
+
+def validate_artifact(metadata: Dict[str, Any]) -> Dict[str, Any]:
+    """
+    Validates complete artifact against metadata schema.
+
+    Returns a structured result with:
+      - valid: boolean
+      - errors: string[]
+      - missing_fields: string[]
+    """
+    required = _required_artifact_keys()
+    missing_fields = [field for field in required if field not in metadata]
+
+    errors: List[str] = []
+
+    if "metadata" in metadata:
+        metadata_obj = metadata["metadata"]
+        if not isinstance(metadata_obj, dict):
+            errors.append("Field 'metadata' must be an object")
+        else:
+            for field in _required_metadata_keys():
+                if field not in metadata_obj:
+                    errors.append(f"metadata.{field} is required")
+
+    if "type" in metadata:
+        artifact_type = metadata["type"]
+        if not isinstance(artifact_type, str) or not artifact_type.strip():
+            errors.append("Field 'type' must be a non-empty string")
+
+    if "milestone_id" in metadata:
+        milestone_id = metadata["milestone_id"]
+        if not isinstance(milestone_id, str) or not milestone_id.strip():
+            errors.append("Field 'milestone_id' must be a non-empty string")
+
+    valid = not missing_fields and not errors
+    return {"valid": valid, "errors": errors, "missing_fields": missing_fields}

@@ -1,0 +1,15 @@
+{
+  "env_detection": {
+    "test_cases": [
+      {
+        "name": "python detection",
+        "project": "/Users/bparlan/devcode/aef/agent/test_project",
+        "expected_runtime": "python",
+        "expected_tools": [
+          "python"
+        ],
+        "threshold": 0.95
+      }
+    ]
+  }
+}

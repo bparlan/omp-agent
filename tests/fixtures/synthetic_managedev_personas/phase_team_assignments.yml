@@ -1,0 +1,82 @@
+# Phase team assignments for M12S1 test fixtures
+# Defines the expected 6-phase 3-person team compositions from FR-M12S1-3
+
+phase_team_assignments:
+  milestone:
+    team_members:
+      - the-analyst
+      - the-architect
+      - the-implementer
+    display_labels:
+      - Requirements Analyst
+      - Systems Architect
+      - Engineering Executor
+    primary_focus: Evidence completeness, technical boundaries, implementation continuity
+    continuity_anchor: the-implementer
+
+  specification:
+    team_members:
+      - the-architect
+      - the-skeptic
+      - the-implementer
+    display_labels:
+      - Systems Architect
+      - Adversarial Verification Engineer
+      - Engineering Executor
+    primary_focus: Contract decomposition, assumption challenge, practical feasibility
+    continuity_anchor: the-implementer
+
+  verification:
+    team_members:
+      - the-skeptic
+      - the-auditor
+      - the-implementer
+    display_labels:
+      - Adversarial Verification Engineer
+      - Independent Test Auditor
+      - Engineering Executor
+    primary_focus: Evidence validation, test quality audit, practical validation
+    continuity_anchor: the-implementer
+
+  tests:
+    team_members:
+      - the-strategist
+      - the-auditor
+      - the-implementer
+    display_labels:
+      - Adversarial QA / Test Strategist
+      - Independent Test Auditor
+      - Engineering Executor
+    primary_focus: Failure scenario focus, test independence, practical implementation
+    continuity_anchor: the-implementer
+
+  evaluation:
+    team_members:
+      - the-reviewer
+      - the-auditor
+      - the-implementer
+    display_labels:
+      - Adversarial Reviewer
+      - Independent Test Auditor
+      - Engineering Executor
+    primary_focus: Hidden defect detection, evidence validation, execution continuity
+    continuity_anchor: the-implementer
+
+  implementation:
+    team_members:
+      - the-implementer
+      - the-architect
+      - the-reviewer
+    display_labels:
+      - Engineering Executor
+      - Systems Architect
+      - Adversarial Reviewer
+    primary_focus: Contract execution, architecture integration, defect prevention
+    continuity_anchor: the-implementer
+
+# Validation rules
+validation:
+  total_phases: 6
+  team_size: 3
+  continuity_anchor_id: the-implementer
+  expected_continuity_anchor_count: 6

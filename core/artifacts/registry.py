@@ -119,7 +119,13 @@ def _ensure_registered_types() -> None:
 
         registry_storage_rule = {
             "pattern": definition.canonical_storage_location,
-            "extensions": ["md"]
+            "extensions": ["md"],
+            "naming_conventions": {
+                "milestone_id_prefix": "M",
+                "skill_id_prefix": "",
+                "health_check_suffix": "-HC",
+                "numbering_scheme": "{N}"
+            }
         }
 
         _registry.register_type(type_name, registry_schema, registry_storage_rule)

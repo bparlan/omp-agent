@@ -89,4 +89,4 @@ docs/*.pptx
 verification_fixture_*.md
 mock_ledger_*.md
 sample_spec.md
-sample_verification.md
+sample_verification.md*.dmg

@@ -106,7 +106,7 @@ Your skill now has access to `code-search` and `lsp` tools for safe repository e
 
 | Option Label | Action |
 |:----------|:---|
-| Generate Verification | Run `/generate-verification` to create the verification protocol for this specification. |
+| Generate Verification | Run `/healthcheck generate-verification --execute` to create the verification protocol for this specification. |
 | Review Specification | Review the generated specification document before proceeding. |
 | Custom | Let me specify a different next step. |
 

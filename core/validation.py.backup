@@ -1,0 +1,459 @@
+#!/usr/bin/env python3
+"""Artifact validation module - FR-ARTIFACT_VALIDATION
+
+Validates artifact metadata against canonical contract.
+Implements contract: validate_metadata(artifact_path, schema?)
+"""
+
+from __future__ import annotations
+
+from dataclasses import dataclass, field
+from typing import Any, Dict, List, Optional
+import yaml
+from core.artifacts.metadata import extract_frontmatter
+
+@dataclass
+class ValidationResult:
+    """M9S1 canonical artifact validation result."""
+    valid: bool = True
+    errors: List[str] = field(default_factory=list)
+    missing_fields: List[str] = field(default_factory=list)
+
+@dataclass
+class ArtifactValidationResult:
+    """M9S1 artifact validation result (legacy compatibility)."""
+    valid: bool = True
+    errors: List[str] = field(default_factory=list)
+    missing_fields: List[str] = field(default_factory=list)
+
+class Validator:
+    """Abstract base class for skill validation rules (M8S1 FR-VALIDATOR_BASE_CLASS)."""
+    def validate(self, content: str) -> Dict[str, Any]:
+        raise NotImplementedError
+
+class SkillValidator:
+    """Concrete validator for skill content (M8S1 FR-SKILL_VALIDATOR)."""
+    
+    def validate(self, content: str) -> Dict[str, Any]:
+        """Validate skill content (M8S1 FR-SKILL_VALIDATOR_VALIDATE).
+        
+        Args:
+            content: Raw SKILL.md content string to validate
+            
+        Returns:
+            Dict with keys: score, status, fields_checked, field_results, errors, stable_suffix_detected
+        """
+        result: Dict[str, Any] = {
+            "score": 0.0,
+            "status": "unknown",
+            "fields_checked": [],
+            "field_results": {},
+            "errors": [],
+            "stable_suffix_detected": False
+        }
+        
+        try:
+            # Parse YAML frontmatter
+            parsed = self._parse_frontmatter(content)
+            if parsed is None:
+                result["errors"].append("Invalid or missing YAML frontmatter")
+                return result
+                
+            # Validate required fields
+            result["fields_checked"], field_results = self._validate_fields(parsed)
+            result["field_results"] = field_results
+            
+            # Calculate score
+            result["score"] = self._calculate_score(field_results)
+            
+            # Determine status
+            result["status"] = self._determine_status(result["score"], result["errors"])
+            
+            # Check for stable suffix
+            result["stable_suffix_detected"] = self._check_stable_suffix(content)
+            
+        except Exception as e:
+            result["errors"].append(f"Validation error: {str(e)}")
+            
+        return result
+    
+    def _parse_frontmatter(self, content: str) -> Optional[Dict[str, Any]]:
+        """Parse YAML frontmatter from skill content."""
+        # Simple frontmatter detection: YAML block between --- delimiters
+        if not content or not isinstance(content, str):
+            return None
+            
+        lines = content.split('\n')
+        if len(lines) < 2 or lines[0].strip() != '---':
+            return None
+            
+        try:
+            end_idx = None
+            for i, line in enumerate(lines[1:], 1):
+                if line.strip() == '---':
+                    end_idx = i
+                    break
+                    
+            if end_idx is None:
+                return None
+                
+            frontmatter_text = '\n'.join(lines[1:end_idx])
+            return yaml.safe_load(frontmatter_text) or {}
+            
+        except Exception:
+            return None
+    
+    def _validate_fields(self, frontmatter: Dict[str, Any]) -> tuple[List[str], Dict[str, Any]]:
+        """Validate skill frontmatter fields and return results."""
+        fields_checked = []
+        field_results = {}
+        
+        # Check required fields for skill artifacts
+        required_fields = ["id", "title", "type", "status"]
+        
+        for field in required_fields:
+            fields_checked.append(field)
+            if field in frontmatter:
+                value = frontmatter[field]
+                is_valid = self._validate_field_value(field, value)
+                field_results[field] = {
+                    "valid": is_valid,
+                    "value": value,
+                    "error": None if is_valid else f"Invalid {field} value"
+                }
+            else:
+                field_results[field] = {
+                    "valid": False,
+                    "value": None,
+                    "error": f"Missing required field: {field}"
+                }
+        
+        return fields_checked, field_results
+    
+    def _validate_field_value(self, field: str, value: Any) -> bool:
+        """Validate a single field value."""
+        if value is None:
+            return False
+            
+        if field == "id":
+            return isinstance(value, str) and bool(value.strip())
+        elif field == "title":
+            return isinstance(value, str) and bool(value.strip())
+        elif field == "type":
+            return isinstance(value, str) and bool(value.strip())
+        elif field == "status":
+            return isinstance(value, str) and bool(value.strip())
+            
+        return False
+    
+    def _calculate_score(self, field_results: Dict[str, Any]) -> float:
+        """Calculate validation score based on field results."""
+        if not field_results:
+            return 0.0
+            
+        valid_count = 0
+        for field_result in field_results.values():
+            if field_result.get("valid", False):
+                valid_count += 1
+                
+        return valid_count / len(field_results)
+    
+    def _determine_status(self, score: float, errors: List[str]) -> str:
+        """Determine validation status based on score and errors."""
+        if errors:
+            return "invalid"
+        elif score >= 1.0:
+            return "healthy"
+        elif score >= 0.5:
+            return "warning"
+        else:
+            return "invalid"
+    def validate_skill_file(self, skill_path: Path) -> dict:
+        """Validate a skill file using the modular validation system.
+
+        Args:
+            skill_path: Path to the skill file (e.g., SKILL.md)
+
+        Returns:
+            dict: Validation result with keys:
+                - name: Skill name
+                - status: "healthy", "needs_review", or "error"
+                - validation_score: Float between 0 and 1
+                - has_stable_suffix: Boolean indicating if -stable suffix present
+                - issues: List of validation issues
+                - last_modified: ISO format timestamp
+                - last_checked: ISO format timestamp
+        """
+        from datetime import datetime
+
+        orchestrator = ValidationOrchestrator()
+
+        try:
+            content = skill_path.read_text()
+
+            # Use the orchestrator to get validation results
+            result = orchestrator.validate_skill(content, skill_path)
+
+            # Format result to match expected format
+            return {
+                "name": result.name,
+                "status": result.status,
+                "validation_score": result.validation_score,
+                "has_stable_suffix": result.has_stable_suffix,
+                "issues": result.issues,
+                "last_modified": datetime.now().isoformat(),
+                "last_checked": datetime.now().isoformat(),
+            }
+
+        except Exception as e:
+            return {
+                "name": skill_path.parent.name,
+                "status": "error",
+                "validation_score": 0.0,
+                "has_stable_suffix": False,
+                "issues": [f"Error reading file: {str(e)}"],
+                "last_modified": datetime.now().isoformat(),
+                "last_checked": datetime.now().isoformat(),
+            }
+    
+    def _check_stable_suffix(self, content: str) -> bool:
+        """Check if content has stable suffix detection (e.g., `-stable` in path)."""
+        if not content:
+            return False
+            
+        # Check if there's a stable suffix in the content
+        import re
+            
+        # Look for patterns like `-stable` in frontmatter or other indicators
+        stable_indicators = [
+            r'-stable\b',
+            r'--stable\b',
+            r'stable[-_]?\d*$'
+        ]
+        
+        for indicator in stable_indicators:
+            if re.search(indicator, content, re.IGNORECASE):
+                return True
+                
+        return False
+
+def _required_artifact_keys() -> List[str]:
+    """Return required artifact metadata keys per canonical contract."""
+    return ["id", "type", "title", "milestone_id", "status", "derived_from", "template_version", "metadata"]
+
+def _required_metadata_keys() -> List[str]:
+    """Return required metadata sub-keys."""
+    return ["created_at", "updated_at", "artifact_identity", "artifact_type"]
+
+def validate_metadata(artifact_path: str, schema: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+    """Validates artifact frontmatter and metadata against the Artifact Registry schema."""
+
+    try:
+        metadata = extract_frontmatter(artifact_path)
+    except Exception as e:
+        return {"valid": False, "errors": [f"Could not read file: {e}"], "missing_fields": _required_artifact_keys()}
+
+    if metadata is None:
+        return {"valid": False, "errors": ["No valid YAML frontmatter found"], "missing_fields": _required_artifact_keys()}
+
+    required = _required_artifact_keys()
+    missing = [field for field in required if field not in metadata]
+
+    errors: List[str] = []
+
+    if "metadata" in metadata:
+        metadata_obj = metadata["metadata"]
+        if not isinstance(metadata_obj, dict):
+            errors.append("Field 'metadata' must be an object")
+        else:
+            for field in _required_metadata_keys():
+                if field not in metadata_obj:
+                    errors.append(f"metadata.{field} is required")
+
+    if "type" in metadata:
+        artifact_type = metadata["type"]
+        if not isinstance(artifact_type, str) or not artifact_type.strip():
+            errors.append("Field 'type' must be a non-empty string")
+
+    if "milestone_id" in metadata:
+        milestone_id = metadata["milestone_id"]
+        if not isinstance(milestone_id, str) or not milestone_id.strip():
+            errors.append("Field 'milestone_id' must be a non-empty string")
+
+    valid = not missing and not errors
+    return {"valid": valid, "errors": errors, "missing_fields": missing}
+
+def _validate_metadata_against_schema(metadata: Dict[str, Any], schema: Dict[str, Any]) -> List[str]:
+    """Validate metadata against schema constraints."""
+    errors = []
+
+    # Check required fields from schema
+    if "required" in schema:
+        for field in schema["required"]:
+            if field not in metadata:
+                errors.append(f"Missing required field: {field}")
+
+    # Check additionalProperties
+    if "additionalProperties" in schema and not schema["additionalProperties"]:
+        allowed_fields = set(schema.get("properties", {}).keys())
+        if "required" in schema:
+            allowed_fields.update(schema["required"])
+        for field in metadata:
+            if field not in allowed_fields:
+                errors.append(f"Unexpected field: {field}")
+
+    # Check type constraints
+    if "properties" in schema:
+        for field, constraints in schema["properties"].items():
+            if field in metadata:
+                type_errors = _validate_field_type(metadata[field], constraints)
+                errors.extend(type_errors)
+
+    return errors
+
+def _validate_field_type(value: Any, constraints: Dict[str, Any]) -> List[str]:
+    """Validate a single field against its type constraints."""
+    errors = []
+
+    # Get expected type
+    expected_type = constraints.get("type")
+    if expected_type and not _check_type(value, expected_type):
+        errors.append(f"Field '{constraints.get('description', '')}' expected type {expected_type}")
+
+    # Check pattern constraints
+    if "pattern" in constraints and not _check_pattern(value, constraints["pattern"]):
+        errors.append(f"Field '{constraints.get('description', '')}' does not match pattern")
+
+    return errors
+
+def _check_type(value: Any, expected_type: str) -> bool:
+    """Check if value matches expected type."""
+    if expected_type == "string":
+        return isinstance(value, str)
+    elif expected_type == "object":
+        return isinstance(value, dict)
+    elif expected_type == "integer":
+        return isinstance(value, int)
+    return True
+
+def _check_pattern(value: str, pattern: str) -> bool:
+    """Check if value matches regex pattern."""
+    import re
+    return bool(re.match(pattern, value))
+
+# Project Configuration Validation Functions
+
+def validate_project_config(project_root: str) -> Dict[str, Any]:
+    """Validate project configuration at the project root.
+    
+    Validates .omp/config.yml and related configuration files.
+    """
+    import os
+
+    config_path = os.path.join(project_root, ".omp", "config.yml")
+    if not os.path.exists(config_path):
+        return {"valid": False, "errors": ["Configuration file not found"], "missing_fields": ["project_id", "project_slug", "version"]}
+
+    # Project configuration schema
+    project_config_schema = {
+        "type": "object",
+        "properties": {
+            "project_id": {
+                "type": "string",
+                "description": "Unique project identifier"
+            },
+            "project_slug": {
+                "type": "string",
+                "pattern": "^[a-z0-9-]+$",
+                "description": "URL-safe name for the project"
+            },
+            "version": {
+                "type": "string",
+                "pattern": "^\\d+\\.\\d+\\.\\d+(-stable)?$",
+                "description": "Semantic version of the project"
+            }
+        },
+        "required": ["project_id", "project_slug", "version"],
+        "additionalProperties": False
+    }
+
+    # Extract YAML content from .omp/config.yml
+    # Note: .omp/config.yml is a special artifact type that may not have frontmatter delimiters
+    # It's a simple YAML configuration file for the project
+    yaml_content = {}
+    try:
+        with open(config_path, "r", encoding="utf-8") as f:
+            content = f.read()
+
+        # Try to parse as YAML frontmatter first (for canonical artifacts)
+        try:
+            metadata = extract_frontmatter(str(config_path))
+            if metadata is not None:
+                yaml_content = metadata
+        except:
+            pass
+
+        # If no frontmatter found, try to parse the entire file as YAML
+        if not yaml_content:
+            try:
+                yaml_content = yaml.safe_load(content) or {}
+            except:
+                yaml_content = {}
+
+    except Exception as e:
+        return {"valid": False, "errors": [f"Could not read configuration file: {e}"], "missing_fields": ["project_id", "project_slug", "version"]}
+
+    # Apply schema validation using existing validation functions
+    errors = _validate_metadata_against_schema(yaml_content, project_config_schema)
+    missing = []
+    if "required" in project_config_schema:
+        for field in project_config_schema["required"]:
+            if field not in yaml_content:
+                missing.append(field)
+
+    # Add human-readable error context for project config validation
+    if not missing and not errors:
+        return {"valid": True, "errors": [], "missing_fields": []}
+    else:
+        enhanced_errors = []
+        for error in errors:
+            enhanced_errors.append(f"Configuration error: {error}")
+        for missing_field in missing:
+            enhanced_errors.append(f"Missing required field: {missing_field}")
+        return {"valid": False, "errors": enhanced_errors, "missing_fields": missing}
+
+def validate_artifact(metadata: Dict[str, Any]) -> Dict[str, Any]:
+    """
+    Validates complete artifact against metadata schema.
+
+    Returns a structured result with:
+      - valid: boolean
+      - errors: string[]
+      - missing_fields: string[]
+    """
+    required = _required_artifact_keys()
+    missing_fields = [field for field in required if field not in metadata]
+
+    errors: List[str] = []
+
+    if "metadata" in metadata:
+        metadata_obj = metadata["metadata"]
+        if not isinstance(metadata_obj, dict):
+            errors.append("Field 'metadata' must be an object")
+        else:
+            for field in _required_metadata_keys():
+                if field not in metadata_obj:
+                    errors.append(f"metadata.{field} is required")
+
+    if "type" in metadata:
+        artifact_type = metadata["type"]
+        if not isinstance(artifact_type, str) or not artifact_type.strip():
+            errors.append("Field 'type' must be a non-empty string")
+
+    if "milestone_id" in metadata:
+        milestone_id = metadata["milestone_id"]
+        if not isinstance(milestone_id, str) or not milestone_id.strip():
+            errors.append("Field 'milestone_id' must be a non-empty string")
+
+    valid = not missing_fields and not errors
+    return {"valid": valid, "errors": errors, "missing_fields": missing_fields}

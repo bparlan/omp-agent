@@ -1,0 +1,10 @@
+{
+  "tests_run": 18,
+  "tests_passed": 13,
+  "tests_failed": 3,
+  "valid_initial_failures": 2,
+  "invalid_tests": 2,
+  "spec_checks": 3,
+  "tdd_leaks": 8,
+  "exit_code": 2
+}

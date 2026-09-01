@@ -1,0 +1,34 @@
+{
+  "environment": {
+    "detection": {
+      "api_version": "1.0.0",
+      "version": "1.0.0",
+      "runtime_detection": {
+        "method": "probe_and_match",
+        "timeout_ms": 5000,
+        "fallback_strategies": [
+          "tool_fallback",
+          "system_default",
+          "compatibility_mode"
+        ]
+      },
+      "tool_validation": {
+        "require_exact_match": true,
+        "compatibility_threshold": 0.95,
+        "allow_alternatives": true,
+        "priority_order": [
+          "mise",
+          "system",
+          "virtualenv",
+          "container"
+        ]
+      }
+    },
+    "isolation": {
+      "mode": "workspace_per_project",
+      "shared_base": "mise_global_cache",
+      "cross_contamination_prevention": true,
+      "workspace_prefix": ".aef-env"
+    }
+  }
+}

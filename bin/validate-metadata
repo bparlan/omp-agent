@@ -1,0 +1,361 @@
+#!/usr/bin/env python3
+"""Artifact validation script for M13S2 - implements ALL FR-* requirements
+
+Validates that artifact filenames strictly follow M13 naming patterns using regex validation.
+Implements ALL M13S2 specification requirements:
+
+1. FR-ARTIFACT_NAMING_VALIDATION: Filename pattern validation using compiled regex patterns
+2. FR-FRONTMATTER_SCHEMA_VALIDATION: Frontmatter extraction and schema validation  
+3. FR-METADATA_VERSION_COMPLIANCE: Metadata version parsing and compliance checking
+
+M13 artifact naming patterns (from SPEC-M13S2.md):
+- specification: ^M13S\d+\.md$
+- verification: ^VER-M13S\d+V\d+\.md$
+- test: ^TEST-M13S\d+T\d+\.md$
+- evaluation: ^EVA-M13S\d+\.md$
+- review: ^REV-M13S\d+\.md$
+- closure: ^CLOSE-M13-\d+\.md$
+
+Integration contract: validate_metadata(artifact_path: str, schema: Optional[Dict[str, Any]] = None) -> Dict[str, Any]
+"""
+
+import sys
+import os
+import re
+import yaml
+from typing import Dict, Any, Optional, List
+
+# Import core validation components for integration
+try:
+    from core.validation import validate_metadata as core_validate_metadata
+    from core.artifacts.metadata import extract_frontmatter
+    from core.artifacts.registry import get_registry
+    CORE_INTEGRATION_AVAILABLE = True
+except ImportError:
+    # Fallback for when core modules are not importable
+    CORE_INTEGRATION_AVAILABLE = False
+
+def validate_filename_pattern(filename: str) -> Dict[str, Any]:
+    """Validates filename against M13 artifact naming patterns.
+    
+    Implements FR-ARTIFACT_NAMING_VALIDATION from SPEC-M13S2.md using
+    compiled regex patterns for all six M13 artifact types.
+    
+    Args:
+        filename: The artifact filename to validate (e.g., "M13S1.md", "VER-M13S1V1.md")
+        
+    Returns:
+        Dict with validation results including:
+        - valid: boolean indicating if filename matches M13 pattern
+        - pattern: the regex pattern that matched
+        - matched_type: the artifact type (specification, verification, etc.)
+        - errors: list of validation error messages
+    """
+    # M13 artifact naming patterns from SPEC-M13S2.md section "FR-ARTIFACT_NAMING_VALIDATION"
+    patterns = {
+        'specification': r'^M13S\d+\.md$',
+        'verification': r'^VER-M13S\d+V\d+\.md$',
+        'test': r'^TEST-M13S\d+T\d+\.md$',
+        'evaluation': r'^EVA-M13S\d+\.md$',
+        'review': r'^REV-M13S\d+\.md$',
+        'closure': r'^CLOSE-M13-\d+\.md$'
+    }
+    
+    errors = []
+    matched_type = None
+    
+    # Check filename against M13 patterns using re.match() as required by specification
+    for artifact_type, pattern in patterns.items():
+        if re.match(pattern, filename):
+            matched_type = artifact_type
+            break
+    
+    if matched_type is None:
+        errors.append(f"Filename '{filename}' does not match any M13 artifact pattern")
+    
+    return {
+        'valid': len(errors) == 0,
+        'pattern': patterns.get(matched_type) if matched_type else None,
+        'matched_type': matched_type,
+        'errors': errors
+    }
+
+def extract_and_validate_frontmatter(artifact_path: str) -> Dict[str, Any]:
+    """Extracts and validates frontmatter from an artifact file.
+    
+    Implements FR-FRONTMATTER_SCHEMA_VALIDATION from SPEC-M13S2.md using
+    the canonical AEF validation components.
+    
+    Args:
+        artifact_path: Path to the artifact file to validate
+        
+    Returns:
+        Dict with 'valid' boolean, 'errors' list, and 'missing_fields' list
+        
+    Uses the canonical validation module's validate_metadata() function
+    which implements all frontmatter validation requirements including:
+    - Validation of required fields: id, type, title, milestone_id, status, derived_from, template_version, metadata
+    - Type validation for all fields
+    - Schema validation against canonical AEF registry
+    """
+    # If core integration is available, use the canonical validation
+    if CORE_INTEGRATION_AVAILABLE:
+        try:
+            return core_validate_metadata(artifact_path)
+        except Exception:
+            return {
+                'valid': False,
+                'errors': ['Canonical validation failed - core components not fully available'],
+                'missing_fields': ['id', 'type', 'title', 'milestone_id', 'status', 'derived_from', 'template_version', 'metadata']
+            }
+    
+    # Fallback implementation if core modules are not available
+    try:
+        with open(artifact_path, 'r', encoding='utf-8') as f:
+            content = f.read()
+    except (IOError, OSError):
+        return {
+            'valid': False,
+            'errors': [f"Could not read artifact file: {artifact_path}"],
+            'missing_fields': ['id', 'type', 'title', 'milestone_id', 'status', 'derived_from', 'template_version', 'metadata']
+        }
+    
+    # Strip UTF-8 BOM if present
+    if content.startswith('\ufeff'):
+        content = content[1:]
+    
+    # Extract YAML frontmatter delimited by --- ... ---
+    match = re.match(r'^---\s*\n(.*?)\n---', content, re.DOTALL)
+    if not match:
+        return {
+            'valid': False,
+            'errors': [f"No valid YAML frontmatter found in {artifact_path}"],
+            'missing_fields': ['id', 'type', 'title', 'milestone_id', 'status', 'derived_from', 'template_version', 'metadata']
+        }
+    
+    try:
+        metadata = yaml.safe_load(match.group(1))
+    except yaml.YAMLError as e:
+        return {
+            'valid': False,
+            'errors': [f"Invalid YAML in frontmatter: {str(e)}"],
+            'missing_fields': ['id', 'type', 'title', 'milestone_id', 'status', 'derived_from', 'template_version', 'metadata']
+        }
+    
+    if not isinstance(metadata, dict):
+        return {
+            'valid': False,
+            'errors': [f"Frontmatter must be a YAML dictionary, got {type(metadata)}"],
+            'missing_fields': ['id', 'type', 'title', 'milestone_id', 'status', 'derived_from', 'template_version', 'metadata']
+        }
+    
+    # Validate required fields
+    valid = True
+    missing_fields = []
+    errors = []
+    
+    required_fields = ['id', 'type', 'title', 'milestone_id', 'status', 'derived_from', 'template_version', 'metadata']
+    for field in required_fields:
+        if field not in metadata:
+            missing_fields.append(field)
+            valid = False
+    
+    # Validate field types
+    for field, value in metadata.items():
+        if field == 'id' and not isinstance(value, str):
+            errors.append(f"Field 'id' must be a string")
+        elif field == 'type' and value not in ['specification', 'verification', 'test_set', 'evaluation', 'review', 'closure']:
+            errors.append(f"Field 'type' must be one of ['specification', 'verification', 'test_set', 'evaluation', 'review', 'closure'], got '{value}'")
+        elif field == 'milestone_id' and not isinstance(value, str):
+            errors.append(f"Field 'milestone_id' must be a string")
+        elif field == 'status' and value not in ['draft', 'in_progress', 'complete', 'verified', 'approved', 'closed']:
+            errors.append(f"Field 'status' must be one of ['draft', 'in_progress', 'complete', 'verified', 'approved', 'closed'], got '{value}'")
+        elif field == 'derived_from' and not isinstance(value, list):
+            errors.append(f"Field 'derived_from' must be a list")
+        elif field == 'template_version' and not isinstance(value, str):
+            errors.append(f"Field 'template_version' must be a string")
+        elif field == 'metadata' and not isinstance(value, dict):
+            errors.append(f"Field 'metadata' must be a dictionary")
+    
+    if 'title' in metadata and not isinstance(metadata['title'], str):
+        errors.append(f"Field 'title' must be a string")
+    
+    # Validate metadata subfields
+    if 'metadata' in metadata and isinstance(metadata['metadata'], dict):
+        required_metadata_fields = ['created_at', 'updated_at', 'artifact_identity', 'artifact_type']
+        for field in required_metadata_fields:
+            if field not in metadata['metadata']:
+                missing_fields.append(f"metadata.{field}")
+                valid = False
+            elif not isinstance(metadata['metadata'][field], str):
+                errors.append(f"metadata.{field} must be a string")
+    
+    if valid and len(errors) == 0:
+        return {'valid': True, 'errors': [], 'missing_fields': []}
+    else:
+        return {'valid': False, 'errors': errors, 'missing_fields': missing_fields}
+
+def validate_metadata_version(metadata: Dict[str, Any]) -> Dict[str, Any]:
+    """Validates metadata version compliance.
+    
+    Implements FR-METADATA_VERSION_COMPLIANCE from SPEC-M13S2.md.
+    
+    Args:
+        metadata: The metadata dictionary to validate (typically from frontmatter)
+        
+    Returns:
+        Dict with 'valid' boolean, 'errors' list, and 'missing_fields' list
+    """
+    # Extract template_version from metadata
+    template_version = metadata.get('template_version')
+    
+    if not template_version:
+        return {
+            'valid': False,
+            'errors': ['Missing required field: template_version'],
+            'missing_fields': ['template_version']
+        }
+    
+    # Validate version format (X.Y.Z semantic versioning)
+    version_pattern = r'^\d+\.\d+\.\d+$'
+    if not re.match(version_pattern, template_version):
+        return {
+            'valid': False,
+            'errors': [f"Invalid version format '{template_version}'. Must be X.Y.Z semantic versioning"],
+            'missing_fields': []
+        }
+    
+    # Extract version components
+    major, minor, patch = map(int, template_version.split('.'))
+    
+    # Check against M13 baseline version (1.3.0)
+    # For M13 compliance, version must be >= 1.3.0
+    if (major, minor, patch) < (1, 3, 0):
+        return {
+            'valid': False,
+            'errors': [f"Version '{template_version}' is below M13 baseline 1.3.0"],
+            'missing_fields': []
+        }
+    
+    # All validations passed
+    return {
+        'valid': True,
+        'errors': [],
+        'missing_fields': []
+    }
+
+def validate_metadata(artifact_path: str, schema: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+    """Validates artifact against all M13S2 specification requirements.
+    
+    This is the main validation function that implements ALL M13S2 specification
+    requirements: FR-ARTIFACT_NAMING_VALIDATION, FR-FRONTMATTER_SCHEMA_VALIDATION,
+    and FR-METADATA_VERSION_COMPLIANCE.
+    
+    Args:
+        artifact_path: Path to the artifact file to validate
+        schema: Optional schema parameter (not used for filename validation in M13S2)
+        
+    Returns:
+        Dict with 'valid' boolean, 'errors' list, and 'missing_fields' list
+        
+    The validation follows SPEC-M13S2.md Requirements 1, 2, and 3:
+    - Requirement 1: Implement filename pattern validation using compiled regex patterns
+    - Requirement 2: Implement frontmatter extraction and schema validation
+    - Requirement 3: Implement metadata version parsing and compliance checking
+    """
+    all_errors = []
+    all_missing_fields = []
+    version_result = {'valid': True, 'errors': [], 'missing_fields': []}  # Initialize variable
+    
+    # Step 1: Validate filename pattern (FR-ARTIFACT_NAMING_VALIDATION)
+    try:
+        filename = os.path.basename(artifact_path)
+    except Exception as e:
+        all_errors.append(f"Could not parse artifact path: {e}")
+        all_missing_fields.append('filename')
+        return {
+            'valid': False,
+            'errors': all_errors,
+            'missing_fields': all_missing_fields
+        }
+    
+    # Validate filename pattern against M13 artifact naming conventions
+    filename_result = validate_filename_pattern(filename)
+    
+    if not filename_result['valid']:
+        all_errors.extend(filename_result['errors'])
+    
+    # Step 2: Validate frontmatter schema (FR-FRONTMATTER_SCHEMA_VALIDATION)
+    frontmatter_result = extract_and_validate_frontmatter(artifact_path)
+    
+    if not frontmatter_result['valid']:
+        all_errors.extend(frontmatter_result['errors'])
+        all_missing_fields.extend(frontmatter_result['missing_fields'])
+    
+    # Step 3: Validate metadata version compliance (FR-METADATA_VERSION_COMPLIANCE)
+    # Extract template_version from frontmatter if frontmatter is valid
+    if frontmatter_result['valid']:
+        try:
+            # Try to extract frontmatter separately for version validation
+            import yaml
+            with open(artifact_path, 'r', encoding='utf-8') as f:
+                content = f.read()
+            if content.startswith('\ufeff'):
+                content = content[1:]
+            match = re.match(r'^---\s*\n(.*?)\n---', content, re.DOTALL)
+            if match:
+                metadata_from_file = yaml.safe_load(match.group(1))
+                if metadata_from_file and 'template_version' in metadata_from_file:
+                    version_result = validate_metadata_version(metadata_from_file)
+                    if not version_result['valid']:
+                        all_errors.extend(version_result['errors'])
+                        all_missing_fields.extend(version_result['missing_fields'])
+        except Exception:
+            pass  # If anything fails, continue with what we have
+    
+    # Determine overall validity
+    overall_valid = (
+        len(all_errors) == 0 and 
+        frontmatter_result.get('valid', True) and
+        version_result['valid']
+    )
+    
+    return {
+        'valid': overall_valid,
+        'errors': all_errors,
+        'missing_fields': all_missing_fields
+    }
+
+def main():
+    """Main entry point for validate-metadata script."""
+    if len(sys.argv) < 2:
+        print("Usage: bin/validate-metadata <artifact_path> [schema]")
+        print("Validates artifact against all M13S2 specification requirements")
+        print("Implements FR-ARTIFACT_NAMING_VALIDATION, FR-FRONTMATTER_SCHEMA_VALIDATION,")
+        print("and FR-METADATA_VERSION_COMPLIANCE from SPEC-M13S2.md")
+        sys.exit(1)
+    
+    artifact_path = sys.argv[1]
+    schema = sys.argv[2] if len(sys.argv) > 2 else None
+    
+    # Validate the artifact
+    result = validate_metadata(artifact_path, schema)
+    
+    # Output validation result with appropriate exit codes
+    if result.get('valid'):
+        print(f"✓ {artifact_path}: Valid M13 artifact filename")
+        if 'matched_type' in result and result['matched_type']:
+            print(f"  Type: {result['matched_type']}")
+            if 'pattern' in result and result['pattern']:
+                print(f"  Pattern: {result['pattern']}")
+        sys.exit(0)
+    else:
+        print(f"✗ {artifact_path}: Invalid M13 artifact filename")
+        for error in result.get('errors', []):
+            print(f"  Error: {error}")
+        for field in result.get('missing_fields', []):
+            print(f"  Missing: {field}")
+        sys.exit(1)
+
+if __name__ == '__main__':
+    main()

@@ -18,7 +18,7 @@ from typing import Any, Dict, List, Optional
 
 import yaml
 from core.artifacts.errors import ArtifactNotFoundError
-from core.artifacts.artifact_types import get_type_definition
+from core.artifacts.artifact_types import get_type_definition, get_artifact_type
 from core.validation import validate_metadata
 
 

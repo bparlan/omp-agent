@@ -123,8 +123,56 @@ _RAW_ARTIFACT_TYPE_DEFINITIONS = {
         "lifecycle_states": ["draft", "proposed", "completed", "archived"],
         "allowed_relationships": ["derived_from", "reviews", "evaluates"]
     },
-}
+    "operations-consolidation": {
+        "machine_identifier": "operations-consolidation",
+        "human_readable_name": "Operations Consolidation Report",
+        "purpose": "Captures operational governance decisions, intake buffer classifications, folder governance outcomes, and docs-handoff recommendations for the manage-docs lifecycle",
+        "producer_skills": ["manage-docs"],
+        "consumer_skills": ["manage-docs", "close-milestone", "sync-documentation"],
+        "canonical_storage_location": "<M_ID>/operations_consolidations/<SPEC_ID>OPS-C-{N}.md",
+        "required_metadata": ["created_at", "updated_at", "artifact_identity", "artifact_type", "scope", "classification"],
+        "optional_metadata": ["intake_buffer_status", "folder_migration_plan", "event_watch_state", "derived_from"],
+        "lifecycle_states": ["draft", "proposed", "completed", "archived"],
+        "allowed_relationships": ["derived_from", "reviews", "evaluates", "implements"]
+    },
+    "health-check": {
+        "machine_identifier": "health-check",
+        "human_readable_name": "Health Check Artifact",
+        "purpose": "Records skill health validation results and outcomes",
+        "producer_skills": ["healthcenter"],
+        "consumer_skills": ["manage-development", "evaluate-implementation"],
+        "canonical_storage_location": "{milestone_id}/health-checks/{skill_id}-HC-{N}.md",
+        "required_metadata": ["id", "type", "milestone_id", "skill_id", "validation_score", "status", "timestamp", "insights"],
+        "optional_metadata": ["version", "recommendations", "failed_validations", "passed_validations"],
+        "lifecycle_states": ["draft", "completed", "archived"],
+        "allowed_relationships": ["derived_from", "evaluates", "implements"]
+    },
+    "project-config": {
+        "machine_identifier": "project-config",
+        "human_readable_name": "Project Configuration",
+        "purpose": "Standard project configuration for AEF projects",
+        "producer_skills": ["bootstrap-project", "manage-roadmap"],
+        "consumer_skills": ["validate", "healthcenter", "manage-development"],
+        "canonical_storage_location": ".omp/config.yml",
+        "required_metadata": ["created_at", "updated_at", "artifact_identity", "artifact_type"],
+        "optional_metadata": ["version", "producer_skill"],
+        "lifecycle_states": ["draft", "proposed", "implemented", "reviewed", "archived"],
+        "allowed_relationships": ["derived_from", "evaluates", "implements", "tests"]
+    },
+    "closure": {
+        "machine_identifier": "closure",
+        "human_readable_name": "Closure",
+        "purpose": "Milestone closure artifact marking milestone completion",
+        "producer_skills": ["close-milestone", "manage-development"],
+        "consumer_skills": ["close-milestone", "review-implementation"],
+        "canonical_storage_location": "<M_ID>/closures/<CLOSE_ID>.md",
+        "required_metadata": ["created_at", "updated_at", "artifact_identity", "artifact_type"],
+        "optional_metadata": ["version"],
+        "lifecycle_states": ["draft", "completed", "archived"],
+        "allowed_relationships": ["derived_from", "reviews", "implements"]
+    }
 
+}
 # Canonical type definitions for AEF artifact system
 _ARTIFACT_TYPE_DEFINITIONS: Dict[str, CanonicalArtifactType] = {}
 for key, value in _RAW_ARTIFACT_TYPE_DEFINITIONS.items():
@@ -132,12 +180,39 @@ for key, value in _RAW_ARTIFACT_TYPE_DEFINITIONS.items():
 
 
 def get_artifact_type(identifier: str) -> Optional[CanonicalArtifactType]:
-    """Retrieves a canonical artifact type by its machine identifier."""
+    """Retrieves a canonical artifact type by its machine identifier or naming pattern.
+
+    Supports both direct type names (e.g., 'specification', 'verification') and
+    naming pattern prefixes (e.g., 'SPEC-M13S1' -> 'specification',
+    'VER-M13S1V1' -> 'verification', 'TEST-M13S1T1' -> 'test',
+    'EVA-M13S1' -> 'evaluation', 'REV-M13S1' -> 'review',
+    'CLOSE-M13-1' -> 'closure').
+    """
+    # Pattern-based mapping for M13 pipeline naming conventions
+    pattern_map = {
+        'SPEC-': 'specification',
+        'VER-': 'verification',
+        'TEST-': 'test',
+        'TSET-': 'test',
+        'EVA-': 'evaluation',
+        'REV-': 'review',
+        'CLOSE-': 'closure',
+    }
+
+    # Check if identifier matches a naming pattern prefix
+    for prefix, type_name in pattern_map.items():
+        if identifier.startswith(prefix):
+            # Find the canonical type by type_name
+            for artifact_type in _ARTIFACT_TYPE_DEFINITIONS.values():
+                if artifact_type.machine_identifier == type_name:
+                    return artifact_type
+
+    # Direct lookup by machine_identifier
     for artifact_type in _ARTIFACT_TYPE_DEFINITIONS.values():
         if artifact_type.machine_identifier == identifier:
             return artifact_type
-    return None
 
+    return None
 
 def get_all_artifact_types() -> List[CanonicalArtifactType]:
     """Returns a list of all defined canonical artifact types."""

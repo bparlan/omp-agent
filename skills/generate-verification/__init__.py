@@ -185,7 +185,7 @@ template_version: 1.0.0
 """
 
     for oracle in protocol['test_oracles']:
-        content += f"### {oracle['semantic_id']}
+        content += f\"### {oracle[\"semantic_id\"]}
 
 **Type:** {oracle['type']}
 **Interface Contract:** {oracle['test_contract']['cli_executable']}
