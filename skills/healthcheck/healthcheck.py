@@ -26,21 +26,21 @@ def main():
     try:
         # Parse command line arguments
         args = parse_arguments()
-        
+
         # Check for help flag
         if args.help_flag:
             print_help()
             return 0
-        
+
         # Run health check based on arguments
         results = run_health_check(
             skill_name=args.skill_name if args.skill_name else None,
             all_flag=args.all_flag,
         )
-        
+
         # Generate all reports from the results
         generate_all_reports(results)
-        
+
         return 0
     except KeyboardInterrupt:
         print("\nOperation interrupted by user.")
