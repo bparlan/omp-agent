@@ -9,7 +9,7 @@ import re
 from datetime import datetime
 from pathlib import Path
 from dataclasses import dataclass
-from typing import List
+from typing import List, Dict, Any, Optional
 
 
 @dataclass
@@ -28,93 +28,114 @@ class ValidationResult:
 class Validator:
     """Base validator class for skill validation rules"""
 
-    def validate(self, content: str, skill_path: Path) -> ValidationResult:
-        """Validate skill content - to be implemented by subclasses"""
+    def validate(self, content: str) -> Dict[str, Any]:
+        """Validates content based on specific rules.
+        
+        Args:
+            content: String content to validate
+            
+        Returns:
+            Dict containing validation results with keys:
+            - is_valid: bool indicating if validation passed
+            - errors: List[str] of error messages
+            - warnings: List[str] of warning messages
+            - score: float validation score (0.0-100.0)
+        """
         raise NotImplementedError
 
 
 class RequiredFieldsValidator(Validator):
     """Validates required fields in SKILL.md file"""
 
-    def __init__(self):
-        self.required_fields = [
-            ("name:", "name field"),
-            ("version:", "version field"),
-            ("description:", "description field"),
-            ("tools:", "tools field"),
-            ("userInvocable:", "userInvocable field"),
-        ]
-
-    def validate(self, content: str, skill_path: Path) -> ValidationResult:
-        """Validate required fields presence"""
-        issues = []
-        validation_score = 0.0
-        total_checks = len(self.required_fields)
-
-        content_lower = content.lower()
-
-        for field, field_name in self.required_fields:
-            field_lower = field.lower()
-            if field_lower in content_lower:
-                validation_score += 1.0
-            else:
-                issues.append(f"Missing {field_name}")
-
-        validation_score = validation_score / total_checks if total_checks > 0 else 0.0
-
-        return ValidationResult(
-            name="",
-            status="",
-            validation_score=validation_score,
-            has_stable_suffix="-stable" in content.lower(),
-            issues=issues,
-            last_modified="",
-            last_checked="",
-        )
+    def validate(self, content: str) -> Dict[str, Any]:
+        required_fields = ["name", "description", "version", "userInvocable"]
+        errors = []
+        warnings = []
+        
+        # Check each required field
+        for field in required_fields:
+            # Check for different field formats
+            field_pattern = rf"^\s*{field}:\s*(.+?)$"
+            if not re.search(field_pattern, content, re.MULTILINE | re.IGNORECASE):
+                errors.append(f"Missing required field: {field}")
+        
+        score = max(0.0, 100.0 - len(errors) * 25.0)
+        
+        return {
+            "is_valid": len(errors) == 0,
+            "errors": errors,
+            "warnings": warnings,
+            "score": score,
+        }
 
 
 class VersionValidator(Validator):
     """Validates version information and -stable suffix"""
 
-    def validate(self, content: str, skill_path: Path) -> ValidationResult:
-        """Validate version and stable suffix"""
-        # Extract version using regex
-        version_match = re.search(r"version:\s*([^\n]+)", content, re.IGNORECASE)
-        version = version_match.group(1) if version_match else None
-
-        # Check for -stable suffix in version field
-        has_stable_suffix = "-stable" in content.lower()
-
-        return ValidationResult(
-            name="",
-            status="",
-            validation_score=0.0,
-            has_stable_suffix=has_stable_suffix,
-            issues=[],
-            last_modified="",
-            last_checked="",
-        )
+    def validate(self, content: str) -> Dict[str, Any]:
+        version_pattern = r"^\s*version:\s*(.+?)$"
+        version_match = re.search(version_pattern, content, re.MULTILINE | re.IGNORECASE)
+        
+        if not version_match:
+            return {
+                "is_valid": False,
+                "errors": ["Version field not found"],
+                "warnings": [],
+                "score": 0.0,
+            }
+        
+        version = version_match.group(1).strip('"\' ')
+        has_stable_suffix = version.endswith('-stable') or version.endswith('-test')
+        
+        errors = []
+        if not has_stable_suffix:
+            errors.append(f"Version '{version}' does not have -stable or -test suffix")
+        
+        score = 100.0 if has_stable_suffix else 50.0
+        
+        return {
+            "is_valid": len(errors) == 0,
+            "errors": errors,
+            "warnings": [],
+            "score": score,
+            "has_stable_suffix": has_stable_suffix,
+            "version": version,
+        }
 
 
 class NameValidator(Validator):
     """Validates skill name extraction"""
 
-    def validate(self, content: str, skill_path: Path) -> ValidationResult:
-        """Extract and validate skill name"""
-        name_match = re.search(r"name:\s*([^\n]+)", content, re.IGNORECASE)
-        skill_name = (
-            name_match.group(1).strip() if name_match else skill_path.parent.name
-        )
-
-        return ValidationResult(
-            name=skill_name,
-            status="",
-            validation_score=0.0,
-            has_stable_suffix=False,
-            issues=[],
-            last_modified="",
-            last_checked="",
-        )
+    def validate(self, content: str) -> Dict[str, Any]:
+        name_pattern = r"^\s*name:\s*(.+?)$"
+        name_match = re.search(name_pattern, content, re.MULTILINE | re.IGNORECASE)
+        
+        if not name_match:
+            return {
+                "is_valid": False,
+                "errors": ["Name field not found"],
+                "warnings": [],
+                "score": 0.0,
+            }
+        
+        name = name_match.group(1).strip('"\' ')
+        
+        # Basic name validation
+        if len(name) < 2:
+            return {
+                "is_valid": False,
+                "errors": ["Name is too short"],
+                "warnings": [],
+                "score": 0.0,
+            }
+        
+        return {
+            "is_valid": True,
+            "errors": [],
+            "warnings": [],
+            "score": 100.0,
+            "name": name,
+        }
 
 
 class ValidationOrchestrator:
@@ -126,82 +147,94 @@ class ValidationOrchestrator:
             VersionValidator(),
             NameValidator(),
         ]
+    
+    def validate(self, content: str) -> Dict[str, Any]:
+        """Runs all validators and combines results."""
+        results = [validator.validate(content) for validator in self.validators]
+        
+        # Aggregate results
+        all_errors = []
+        all_warnings = []
+        scores = []
+        
+        for result in results:
+            all_errors.extend(result.get("errors", []))
+            all_warnings.extend(result.get("warnings", []))
+            scores.append(result.get("score", 0.0))
+        
+        # Calculate overall score (average of validator scores)
+        overall_score = sum(scores) / len(scores) if scores else 0.0
+        
+        # Determine overall validation status
+        is_valid = len(all_errors) == 0
+        
+        # Extract additional info from results
+        extra_info = {}
+        for result in results:
+            extra_info.update({k: v for k, v in result.items() if k not in ["is_valid", "errors", "warnings", "score"]})
+        
+        return {
+            "is_valid": is_valid,
+            "errors": all_errors,
+            "warnings": all_warnings,
+            "score": overall_score,
+            **extra_info,
+        }
 
-    def validate_skill(self, content: str, skill_path: Path) -> ValidationResult:
-        """Run all validators and combine results"""
-        # Base result with skill info
-        result = ValidationResult(
-            name="",
-            status="",
-            validation_score=0.0,
-            has_stable_suffix=False,
-            issues=[],
-            last_modified="",
-            last_checked="",
-        )
 
-        # Run all validators
-        for validator in self.validators:
-            try:
-                validation_result = validator.validate(content, skill_path)
-
-                # Merge results
-                if hasattr(validation_result, "validation_score"):
-                    result.validation_score = validation_result.validation_score
-                    result.issues = validation_result.issues
-                    result.has_stable_suffix = validation_result.has_stable_suffix
-                elif hasattr(validation_result, "has_stable_suffix"):
-                    result.has_stable_suffix = validation_result.has_stable_suffix
-                elif hasattr(validation_result, "skill_name"):
-                    result.name = validation_result.skill_name
-
-            except Exception as e:
-                # If any validator fails, mark as error
-                result.status = "error"
-                result.issues.append(f"Validation error: {str(e)}")
-                break
-
-        # Determine status based on score
-        if result.status != "error":
-            result.status = (
-                "healthy" if result.validation_score >= 0.8 else "needs_review"
-            )
-
-        return result
+class SkillValidator:
+    """Main skill validator that orchestrates all validation rules"""
+    
+    def __init__(self):
+        self.orchestrator = ValidationOrchestrator()
+    
+    def validate(self, content: str) -> Dict[str, Any]:
+        """Validates skill content using the validation orchestrator.
+        
+        Args:
+            content: SKILL.md file content
+            
+        Returns:
+            Dict containing validation results with keys:
+            - is_valid: bool indicating if validation passed
+            - errors: List[str] of error messages
+            - warnings: List[str] of warning messages
+            - score: float validation score (0.0-100.0)
+            - name: str skill name (if found)
+            - version: str skill version (if found)
+            - has_stable_suffix: bool indicating if version has stable suffix
+        """
+        return self.orchestrator.validate(content)
 
 
 def validate_skill_file(skill_path: Path) -> dict:
     """
-    Legacy function for backward compatibility.
-    This function provides the original interface for healthcheck.py
-    while internally using the new modular validation system.
+    Validates a skill file by reading its content and running validation.
+    
+    Args:
+        skill_path: Path to skill directory containing SKILL.md
+        
+    Returns:
+        Dict containing validation results
     """
-    orchestrator = ValidationOrchestrator()
-
     try:
-        content = skill_path.read_text()
-
-        # Use the orchestrator to get validation results
-        result = orchestrator.validate_skill(content, skill_path)
-
-        # Format result to match original healthcheck.py output format
-        return {
-            "name": result.name,
-            "status": result.status,
-            "validation_score": result.validation_score,
-            "has_stable_suffix": result.has_stable_suffix,
-            "issues": result.issues,
-            "last_modified": result.last_modified,
-            "last_checked": result.last_checked,
-        }
-
+        skill_md_path = skill_path / "SKILL.md"
+        if not skill_md_path.exists():
+            return {
+                "is_valid": False,
+                "errors": ["SKILL.md file not found"],
+                "warnings": [],
+                "score": 0.0,
+            }
+        
+        content = skill_md_path.read_text()
+        validator = SkillValidator()
+        return validator.validate(content)
+        
     except Exception as e:
         return {
-            "name": skill_path.parent.name,
-            "status": "error",
-            "validation_score": 0.0,
-            "has_stable_suffix": False,
-            "issues": [f"Error reading file: {str(e)}"],
-            "last_modified": datetime.now().isoformat(),
-            "last_checked": datetime.now().isoformat(),
+            "is_valid": False,
+            "errors": [f"Error reading skill file: {str(e)}"],
+            "warnings": [],
+            "score": 0.0,
         }

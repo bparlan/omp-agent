@@ -24,7 +24,9 @@ class ArtifactRegistry:
     ) -> None:
         """Registers an artifact type definition."""
         self._types[type_name] = ArtifactTypeDefinition(
-            name=type_name, schema=schema, storage_rule=storage_rule
+            name=type_name,
+            schema=schema,
+            storage_rule=storage_rule,
         )
 
     def get_type(self, type_name: str) -> Optional[ArtifactTypeDefinition]:
@@ -46,53 +48,41 @@ class ArtifactRegistry:
         return list(self._types.keys())
 
     def store_relationship(
-        self,
-        source_id: str,
-        target_id: str,
-        relationship_type: str,
-        metadata: dict = None,
+        self, source_id: str, relationship_type: str, target_id: str, metadata: Dict[str, Any]
     ) -> bool:
         """Store a relationship between artifacts.
-
-        Args:
-            source_id: The identifier of the source artifact
-            target_id: The identifier of the target artifact
-            relationship_type: The type of relationship (e.g., "tests", "verifies", "implements")
-            metadata: Optional metadata for the relationship
-
+        
         Returns:
-            bool: True if relationship was stored successfully
+            bool: True if relationship stored successfully
         """
-        relationship = {
-            "source_id": source_id,
-            "target_id": target_id,
-            "relationship_type": relationship_type,
-            "metadata": metadata or {},
-        }
-
         if source_id not in self._relationships:
             self._relationships[source_id] = []
-
-        self._relationships[source_id].append(relationship)
+        
+        self._relationships[source_id].append({
+            "type": relationship_type,
+            "target_id": target_id,
+            "metadata": metadata,
+            "timestamp": datetime.now().isoformat(),
+        })
+        
         return True
 
     def get_relationships(self, source_id: str = None) -> list:
         """Get relationships from artifacts.
-
+        
         Args:
-            source_id: Optional artifact identifier to filter relationships
-
+            source_id: Optional source artifact ID
+            
         Returns:
-            list: List of relationship dictionaries
+            list: List of relationships
         """
         if source_id:
             return self._relationships.get(source_id, [])
-
-        # Return all relationships
-        all_relationships = []
-        for relationships in self._relationships.values():
-            all_relationships.extend(relationships)
-        return all_relationships
+        else:
+            all_relationships = []
+            for relationships in self._relationships.values():
+                all_relationships.extend(relationships)
+            return all_relationships
 
 
 _registry = ArtifactRegistry()
@@ -100,78 +90,271 @@ _registry = ArtifactRegistry()
 
 def _ensure_registered_types() -> None:
     """Registers canonical artifact types from type definitions."""
-    for type_name, definition in _ARTIFACT_TYPE_DEFINITIONS.items():
-        registry_schema = {
-            "type": "object",
-            "required": _required_artifact_keys(),
-            "properties": {
-                "id": {"type": "string", "pattern": "^[A-Z0-9_-]+$"},
-                "type": {"type": "string"},
-                "title": {"type": "string"},
-                "milestone_id": {"type": "string", "pattern": "^M[0-9]+$"},
-                "status": {
-                    "type": "string",
-                    "enum": [
-                        "draft",
-                        "approved",
-                        "implemented",
-                        "reviewed",
-                        "archived",
-                    ],
-                },
-                "derived_from": {"type": "array", "items": {"type": "string"}},
-                "template_version": {
-                    "type": "string",
-                    "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$",
-                },
-                "metadata": {
-                    "type": "object",
-                    "required": [
-                        "created_at",
-                        "updated_at",
-                        "artifact_identity",
-                        "artifact_type",
-                    ],
-                    "properties": {
-                        "created_at": {"type": "string", "format": "date-time"},
-                        "updated_at": {"type": "string", "format": "date-time"},
-                        "artifact_identity": {"type": "string"},
-                        "artifact_type": {"type": "string"},
-                    },
-                },
-            },
+    import core.artifacts.artifact_types as artifact_types
+
+    # Register all canonical artifact types
+    for type_name, type_definition in _ARTIFACT_TYPE_DEFINITIONS.items():
+        schema = {
+            "type": type_definition.get("type"),
+            "description": type_definition.get("description", ""),
+            "fields": type_definition.get("fields", []),
         }
-
-        registry_storage_rule = {
-            "pattern": definition.canonical_storage_location,
-            "extensions": ["md"],
-            "naming_conventions": {
-                "milestone_id_prefix": "M",
-                "skill_id_prefix": "",
-                "health_check_suffix": "-HC",
-                "numbering_scheme": "{N}",
-            },
+        
+        storage_rule = {
+            "path_template": type_definition.get("path_template"),
+            "filename": type_definition.get("filename"),
+            "storage_location": type_definition.get("storage_location", "milestones"),
         }
-
-        _registry.register_type(type_name, registry_schema, registry_storage_rule)
-
-
-def _required_artifact_keys() -> List[str]:
-    return [
-        "id",
-        "type",
-        "title",
-        "milestone_id",
-        "status",
-        "derived_from",
-        "template_version",
-        "metadata",
-    ]
+        
+        _registry.register_type(type_name, schema, storage_rule)
 
 
+_registry.register_type(
+    "specification",
+    {
+        "type": "specification",
+        "description": "Specification artifacts",
+        "fields": ["name", "title", "milestone_id", "status"],
+    },
+    {
+        "path_template": "milestones/{milestone_id}/SPEC-{spec_id}.md",
+        "filename": "SPEC-{spec_id}.md",
+        "storage_location": "milestones",
+    },
+)
+
+_registry.register_type(
+    "verification",
+    {
+        "type": "verification",
+        "description": "Verification artifacts",
+        "fields": ["spec_id", "milestone_id", "status"],
+    },
+    {
+        "path_template": "milestones/{milestone_id}/VER-{spec_id}V{m}.md",
+        "filename": "VER-{spec_id}V{m}.md",
+        "storage_location": "milestones",
+    },
+)
+
+_registry.register_type(
+    "test_set",
+    {
+        "type": "test_set",
+        "description": "Test set artifacts",
+        "fields": ["milestone_id", "spec_id", "status"],
+    },
+    {
+        "path_template": "milestones/{milestone_id}/TEST-{spec_id}T{p}.md",
+        "filename": "TEST-{spec_id}T{p}.md",
+        "storage_location": "milestones",
+    },
+)
+
+_registry.register_type(
+    "evaluation",
+    {
+        "type": "evaluation",
+        "description": "Evaluation artifacts",
+        "fields": ["milestone_id", "spec_id"],
+    },
+    {
+        "path_template": "milestones/{milestone_id}/EVA-{spec_id}.md",
+        "filename": "EVA-{spec_id}.md",
+        "storage_location": "milestones",
+    },
+)
+
+_registry.register_type(
+    "review",
+    {
+        "type": "review",
+        "description": "Review artifacts",
+        "fields": ["milestone_id", "spec_id"],
+    },
+    {
+        "path_template": "milestones/{milestone_id}/REV-{spec_id}.md",
+        "filename": "REV-{spec_id}.md",
+        "storage_location": "milestones",
+    },
+)
+
+_registry.register_type(
+    "closure",
+    {
+        "type": "closure",
+        "description": "Closure artifacts",
+        "fields": ["milestone_id"],
+    },
+    {
+        "path_template": "CLOSE-{milestone_id}-*.md",
+        "filename": "CLOSE-{milestone_id}-*.md",
+        "storage_location": "milestones",
+    },
+)
+
+_import_modules()
+
+
+def _import_modules():
+    """Import module dependencies."""
+    try:
+        import datetime
+    except ImportError:
+        import datetime
+
+
+_registry = ArtifactRegistry()
+
+
+def _ensure_registered_types() -> None:
+    """Registers canonical artifact types from type definitions."""
+    import core.artifacts.artifact_types as artifact_types
+
+    # Register all canonical artifact types
+    for type_name, type_definition in _ARTIFACT_TYPE_DEFINITIONS.items():
+        schema = {
+            "type": type_definition.get("type"),
+            "description": type_definition.get("description", ""),
+            "fields": type_definition.get("fields", []),
+        }
+        
+        storage_rule = {
+            "path_template": type_definition.get("path_template"),
+            "filename": type_definition.get("filename"),
+            "storage_location": type_definition.get("storage_location", "milestones"),
+        }
+        
+        _registry.register_type(type_name, schema, storage_rule)
+
+
+# Import modules for datetime
+import datetime
+
+# Register canonical types
 _ensure_registered_types()
 
 
 def get_registry() -> ArtifactRegistry:
     """Returns the global artifact registry instance."""
     return _registry
+
+
+def get_artifact_type(identifier: str) -> Optional["CanonicalArtifactType"]:
+    """Returns registered artifact type definition or None.
+    
+    Args:
+        identifier: Artifact type identifier
+        
+    Returns:
+        Optional[CanonicalArtifactType]: Artifact type definition or None
+    """
+    registry = get_registry()
+    type_def = registry.get_type(identifier)
+    
+    if type_def is None:
+        return None
+    
+    # Convert ArtifactTypeDefinition to CanonicalArtifactType
+    from core.artifacts.types import CanonicalArtifactType
+    
+    return CanonicalArtifactType(
+        name=type_def.name,
+        schema=type_def.schema,
+        storage_rule=type_def.storage_rule,
+    )
+
+
+def get_all_artifact_types() -> List["CanonicalArtifactType"]:
+    """Returns all registered artifact types.
+    
+    Returns:
+        List[CanonicalArtifactType]: All artifact types
+    """
+    registry = get_registry()
+    type_names = registry.list_types()
+    
+    from core.artifacts.types import CanonicalArtifactType
+    
+    artifact_types = []
+    for type_name in type_names:
+        type_def = registry.get_type(type_name)
+        if type_def:
+            artifact_types.append(
+                CanonicalArtifactType(
+                    name=type_def.name,
+                    schema=type_def.schema,
+                    storage_rule=type_def.storage_rule,
+                )
+            )
+    
+    return artifact_types
+
+
+def get_type_definition(name: str) -> Optional[Dict[str, Any]]:
+    """Returns type definition for given name.
+    
+    Args:
+        name: Type name
+        
+    Returns:
+        Optional[Dict[str, Any]]: Type definition or None
+    """
+    artifact_type = get_artifact_type(name)
+    
+    if artifact_type is None:
+        return None
+    
+    return {
+        "name": artifact_type.name,
+        "schema": artifact_type.schema,
+        "storage_rule": artifact_type.storage_rule,
+    }
+
+
+def get_all_type_definitions() -> Dict[str, Dict[str, Any]]:
+    """Returns all type definitions.
+    
+    Returns:
+        Dict[str, Dict[str, Any]]: All type definitions keyed by name
+    """
+    from core.artifacts.types import CanonicalArtifactType
+    
+    artifact_types = get_all_artifact_types()
+    
+    type_definitions = {}
+    for artifact_type in artifact_types:
+        type_definitions[artifact_type.name] = {
+            "name": artifact_type.name,
+            "schema": artifact_type.schema,
+            "storage_rule": artifact_type.storage_rule,
+        }
+    
+    return type_definitions
+
+
+def store_relationship(source_id: str, relationship_type: str, target_id: str, metadata: Dict[str, Any]) -> bool:
+    """Store a relationship between artifacts.
+    
+    Args:
+        source_id: Source artifact ID
+        relationship_type: Type of relationship
+        target_id: Target artifact ID
+        metadata: Relationship metadata
+        
+    Returns:
+        bool: True if relationship stored successfully
+    """
+    return get_registry().store_relationship(source_id, relationship_type, target_id, metadata)
+
+
+def get_relationships(source_id: str = None) -> list:
+    """Get relationships from artifacts.
+    
+    Args:
+        source_id: Optional source artifact ID
+        
+    Returns:
+        list: List of relationships
+    """
+    return get_registry().get_relationships(source_id)

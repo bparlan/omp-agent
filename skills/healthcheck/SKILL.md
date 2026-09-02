@@ -1,7 +1,7 @@
 ---
 name: healthcheck
-description: Simple skill health checker for AEF-OMP skills - validates SKILL.md files and checks -stable suffix in versions
-version: "1.0.0-stable"
+description: Enhanced skill health checker that validates milestone and specification agnosticism - ensures skills don't have hardcoded milestone/spec IDs and follow AEF architectural patterns
+version: "2.0.0-stable"
 userInvocable: true
 tools: [read, write, edit, bash, glob]
 ---

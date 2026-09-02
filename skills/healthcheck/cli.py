@@ -1,203 +1,272 @@
+#!/usr/bin/env python3
 """
-CLI interface for healthcheck skill.
-Handles command-line argument parsing and user interaction orchestration.
+HealthCheck Skill CLI Module
+
+Provides the command-line interface for the HealthCheck Skill modular architecture.
+Implements the same interface as the root CLI module but for the healthcheck skill specifically.
+
+This module exports the six public functions expected by the root CLI and provides
+milestone/specification agnostic skill validation capabilities.
 """
 
 import argparse
 import sys
-from typing import List, Optional, Dict, Any
+from pathlib import Path
+from typing import List, Dict, Any, Optional
 
-from discovery import discover_skills, discover_skill_by_name
-from core.validation import SkillValidator
-from reporting import generate_badges, generate_health_report, generate_processed_skills
+# Import SkillValidator from core validation module (for root CLI compatibility)
+from skills.healthcheck.core.validation import SkillValidator
+
+# Import other healthcheck modules
+from .core.validation import validate_skill_file
+from .discovery import discover_skills
+from .reporting import generate_badges, generate_health_report
 
 
 def parse_arguments() -> argparse.Namespace:
-    """Parse command-line arguments"""
+    """
+    Parses command line arguments.
+    
+    Returns:
+        argparse.Namespace with skill_name, all_flag, help_flag attributes.
+    """
     parser = argparse.ArgumentParser(
-        description="AEF-OMP Skill Health Checker - validates SKILL.md files and checks -stable suffix",
-        formatter_class=argparse.RawDescriptionHelpFormatter,
-        epilog="""
-Examples:
-  %(prog)s my_skill                    # Check specific skill
-  %(prog)s --all                       # Process all skills in 3 batches
-  %(prog)s --help                      # Show help
-        """,
+        description="Skill Health Checker - Validates skills for AEF-OMP compliance"
     )
-
+    
     parser.add_argument(
-        "skill_name", nargs="?", help="Specific skill name to check (optional)"
+        "skill_name", 
+        nargs="?", 
+        help="Name of skill to validate (optional, shows all skills if not specified)"
     )
-
+    
     parser.add_argument(
-        "--all", action="store_true", help="Process all skills in 3 batches"
+        "--all", 
+        "-a", 
+        action="store_true", 
+        help="Check all skills"
     )
-
-    parser.add_argument("--help", action="store_true", help="Show help message")
-
+    
+    parser.add_argument(
+        "--help", 
+        "-h", 
+        action="store_true", 
+        help="Show help information"
+    )
+    
     return parser.parse_args()
 
 
 def validate_single_skill(skill_name: str) -> Optional[Dict[str, Any]]:
-    """Validate a single skill by name"""
-    validator = SkillValidator()
-
-    # Discover the skill file
-    skill_file = discover_skill_by_name(skill_name)
-
-    if not skill_file:
-        print(f"Skill '{skill_name}' not found", file=sys.stderr)
+    """
+    Validates a single skill.
+    
+    Args:
+        skill_name: Name of skill to validate
+        
+    Returns:
+        Dict containing validation results, or None if skill not found
+    """
+    skills_dir = Path("skills")
+    skill_path = skills_dir / skill_name
+    
+    if not skill_path.exists() or not skill_path.is_dir():
         return None
-
-    print(f"Checking {skill_name}...", end=" ")
-    result = validator.validate_skill_file(skill_file)
-    print(f"{result['status']} (score: {result['validation_score']:.2f})")
-
-    return result
+    
+    try:
+        # Use the skill validator to validate the skill file
+        result = validate_skill_file(skill_path)
+        return result
+    except Exception as e:
+        return {
+            "skill_name": skill_name,
+            "is_valid": False,
+            "errors": [f"Validation error: {str(e)}"],
+            "warnings": [],
+            "score": 0.0,
+        }
 
 
 def process_all_skills() -> List[Dict[str, Any]]:
-    """Process all skills in 3 batches"""
-    print("Processing all skills in 3 batches...")
-
+    """
+    Processes all skills and returns validation results for each.
+    
+    Returns:
+        List of dictionaries containing validation results for each skill
+    """
+    skills_dir = Path("skills")
+    results = []
+    
+    # Discover skills using the discovery module
     skills = discover_skills()
-
-    # Batch 1: Core skills (first 3)
-    print("\n=== BATCH 1: CORE SKILLS ===")
-    batch1_results = []
-    validator = SkillValidator()
-
-    for skill_file in skills[:3]:
-        print(f"Checking {skill_file.parent.name}...", end=" ")
-        result = validator.validate_skill_file(skill_file)
-        print(f"{result['status']} (score: {result['validation_score']:.2f})")
-        batch1_results.append(result)
-
-    # Batch 2: Extension skills (next 3)
-    print("\n=== BATCH 2: EXTENSION SKILLS ===")
-    batch2_results = []
-    for skill_file in skills[3:6]:
-        print(f"Checking {skill_file.parent.name}...", end=" ")
-        result = validator.validate_skill_file(skill_file)
-        print(f"{result['status']} (score: {result['validation_score']:.2f})")
-        batch2_results.append(result)
-
-    # Batch 3: Edge cases (remaining)
-    print("\n=== BATCH 3: EDGE CASES ===")
-    batch3_results = []
-    for skill_file in skills[6:]:
-        print(f"Checking {skill_file.parent.name}...", end=" ")
-        result = validator.validate_skill_file(skill_file)
-        print(f"{result['status']} (score: {result['validation_score']:.2f})")
-        batch3_results.append(result)
-
-    all_results = batch1_results + batch2_results + batch3_results
-
-    print("\n=== BATCH SUMMARY ===")
-    print(f"Batch 1 (Core): {len(batch1_results)} skills processed")
-    print(f"Batch 2 (Extensions): {len(batch2_results)} skills processed")
-    print(f"Batch 3 (Edge Cases): {len(batch3_results)} skills processed")
-    print(f"Total: {len(all_results)} skills processed")
-
-    return all_results
+    
+    for skill_path in skills:
+        try:
+            # Use the skill validator to validate each skill
+            result = validate_skill_file(skill_path)
+            if result:  # Only add valid results
+                results.append(result)
+        except Exception as e:
+            # Add error result if validation fails
+            results.append({
+                "skill_name": skill_path.name,
+                "is_valid": False,
+                "errors": [f"Validation error: {str(e)}"],
+                "warnings": [],
+                "score": 0.0,
+            })
+    
+    return results
 
 
 def run_health_check(
     skill_name: Optional[str] = None, all_flag: bool = False
 ) -> List[Dict[str, Any]]:
-    """Run health check with modular architecture"""
-    print("=== AEF-OMP Skill Health Checker ===\n")
-
+    """
+    Runs health check based on arguments.
+    
+    Args:
+        skill_name: Name of specific skill to check (optional)
+        all_flag: Whether to check all skills (optional)
+        
+    Returns:
+        List of dictionaries containing validation results for checked skills
+    """
+    if all_flag:
+        return process_all_skills()
+    
     if skill_name:
-        # Single skill mode
         result = validate_single_skill(skill_name)
         return [result] if result else []
-
-    elif all_flag:
-        # Batch processing mode
-        return process_all_skills()
-
-    else:
-        # Default: process all skills
-        skills = discover_skills()
-        print(f"Found {len(skills)} skills to check\n")
-
-        results = []
-        validator = SkillValidator()
-
-        for skill_file in skills:
-            print(f"Checking {skill_file.parent.name}...", end=" ")
-            result = validator.validate_skill_file(skill_file)
-            print(f"{result['status']} (score: {result['validation_score']:.2f})")
-            results.append(result)
-
-        return results
+    
+    return process_all_skills()
 
 
 def print_help() -> None:
-    """Print help information"""
+    """
+    Prints help information.
+    """
     help_text = """
-AEF-OMP Skill Health Checker Help
-================================
+=== Skill Health Checker Help ===
 
 Usage:
-  healthcheck.py [skill_name]           # Check specific skill
-  healthcheck.py --all                 # Process all skills in 3 batches
-  healthcheck.py --help                # Show help
+    python healthcheck.py [skill_name] [--all] [--help]
 
-Validates SKILL.md files for:
-  - Required fields: name, version, description, tools, userInvocable
-  - -stable suffix in version fields
-  - Proper frontmatter formatting
+Arguments:
+    skill_name          Name of skill to validate (optional)
+    --all, -a           Check all skills
+    --help, -h          Show this help message
 
-Output Reports:
-  - health_badges.md: Status badges
-  - health_check_report.json: Detailed JSON report
-  - processed_skills.json: Name-to-result mapping
+Description:
+    Validates skills for AEF-OMP compliance, focusing on:
+    - Milestone and specification agnosticism
+    - Code quality and structure
+    - Adherence to architectural patterns
+    - Required skill metadata (SKILL.md)
+    - Version stability (-stable or -test suffix)
 
-Modular Architecture:
-  - core/validation.py: Pure validation logic
-  - discovery.py: Skill discovery mechanisms
-  - reporting.py: Report generation
-  - cli.py: CLI interface and orchestration
-  - main.py: Entry point and workflow coordination
-    """
+Examples:
+    python healthcheck.py                    # Check all skills
+    python healthcheck.py --all                # Check all skills
+    python healthcheck.py my-skill             # Check specific skill
+    python healthcheck.py --help               # Show help
+
+Output:
+    The tool generates reports in:
+    - health_badges.md     : Visual status badges for each skill
+    - health_check_report.json : Detailed JSON validation report
+    
+    Reports include validation scores, issues, and compliance status.
+    
+The healthcheck skill validates that skills:
+1. Are milestone-agnostic (no hardcoded M1, M2, M3 references)
+2. Are specification-agnostic (no hardcoded SPEC-M1S1 references)
+3. Have proper SKILL.md metadata files
+4. Follow AEF architectural patterns
+5. Use proper versioning (-stable or -test suffix)
+"""
     print(help_text)
 
 
 def generate_all_reports(results: List[Dict[str, Any]]) -> None:
-    """Generate all reports from validation results"""
-    print("\n=== Health Check Reports ===")
+    """
+    Generates all reports from health check results.
+    
+    Args:
+        results: List of validation results for skills
+    """
+    if not results:
+        print("No results to report")
+        return
+    
+    print("\n=== Generating Health Check Reports ===\n")
+    
+    # Generate health_badges.md
+    print("Generating health_badges.md...")
+    with open("health_badges.md", "w") as f:
+        f.write("# Skill Health Badges\n\n")
+        for result in results:
+            skill_name = result.get("skill_name", "Unknown")
+            is_valid = result.get("is_valid", False)
+            score = result.get("score", 0.0)
+            issues = result.get("errors", [])
+            
+            status = "✅ HEALTHY" if is_valid and score >= 90 else "⚠️ NEEDS REVIEW" if is_valid else "❌ ERROR"
+            
+            f.write(f"## {skill_name}\n")
+            f.write(f"- **Status**: {status}\n")
+            f.write(f"- **Validation Score**: {score:.1f}/100.0\n")
+            if issues:
+                f.write(f"- **Issues**: {', '.join(issues[:3])}\n")
+            f.write("\n")
+    
+    # Generate health_check_report.json
+    print("Generating health_check_report.json...")
+    import json
+    from datetime import datetime
+    
+    report_data = {
+        "timestamp": datetime.now().isoformat(),
+        "total_skills": len(results),
+        "results": results,
+        "summary": {
+            "healthy": len([r for r in results if r.get("is_valid", False) and r.get("score", 0.0) >= 90]),
+            "needs_review": len([r for r in results if r.get("is_valid", False) and 70 <= r.get("score", 0.0) < 90]),
+            "errors": len([r for r in results if not r.get("is_valid", True)]),
+        }
+    }
+    
+    with open("health_check_report.json", "w") as f:
+        json.dump(report_data, f, indent=2)
+    
+    # Print summary to console
+    print("\n=== Health Check Summary ===")
+    print(f"Total skills checked: {len(results)}")
+    print(f"Healthy skills: {len([r for r in results if r.get('is_valid', False) and r.get('score', 0.0) >= 90])}")
+    print(f"Skills needing review: {len([r for r in results if r.get('is_valid', False) and 70 <= r.get('score', 0.0) < 90])}")
+    print(f"Skills with errors: {len([r for r in results if not r.get('is_valid', True)])}")
+    
+    # Show problematic skills
+    print("\n=== Problematic Skills ===")
+    for result in results:
+        if not result.get("is_valid", True) or result.get("score", 0.0) < 70:
+            skill_name = result.get("skill_name", "Unknown")
+            score = result.get("score", 0.0)
+            issues = result.get("errors", [])
+            
+            print(f"- {skill_name}: {score:.1f}/100.0")
+            for issue in issues:
+                print(f"  ❌ {issue}")
 
-    # Generate badges
-    generate_badges(results)
 
-    # Generate health report
-    generate_health_report(results)
+# Re-export at module level for test mocking (cli.discover_skills, cli.get_skills_directory)
+discover_skills = discover_skills
 
-    # Generate processed skills report
-    generate_processed_skills(results)
-
-    # Print summary
-    total = len(results)
-    healthy = len([r for r in results if r["status"] == "healthy"])
-    needs_review = len([r for r in results if r["status"] == "needs_review"])
-    errors = len([r for r in results if r["status"] == "error"])
-
-    print("\n=== SUMMARY ===")
-    print(f"Total skills checked: {total}")
-    print(f"Healthy skills: {healthy} ({healthy/total*100:.1f}%)")
-    print(f"Skills needing review: {needs_review} ({needs_review/total*100:.1f}%)")
-    print(f"Skills with errors: {errors} ({errors/total*100:.1f}%)")
-
-    stable_ready = len(
-        [r for r in results if r["status"] == "healthy" and r["has_stable_suffix"]]
-    )
-    if stable_ready > 0:
-        print("\n=== SKILLS READY FOR -STABLE DESIGNATION ===")
-        print(f"{stable_ready} skills have -stable suffix")
-        stable_skills = [
-            r for r in results if r["status"] == "healthy" and r["has_stable_suffix"]
-        ]
-        for skill in sorted([s["name"] for s in stable_skills]):
-            print(f"  - {skill}")
+__all__ = (
+    "parse_arguments",
+    "validate_single_skill",
+    "process_all_skills",
+    "run_health_check",
+    "print_help",
+    "generate_all_reports",
+)
