@@ -15,7 +15,7 @@ from datetime import datetime, timezone
 
 from core.artifacts.registry import get_registry, ArtifactRegistry
 from core.artifacts.artifact_types import CanonicalArtifactType
-from core.artifacts.resolution import construct_canonical_path, _artifact_identity
+from core.artifacts.resolution import construct_canonical_path
 from core.validation import validate_metadata
 
 
@@ -43,9 +43,18 @@ def _assign_identity(
 ) -> str:
     """Assigns canonical artifact identity."""
     # Generate artifact identity using the resolution module
-    from core.artifacts.resolution import _artifact_identity
+    from core.artifacts.resolution import _artifact_identity as artifact_identity_func
     
-    return _artifact_identity(title, artifact_type, milestone_id)
+    # Create a minimal artifact dict for identity generation
+    artifact_data = {
+        "id": identity,
+        "artifact_identity": identity,
+        "title": title,
+        "type": artifact_type,
+        "milestone_id": milestone_id,
+    }
+    
+    return artifact_identity_func(artifact_data)
 
 
 def _build_frontmatter(metadata: Dict[str, Any]) -> str:
