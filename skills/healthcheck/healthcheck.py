@@ -43,7 +43,7 @@ def main():
         # Run health check based on arguments
         results = run_health_check(
             skill_name=args.skill_name if args.skill_name else None,
-            all_flag=args.all_flag,
+            all_flag=True if "--all" in sys.argv else False,
         )
 
         # Generate all reports from the results

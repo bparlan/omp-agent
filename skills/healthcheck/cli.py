@@ -5,11 +5,11 @@ Handles command-line argument parsing and user interaction orchestration.
 
 import argparse
 import sys
-from pathlib import Path
 from typing import List, Optional, Dict, Any
+from dataclasses import asdict
 
 from .discovery import get_skills_directory, discover_skills, discover_skill_by_name
-from skills.healthcheck.core.validation import SkillValidator
+from skills.healthcheck.core.validation import SkillValidator, ValidationOrchestrator
 from reporting import (
     generate_badges,
     generate_health_report,
@@ -44,18 +44,18 @@ Examples:
     return parser.parse_args()
 def validate_single_skill(skill_name: str) -> Optional[Dict[str, Any]]:
     """Validate a single skill by name"""
-    validator = SkillValidator()
+    orchestrator = ValidationOrchestrator()
 
     # Discover the skill file
-    skill_file = discover_skill_by_name(skill_name)
+    skill_file_path = discover_skill_by_name(skill_name)
 
-    if not skill_file:
+    if not skill_file_path:
         print(f"Skill '{skill_name}' not found", file=sys.stderr)
         return None
 
     print(f"Checking {skill_name}...", end=" ")
-    result = validator.validate_skill_file(skill_file)
-    print(f"{result['status']} (score: {result['validation_score']:.2f})")
+    result = orchestrator.validate_skill_file(skill_file_path)
+    print(f"{result.status} (score: {result.validation_score:.2f})")
 
     return result
 def process_all_skills() -> List[Dict[str, Any]]:
@@ -67,31 +67,31 @@ def process_all_skills() -> List[Dict[str, Any]]:
     # Batch 1: Core skills (first 3)
     print("\n=== BATCH 1: CORE SKILLS ===")
     batch1_results = []
-    validator = SkillValidator()
+    orchestrator = ValidationOrchestrator()
 
     for skill_file in skills[:3]:
         print(f"Checking {skill_file.parent.name}...", end=" ")
-        result = validator.validate_skill_file(skill_file)
-        print(f"{result['status']} (score: {result['validation_score']:.2f})")
-        batch1_results.append(result)
+        result = orchestrator.validate_skill_file(skill_file)
+        print(f"{result.status} (score: {result.validation_score:.2f})")
+        batch1_results.append(asdict(result))
 
     # Batch 2: Extension skills (next 3)
     print("\n=== BATCH 2: EXTENSION SKILLS ===")
     batch2_results = []
     for skill_file in skills[3:6]:
         print(f"Checking {skill_file.parent.name}...", end=" ")
-        result = validator.validate_skill_file(skill_file)
-        print(f"{result['status']} (score: {result['validation_score']:.2f})")
-        batch2_results.append(result)
+        result = orchestrator.validate_skill_file(skill_file)
+        print(f"{result.status} (score: {result.validation_score:.2f})")
+        batch2_results.append(asdict(result))
 
     # Batch 3: Edge cases (remaining)
     print("\n=== BATCH 3: EDGE CASES ===")
     batch3_results = []
     for skill_file in skills[6:]:
         print(f"Checking {skill_file.parent.name}...", end=" ")
-        result = validator.validate_skill_file(skill_file)
-        print(f"{result['status']} (score: {result['validation_score']:.2f})")
-        batch3_results.append(result)
+        result = orchestrator.validate_skill_file(skill_file)
+        print(f"{result.status} (score: {result.validation_score:.2f})")
+        batch3_results.append(asdict(result))
 
     all_results = batch1_results + batch2_results + batch3_results
 
