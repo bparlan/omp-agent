@@ -11,7 +11,9 @@ from dataclasses import dataclass, field
 from typing import Any, Dict, List, Optional
 import yaml
 from pathlib import Path
-from datetime import datetime
+import re
+from core.artifacts.metadata import extract_frontmatter
+from core.artifacts.artifact_types import get_all_type_definitions
 
 
 @dataclass
@@ -23,14 +25,6 @@ class ValidationResult:
     missing_fields: List[str] = field(default_factory=list)
 
 
-@dataclass
-class ArtifactValidationResult:
-    """M9S1 artifact validation result (legacy compatibility)."""
-
-    valid: bool = True
-    errors: List[str] = field(default_factory=list)
-    missing_fields: List[str] = field(default_factory=list)
-
 
 class Validator:
     """Abstract base class for skill validation rules (M8S1 FR-VALIDATOR_BASE_CLASS)."""
@@ -39,8 +33,6 @@ class Validator:
         raise NotImplementedError
 
 
-from core.artifacts.metadata import extract_frontmatter
-from core.artifacts.artifact_types import get_all_type_definitions
 
 
 def _required_artifact_keys() -> List[str]:
@@ -201,7 +193,6 @@ class RequiredFieldsValidator(Validator):
             return False
 
         # Check if there's a stable suffix in the content
-        import re
 
         # Look for patterns like `-stable` in frontmatter or other indicators
         stable_indicators = [r"-stable\b", r"--stable\b", r"stable[-_]?\d*$"]
@@ -393,7 +384,6 @@ class SkillValidator:
             return False
 
         # Check if there's a stable suffix in the content
-        import re
 
         # Look for patterns like `-stable` in frontmatter or other indicators
         stable_indicators = [r"-stable\b", r"--stable\b", r"stable[-_]?\d*$"]
@@ -498,43 +488,6 @@ def validate_metadata(
     return {"valid": valid, "errors": errors, "missing_fields": missing}
 
 
-def _validate_metadata_against_schema(
-    metadata: Dict[str, Any], schema: Dict[str, Any]
-) -> List[str]:
-    """Validate metadata against schema constraints."""
-    errors = []
-
-    if "type" in metadata and "type" in schema:
-        type_constraints = schema["type"]
-        if "type" in type_constraints and not _check_type(
-            metadata["type"], type_constraints["type"]
-        ):
-            errors.append(f"Field 'type' must be of type {type_constraints['type']}")
-
-        if "pattern" in type_constraints and not _check_pattern(
-            metadata["type"], type_constraints["pattern"]
-        ):
-            errors.append(
-                f"Field 'type' must match pattern {type_constraints['pattern']}"
-            )
-
-    if "milestone_id" in metadata and "milestone_id" in schema:
-        milestone_constraints = schema["milestone_id"]
-        if "type" in milestone_constraints and not _check_type(
-            metadata["milestone_id"], milestone_constraints["type"]
-        ):
-            errors.append(
-                f"Field 'milestone_id' must be of type {milestone_constraints['type']}"
-            )
-
-        if "pattern" in milestone_constraints and not _check_pattern(
-            metadata["milestone_id"], milestone_constraints["pattern"]
-        ):
-            errors.append(
-                f"Field 'milestone_id' must match pattern {milestone_constraints['pattern']}"
-            )
-
-    return errors
 
 
 def _validate_field_type(value: Any, constraints: Dict[str, Any]) -> List[str]:
@@ -570,7 +523,6 @@ def _check_type(value: Any, expected_type: str) -> bool:
 
 def _check_pattern(value: str, pattern: str) -> bool:
     """Check if value matches regex pattern."""
-    import re
 
     return bool(re.match(pattern, value))
 
