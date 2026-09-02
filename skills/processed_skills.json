@@ -1,1 +1,13 @@
-{}
+{
+  "Unknown": {
+    "name": "Unknown",
+    "status": "error",
+    "validation_score": 0.0,
+    "has_stable_suffix": false,
+    "issues": [
+      "SKILL.md not found"
+    ],
+    "last_modified": "2026-09-02T14:20:24.283800",
+    "last_checked": "2026-09-02T14:20:24.283801"
+  }
+}

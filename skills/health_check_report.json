@@ -1,9 +1,296 @@
 {
-  "timestamp": "2026-08-27T15:36:39.778890",
-  "total_skills": 0,
+  "timestamp": "2026-09-02T14:20:24.284463",
+  "total_skills": 26,
   "healthy_count": 0,
   "needs_review_count": 0,
-  "error_count": 0,
+  "error_count": 26,
   "skipped_count": 0,
-  "skills": []
+  "skills": [
+    {
+      "name": "Unknown",
+      "status": "error",
+      "validation_score": 0.0,
+      "has_stable_suffix": false,
+      "issues": [
+        "SKILL.md not found"
+      ],
+      "last_modified": "2026-09-02T14:20:24.283056",
+      "last_checked": "2026-09-02T14:20:24.283065"
+    },
+    {
+      "name": "Unknown",
+      "status": "error",
+      "validation_score": 0.0,
+      "has_stable_suffix": false,
+      "issues": [
+        "SKILL.md not found"
+      ],
+      "last_modified": "2026-09-02T14:20:24.283125",
+      "last_checked": "2026-09-02T14:20:24.283127"
+    },
+    {
+      "name": "Unknown",
+      "status": "error",
+      "validation_score": 0.0,
+      "has_stable_suffix": false,
+      "issues": [
+        "SKILL.md not found"
+      ],
+      "last_modified": "2026-09-02T14:20:24.283161",
+      "last_checked": "2026-09-02T14:20:24.283163"
+    },
+    {
+      "name": "Unknown",
+      "status": "error",
+      "validation_score": 0.0,
+      "has_stable_suffix": false,
+      "issues": [
+        "SKILL.md not found"
+      ],
+      "last_modified": "2026-09-02T14:20:24.283198",
+      "last_checked": "2026-09-02T14:20:24.283199"
+    },
+    {
+      "name": "Unknown",
+      "status": "error",
+      "validation_score": 0.0,
+      "has_stable_suffix": false,
+      "issues": [
+        "SKILL.md not found"
+      ],
+      "last_modified": "2026-09-02T14:20:24.283230",
+      "last_checked": "2026-09-02T14:20:24.283232"
+    },
+    {
+      "name": "Unknown",
+      "status": "error",
+      "validation_score": 0.0,
+      "has_stable_suffix": false,
+      "issues": [
+        "SKILL.md not found"
+      ],
+      "last_modified": "2026-09-02T14:20:24.283260",
+      "last_checked": "2026-09-02T14:20:24.283261"
+    },
+    {
+      "name": "Unknown",
+      "status": "error",
+      "validation_score": 0.0,
+      "has_stable_suffix": false,
+      "issues": [
+        "SKILL.md not found"
+      ],
+      "last_modified": "2026-09-02T14:20:24.283287",
+      "last_checked": "2026-09-02T14:20:24.283289"
+    },
+    {
+      "name": "Unknown",
+      "status": "error",
+      "validation_score": 0.0,
+      "has_stable_suffix": false,
+      "issues": [
+        "SKILL.md not found"
+      ],
+      "last_modified": "2026-09-02T14:20:24.283315",
+      "last_checked": "2026-09-02T14:20:24.283316"
+    },
+    {
+      "name": "Unknown",
+      "status": "error",
+      "validation_score": 0.0,
+      "has_stable_suffix": false,
+      "issues": [
+        "SKILL.md not found"
+      ],
+      "last_modified": "2026-09-02T14:20:24.283341",
+      "last_checked": "2026-09-02T14:20:24.283343"
+    },
+    {
+      "name": "Unknown",
+      "status": "error",
+      "validation_score": 0.0,
+      "has_stable_suffix": false,
+      "issues": [
+        "SKILL.md not found"
+      ],
+      "last_modified": "2026-09-02T14:20:24.283369",
+      "last_checked": "2026-09-02T14:20:24.283370"
+    },
+    {
+      "name": "Unknown",
+      "status": "error",
+      "validation_score": 0.0,
+      "has_stable_suffix": false,
+      "issues": [
+        "SKILL.md not found"
+      ],
+      "last_modified": "2026-09-02T14:20:24.283397",
+      "last_checked": "2026-09-02T14:20:24.283399"
+    },
+    {
+      "name": "Unknown",
+      "status": "error",
+      "validation_score": 0.0,
+      "has_stable_suffix": false,
+      "issues": [
+        "SKILL.md not found"
+      ],
+      "last_modified": "2026-09-02T14:20:24.283425",
+      "last_checked": "2026-09-02T14:20:24.283427"
+    },
+    {
+      "name": "Unknown",
+      "status": "error",
+      "validation_score": 0.0,
+      "has_stable_suffix": false,
+      "issues": [
+        "SKILL.md not found"
+      ],
+      "last_modified": "2026-09-02T14:20:24.283450",
+      "last_checked": "2026-09-02T14:20:24.283452"
+    },
+    {
+      "name": "Unknown",
+      "status": "error",
+      "validation_score": 0.0,
+      "has_stable_suffix": false,
+      "issues": [
+        "SKILL.md not found"
+      ],
+      "last_modified": "2026-09-02T14:20:24.283481",
+      "last_checked": "2026-09-02T14:20:24.283482"
+    },
+    {
+      "name": "Unknown",
+      "status": "error",
+      "validation_score": 0.0,
+      "has_stable_suffix": false,
+      "issues": [
+        "SKILL.md not found"
+      ],
+      "last_modified": "2026-09-02T14:20:24.283513",
+      "last_checked": "2026-09-02T14:20:24.283514"
+    },
+    {
+      "name": "Unknown",
+      "status": "error",
+      "validation_score": 0.0,
+      "has_stable_suffix": false,
+      "issues": [
+        "SKILL.md not found"
+      ],
+      "last_modified": "2026-09-02T14:20:24.283540",
+      "last_checked": "2026-09-02T14:20:24.283541"
+    },
+    {
+      "name": "Unknown",
+      "status": "error",
+      "validation_score": 0.0,
+      "has_stable_suffix": false,
+      "issues": [
+        "SKILL.md not found"
+      ],
+      "last_modified": "2026-09-02T14:20:24.283565",
+      "last_checked": "2026-09-02T14:20:24.283566"
+    },
+    {
+      "name": "Unknown",
+      "status": "error",
+      "validation_score": 0.0,
+      "has_stable_suffix": false,
+      "issues": [
+        "SKILL.md not found"
+      ],
+      "last_modified": "2026-09-02T14:20:24.283592",
+      "last_checked": "2026-09-02T14:20:24.283593"
+    },
+    {
+      "name": "Unknown",
+      "status": "error",
+      "validation_score": 0.0,
+      "has_stable_suffix": false,
+      "issues": [
+        "SKILL.md not found"
+      ],
+      "last_modified": "2026-09-02T14:20:24.283619",
+      "last_checked": "2026-09-02T14:20:24.283620"
+    },
+    {
+      "name": "Unknown",
+      "status": "error",
+      "validation_score": 0.0,
+      "has_stable_suffix": false,
+      "issues": [
+        "SKILL.md not found"
+      ],
+      "last_modified": "2026-09-02T14:20:24.283644",
+      "last_checked": "2026-09-02T14:20:24.283645"
+    },
+    {
+      "name": "Unknown",
+      "status": "error",
+      "validation_score": 0.0,
+      "has_stable_suffix": false,
+      "issues": [
+        "SKILL.md not found"
+      ],
+      "last_modified": "2026-09-02T14:20:24.283670",
+      "last_checked": "2026-09-02T14:20:24.283671"
+    },
+    {
+      "name": "Unknown",
+      "status": "error",
+      "validation_score": 0.0,
+      "has_stable_suffix": false,
+      "issues": [
+        "SKILL.md not found"
+      ],
+      "last_modified": "2026-09-02T14:20:24.283694",
+      "last_checked": "2026-09-02T14:20:24.283696"
+    },
+    {
+      "name": "Unknown",
+      "status": "error",
+      "validation_score": 0.0,
+      "has_stable_suffix": false,
+      "issues": [
+        "SKILL.md not found"
+      ],
+      "last_modified": "2026-09-02T14:20:24.283721",
+      "last_checked": "2026-09-02T14:20:24.283722"
+    },
+    {
+      "name": "Unknown",
+      "status": "error",
+      "validation_score": 0.0,
+      "has_stable_suffix": false,
+      "issues": [
+        "SKILL.md not found"
+      ],
+      "last_modified": "2026-09-02T14:20:24.283745",
+      "last_checked": "2026-09-02T14:20:24.283747"
+    },
+    {
+      "name": "Unknown",
+      "status": "error",
+      "validation_score": 0.0,
+      "has_stable_suffix": false,
+      "issues": [
+        "SKILL.md not found"
+      ],
+      "last_modified": "2026-09-02T14:20:24.283772",
+      "last_checked": "2026-09-02T14:20:24.283774"
+    },
+    {
+      "name": "Unknown",
+      "status": "error",
+      "validation_score": 0.0,
+      "has_stable_suffix": false,
+      "issues": [
+        "SKILL.md not found"
+      ],
+      "last_modified": "2026-09-02T14:20:24.283800",
+      "last_checked": "2026-09-02T14:20:24.283801"
+    }
+  ]
 }

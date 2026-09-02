@@ -3,6 +3,8 @@ CLI interface for healthcheck skill.
 Handles command-line argument parsing and user interaction orchestration.
 """
 
+from dataclasses import asdict
+from skills.healthcheck.core.validation import SkillValidator, ValidationOrchestrator
 import argparse
 import sys
 from typing import List, Optional, Dict, Any
@@ -18,12 +20,13 @@ from .reporting import (
 def parse_arguments() -> argparse.Namespace:
     """Parse command-line arguments"""
     parser = argparse.ArgumentParser(
-        description="AEF-OMP Skill Health Checker - validates SKILL.md files and checks -stable suffix",
-        formatter_class=argparse.RawDescriptionHelpFormatter,
-        epilog="""
-Examples:
-  %(prog)s my_skill                    # Check specific skill
-  %(prog)s --all                       # Process all skills in 3 batches
+        description="AEF-OMP Skill Health Checker",
+        usage="""healthcheck.py [skill_name] [--all] [--help]
+
+EXAMPLES:
+  healthcheck.py                    # Check all skills (default mode)
+  healthcheck.py my_skill           # Check specific skill
+  healthcheck.py --all              # Process all skills in 3 batches
         """
     )
 
@@ -33,7 +36,12 @@ Examples:
         help='Specific skill name to check (optional)'
     )
 
-    parser.add_argument('--all', action='store_true', help='Process all skills in 3 batches')
+    parser.add_argument(
+        '--all',
+        dest='all_flag',
+        action='store_true',
+        help='Process all skills in 3 batches'
+    )
 
     return parser.parse_args()
 def validate_single_skill(skill_name: str) -> Optional[Dict[str, Any]]:
@@ -51,7 +59,8 @@ def validate_single_skill(skill_name: str) -> Optional[Dict[str, Any]]:
     result = orchestrator.validate_skill_file(skill_file_path)
     print(f"{result.status} (score: {result.validation_score:.2f})")
 
-    return result
+    return asdict(result)
+
 def process_all_skills() -> List[Dict[str, Any]]:
     """Process all skills in 3 batches"""
     print("Processing all skills in 3 batches...")
@@ -158,29 +167,28 @@ def generate_all_reports(results: List[Dict[str, Any]]) -> None:
 
     # Generate badges
     generate_badges(results)
-
-    # Generate health report
     generate_health_report(results)
-
-    # Generate processed skills report
     generate_processed_skills(results)
-
-    # Print summary
-    total = len(results)
-    healthy = len([r for r in results if r['status'] == 'healthy'])
-    needs_review = len([r for r in results if r['status'] == 'needs_review'])
-    errors = len([r for r in results if r['status'] == 'error'])
-
+    
+    summary = generate_skills_summary(results)
+    
     print(f"\n=== SUMMARY ===")
-    print(f"Total skills checked: {total}")
-    print(f"Healthy skills: {healthy} ({healthy/total*100:.1f}%)")
-    print(f"Skills needing review: {needs_review} ({needs_review/total*100:.1f}%)")
-    print(f"Skills with errors: {errors} ({errors/total*100:.1f}%)")
-
-    stable_ready = len([r for r in results if r['status'] == 'healthy' and r['has_stable_suffix']])
-    if stable_ready > 0:
-        print(f"\n=== SKILLS READY FOR -STABLE DESIGNATION ===")
-        print(f"{stable_ready} skills have -stable suffix")
+    print(f"Total skills checked: {summary['summary']['total_skills']}")
+    print(f"Healthy skills: {summary['summary']['healthy_count']}")
+    print(f"Skills needing review: {summary['summary']['needs_review_count']}")
+    print(f"Skills with errors: {summary['summary']['error_count']}")
+    
+    if summary['summary']['stable_ready_count'] > 0:
+        print(f"\n=== SKILLS WITH STABLE SUFFIX ===")
         stable_skills = [r for r in results if r['status'] == 'healthy' and r['has_stable_suffix']]
         for skill in sorted([s['name'] for s in stable_skills]):
             print(f"  - {skill}")
+            
+    if summary['summary']['error_count'] > 0:
+        print("\n=== SKILLS WITH ERRORS ===")
+        for skill in summary['status_distribution']['error']:
+            print(f"  - {skill['name']}")
+            for issue in skill.get('issues', []):
+                print(f"    [FAIL] {issue}")
+
+    return None
