@@ -102,17 +102,6 @@ Your skill now has access to `code-search` and `lsp` tools for safe repository e
     - Existing fixture structures and dependencies
     - Artifact system contracts (where applicable)
 
-16. **Interactive Handoff (Mandatory)** — Use the `ask` tool to present the user with next logical steps:
-
-| Option Label | Action |
-|:----------|:---|
-| Generate Verification | Run `/healthcheck generate-verification --execute` to create the verification protocol for this specification. |
-| Review Specification | Review the generated specification document before proceeding. |
-| Custom | Let me specify a different next step. |
-
-You MUST NOT emit the legacy hardcoded text message `[SPECIFICATION_GENERATION_COMPLETE] ...` — the interactive ask prompt replaces this mechanism entirely.
-
----
 
 ##### Mechanical Writing Postcondition (CRITICAL)
 

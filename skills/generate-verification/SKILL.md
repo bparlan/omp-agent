@@ -229,7 +229,7 @@ Each verification item MUST be mapped to an active contract (CLI or Schema) expl
 - Use `code-search` to confirm fixture files and test structures referenced
 - Validate that verification methods are appropriate for target types
 - Ensure verification items respect existing module boundaries
-- When verification targets reference `core/validation.py` or `core/artifacts/*`, confirm those modules are importable and their public APIs match the referenced contracts
+- **The Ponytail Verification Constraint:** Keep verification items structurally clean. Minimize the number of assertions needed to prove a contract is satisfied. Proactively design your verification items around automated CLI checks or schema validation, completely avoiding custom testing scripts for simple environmental or structural parameters.
 
 ---
 

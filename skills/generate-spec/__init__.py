@@ -391,8 +391,26 @@ def main() -> int:
     for spec_path in specs_generated:
         print(f"  - {spec_path}")
 
-    # Ask user for next steps
-    ask_user_for_next_steps(specs_generated)
+    # Automatically continue to generate-verification
+    print("\n=== Automatically Executing Next Skill: generate-verification ===")
+    try:
+        # Direct skill handoff - import and execute generate-verification
+        import importlib.util
+        verification_path = Path("skills/generate-verification/__init__.py")
+        if verification_path.exists():
+            spec = importlib.util.spec_from_file_location("generate_verification", verification_path)
+            verif_module = importlib.util.module_from_spec(spec)
+            spec.loader.exec_module(verif_module)
+            if hasattr(verif_module, 'main'):
+                print("Executing generate-verification...")
+                exit_code = verif_module.main()
+                print(f"generate-verification completed with exit code: {exit_code}")
+            else:
+                print("generate-verification module has no main() function")
+        else:
+            print("generate-verification skill not found - please run it manually")
+    except Exception as e:
+        print(f"Error executing generate-verification: {e}")
 
     return 0
 

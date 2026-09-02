@@ -321,7 +321,7 @@ You MUST classify every test in your ledger as exactly one of these types:
 
 ---
 
-#### 11. Safe Execution & Initial Failure Gate
+- **The Ponytail Test Constraint:** Write focused, high-signal assertions. You are strictly prohibited from generating bloated mock setups, redundant boilerplates, or writing multiple test scripts to cover a single coherent behavior. One elegant test file per verification target is the standard.
 
 While `generate-tests` does not run implementation-level test iterations, you MUST execute the generated tests **exactly once** before completing the skill to establish the pre-implementation baseline:
 

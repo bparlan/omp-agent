@@ -263,7 +263,7 @@ You MUST NOT emit the legacy hardcoded text message `[IMPLEMENTATION_COMPLETE] .
 - Do NOT Generate specifications, verifications, test plans, or milestone definitions.
 - Do NOT Delete, overwrite, or recursively remove (`rm -rf`) existing historical directories.
 - Do NOT Write, edit, or touch any files inside the `tests/` directory (except creating empty placeholder folders for static fixtures under `tests/fixtures/`).
-- Do NOT Create `README.md`, `SUMMARY.md`, or unstructured text files in the project root.
+- **The Ponytail Implementation Constraint (CRITICAL):** Before writing any new function, class, or module, you MUST ask: 'Is this code absolutely necessary? Can I leverage an existing utility or standard library built-in instead?' Always optimize for the absolute minimum number of lines required to satisfy the specification contract. Actively look for opportunities to simplify existing files on your Allowlist rather than appending new ones.
 
 ---
 
