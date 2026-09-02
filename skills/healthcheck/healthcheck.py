@@ -36,7 +36,7 @@ def main():
         args = parse_arguments()
 
         # Check for help flag
-        if args.help_flag:
+        if getattr(args, "help_flag", False):
             print_help()
             return 0
 
