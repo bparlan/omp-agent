@@ -17,8 +17,6 @@ sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 # from cli import (
 # parse_arguments,
 # run_health_check,
-# print_help,
-# generate_all_reports,
 #)
 
 # Import from the modular components
@@ -43,7 +41,7 @@ def main():
         # Run health check based on arguments
         results = run_health_check(
             skill_name=args.skill_name if args.skill_name else None,
-            all_flag=True if "--all" in sys.argv else False,
+            all_flag=args.all_flag,
         )
 
         # Generate all reports from the results

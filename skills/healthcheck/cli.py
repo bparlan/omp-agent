@@ -9,8 +9,7 @@ from typing import List, Optional, Dict, Any
 from dataclasses import asdict
 
 from .discovery import get_skills_directory, discover_skills, discover_skill_by_name
-from skills.healthcheck.core.validation import SkillValidator, ValidationOrchestrator
-from reporting import (
+from .reporting import (
     generate_badges,
     generate_health_report,
     generate_processed_skills,
@@ -34,12 +33,7 @@ Examples:
         help='Specific skill name to check (optional)'
     )
 
-    parser.add_argument(
-        '--all',
-        action='store_true',
-        help='Process all skills in 3 batches'
-    )
-
+    parser.add_argument('--all', action='store_true', help='Process all skills in 3 batches')
 
     return parser.parse_args()
 def validate_single_skill(skill_name: str) -> Optional[Dict[str, Any]]:
